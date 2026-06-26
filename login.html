@@ -206,7 +206,10 @@
 
 /* Телефоны: приложение на весь экран без макетной рамки (надёжно, не зависит от PWA-режима) */
 @media (max-width: 600px) {
-    html, body { background: var(--bg-1, #0d0d12) !important; padding: 0 !important; margin: 0 !important; overflow: hidden !important; min-height: 100vh; min-height: 100dvh; }
+    * { -webkit-user-select: none !important; user-select: none !important; -webkit-tap-highlight-color: transparent !important; }
+    input, textarea { -webkit-user-select: text !important; user-select: text !important; }
+    html, body { background: var(--bg-1, #0d0d12) !important; padding: 0 !important; margin: 0 !important; overflow: hidden !important; height: 100vh; height: 100dvh; display: block !important; }
+    body { display: flex !important; align-items: stretch !important; justify-content: flex-start !important; }
     .phone {
         width: 100vw !important;
         max-width: 100vw !important;
@@ -214,13 +217,17 @@
         height: 100dvh !important;
         border-radius: 0 !important;
         box-shadow: none !important;
-        padding-top: env(safe-area-inset-top) !important;
-        padding-bottom: env(safe-area-inset-bottom) !important;
+        padding: 0 !important;
     }
     .phone::before, .phone::after { display: none !important; }
+    /* анимация/фон идут до самого верха под чёлку */
     #atmosCanvas, #cosmicCanvas, #medCanvas, .atmos-canvas, canvas#atmos {
         width: 100vw !important; height: 100vh !important; height: 100dvh !important;
         position: absolute !important; inset: 0 !important; border-radius: 0 !important;
+    }
+    /* safe-area отступ даём контенту, а не фону — чтобы не было чёрной полосы */
+    .screen, .session-area, .slideshow, .scroll-area {
+        padding-top: calc(env(safe-area-inset-top) + 8px) !important;
     }
     .modal, .slideshow, .session-area { border-radius: 0 !important; }
 }
