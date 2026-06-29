@@ -10,7 +10,7 @@
 <link rel="apple-touch-icon" href="icon-192.png">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>Родительский контроль — FOCUS</title>
+<title>Управление ребёнком — FOCUS</title>
 <style>
     :root, [data-theme="original"] { --accent:#FFD966; --accent-rgb:255,217,102; --accent-2:#7C8CFF; --accent-2-rgb:124,140,255; --accent-light:#FFE9A8; --accent-dark:#C9952E; --bg-1:#131319; --bg-2:#0d0d12; --text-strong:#FFFFFF; }
     [data-theme="tron"] { --accent:#FF3B2E; --accent-rgb:255,59,46; --accent-2:#00E5FF; --accent-2-rgb:0,229,255; --accent-light:#FF8A6B; --accent-dark:#B8201A; --bg-1:#0a0a0d; --bg-2:#000000; --text-strong:#FFFFFF; }
@@ -178,7 +178,10 @@
     /* экран ребёнка */
     .section-title { font-size:11px; font-weight:700; color:var(--accent); letter-spacing:0.4px; margin:16px 0 10px; }
     .child-hero { background:linear-gradient(135deg, rgba(150,170,255,0.12), rgba(var(--accent-rgb),0.04)); border:1px solid rgba(150,170,255,0.25); border-radius:16px; padding:16px; margin-bottom:6px; text-align:center; }
-    .child-hero-avatar { width:64px; height:64px; border-radius:50%; margin:0 auto 9px; background:linear-gradient(135deg, #AAB9FF, var(--accent-2)); display:flex; align-items:center; justify-content:center; font-size:30px; }
+    .child-hero-avatar { width:64px; height:64px; border-radius:50%; margin:0 auto 9px; background:linear-gradient(135deg, #AAB9FF, var(--accent-2)); display:flex; align-items:center; justify-content:center; font-size:30px; position:relative; cursor:pointer; overflow:visible; }
+    .child-hero-avatar img { width:100%; height:100%; object-fit:cover; border-radius:50%; }
+    .ch-avatar-edit { position:absolute; bottom:-2px; right:-2px; width:24px; height:24px; border-radius:50%; background:var(--accent); border:2.5px solid #15151c; display:flex; align-items:center; justify-content:center; }
+    .ch-avatar-edit svg { width:11px; height:11px; color:#0a0a0f; }
     .child-hero-name { font-size:18px; font-weight:700; color:#fff; }
     .child-hero-meta { font-size:11px; color:#9a9aab; margin-top:3px; }
     .child-hero-streak { font-size:12px; color:#FFD966; font-weight:600; margin-top:6px; }
@@ -189,9 +192,26 @@
     .toggle-switch.on { background:linear-gradient(135deg, #78DC96, var(--accent-2)); }
     .toggle-knob { width:20px; height:20px; border-radius:50%; background:#fff; position:absolute; top:3px; left:3px; transition:0.25s; }
     .toggle-switch.on .toggle-knob { left:21px; }
-    .access-level { display:flex; gap:7px; margin-bottom:6px; }
-    .access-opt { flex:1; padding:10px 6px; border-radius:11px; text-align:center; font-size:11px; font-weight:600; cursor:pointer; background:rgba(255,255,255,0.05); color:#9a9aab; border:1px solid transparent; }
-    .access-opt.on { background:rgba(150,170,255,0.16); color:#AAB9FF; border-color:rgba(150,170,255,0.4); }
+    .pc-hint { font-size:10.5px; color:#8e8e9e; margin:-4px 0 10px; line-height:1.4; }
+    .notif-row { padding:11px 13px; background:rgba(35,35,46,0.5); border:0.5px solid rgba(var(--accent-rgb),0.1); border-radius:13px; margin-bottom:8px; }
+    .notif-name { font-size:13px; color:#e8e8ee; font-weight:500; margin-bottom:9px; display:flex; align-items:center; gap:8px; }
+    .notif-name .em { font-size:15px; }
+    .notif-toggles { display:flex; gap:8px; }
+    .notif-tog { flex:1; display:flex; align-items:center; justify-content:space-between; gap:7px; padding:7px 10px; border-radius:10px; background:rgba(0,0,0,0.2); border:1px solid transparent; cursor:pointer; }
+    .notif-tog.on { background:rgba(120,220,150,0.1); border-color:rgba(120,220,150,0.3); }
+    .notif-tog-label { font-size:11px; color:#9a9aab; font-weight:600; }
+    .notif-tog.on .notif-tog-label { color:#78DC96; }
+    .mini-switch { width:34px; height:20px; border-radius:11px; background:rgba(255,255,255,0.12); position:relative; transition:0.25s; flex-shrink:0; }
+    .mini-switch.on { background:linear-gradient(135deg, #78DC96, var(--accent-2)); }
+    .mini-knob { width:15px; height:15px; border-radius:50%; background:#fff; position:absolute; top:2.5px; left:2.5px; transition:0.25s; }
+    .mini-switch.on .mini-knob { left:16.5px; }
+    .view-card { display:flex; align-items:center; gap:12px; padding:13px; background:rgba(35,35,46,0.5); border:0.5px solid rgba(var(--accent-rgb),0.1); border-radius:13px; margin-bottom:8px; cursor:pointer; transition:0.2s; }
+    .view-card:active { transform:scale(0.99); background:rgba(150,170,255,0.08); }
+    .view-emoji { font-size:22px; flex-shrink:0; width:30px; text-align:center; }
+    .view-info { flex:1; min-width:0; }
+    .view-name { font-size:13.5px; font-weight:600; color:#fff; }
+    .view-desc { font-size:10.5px; color:#8e8e9e; margin-top:2px; }
+    .view-arrow { font-size:22px; color:#6e6e7e; flex-shrink:0; }
     .danger-btn { padding:13px; border-radius:13px; background:rgba(255,120,120,0.1); border:1px solid rgba(255,120,120,0.3); color:#FF8A7C; font-weight:700; font-size:13px; text-align:center; cursor:pointer; margin-top:14px; }
     .danger-btn:active { transform:scale(0.98); }
     /* модалка добавления */
@@ -219,46 +239,42 @@
     <canvas id="atmosCanvas" width="375" height="700" style="width:375px;height:700px;"></canvas>
     <div class="screen">
         <div class="header-row">
-            <div class="back-btn" onclick="location.href='fokus_profile.html'">
+            <div class="back-btn" onclick="location.href='parental_control.html'">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
             </div>
-            <div class="title">Родительский контроль</div>
+            <div class="title">Управление</div>
             <div class="title-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 7v6c0 4 3.5 7 8 9 4.5-2 8-5 8-9V7l-8-5Z"/></svg></div>
         </div>
 
         <div class="scroll-area">
-            <div class="pc-intro">
-                <div class="pc-intro-title">🛡️ Контроль и забота</div>
-                <div class="pc-intro-sub">Следи за развитием ребёнка: прогресс по сферам, стрик, геолокация. Настраивай доступ к разделам и напоминания.</div>
+            <div class="child-hero">
+                <div class="child-hero-avatar" id="chAvatar">👦
+                    <div class="ch-avatar-edit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></div>
+                </div>
+                <div class="child-hero-name" id="chName">Ребёнок</div>
+                <div class="child-hero-meta" id="chMeta">—</div>
+                <div class="child-hero-streak" id="chStreak">🔥 Стрик: 0 дней</div>
+            </div>
+            <input type="file" id="childAvatarInput" accept="image/*" style="display:none;">
+
+            <div class="section-title">📍 ГЕОЛОКАЦИЯ</div>
+            <div class="btn-primary" id="openMapBtn">🗺️ Показать на карте</div>
+            <div class="toggle-row">
+                <div class="toggle-label"><span class="em">📍</span> Видеть местоположение</div>
+                <div class="toggle-switch" id="geoToggle"><div class="toggle-knob"></div></div>
             </div>
 
-            <div class="premium-lock" id="premiumLock">🔐 Доступно на подписке Про</div>
+            <div class="section-title">👁️ РАЗДЕЛЫ РЕБЁНКА</div>
+            <div class="pc-hint">Нажми на раздел, чтобы посмотреть данные и прогресс ребёнка</div>
+            <div id="spheresList"></div>
 
-            <div class="btn-primary" id="addChildBtn">➕ Добавить ребёнка</div>
+            <div class="section-title">🔔 УВЕДОМЛЕНИЯ РЕБЁНКА</div>
+            <div class="pc-hint">Выбери, какие напоминания получает ребёнок и какие из них дублировать тебе</div>
+            <div id="notifsList"></div>
 
-            <div id="childrenList"></div>
+            <div class="danger-btn" id="removeChildBtn">Отвязать ребёнка</div>
         </div>
     </div>
-
-    <!-- Модалка добавления ребёнка -->
-    <div class="modal" id="addModal">
-        <div class="modal-box">
-            <div class="modal-title">Добавить ребёнка</div>
-            <div class="m-label">ИМЯ РЕБЁНКА</div>
-            <input type="text" class="m-input" id="childName" placeholder="Например: Дима">
-            <div class="m-label">ВОЗРАСТ</div>
-            <input type="number" class="m-input" id="childAge" placeholder="14" inputmode="numeric">
-            <div class="invite-code-box">
-                <div class="invite-code" id="inviteCode">— — — —</div>
-                <div class="invite-hint">Ребёнок вводит этот код в своём приложении FOCUS, чтобы связать аккаунты. Связь активируется с серверной частью.</div>
-            </div>
-            <div class="modal-btns">
-                <button class="modal-btn cancel" id="cancelAdd">Отмена</button>
-                <button class="modal-btn save" id="saveChild">Добавить</button>
-            </div>
-        </div>
-    </div>
-
     <div class="toast" id="toast"></div>
 </div>
 
@@ -446,78 +462,144 @@ initAtmosphere(canvasId) {
     FocusCore.applyStoredTheme();
     FocusCore.initAtmosphere('atmosCanvas');
 
-    function toast(msg){ const t=document.getElementById('toast'); t.innerText=msg; t.classList.add('show'); clearTimeout(window._tt); window._tt=setTimeout(()=>t.classList.remove('show'),2200); }
+    function toast(msg){ const t=document.getElementById('toast'); t.innerText=msg; t.classList.add('show'); clearTimeout(window._tt); window._tt=setTimeout(()=>t.classList.remove('show'),2000); }
     function escapeHtml(s){ const d=document.createElement('div'); d.innerText=String(s==null?'':s); return d.innerHTML; }
 
     const CH_KEY = 'focus_controlled_children';
     function getChildren(){ try { return JSON.parse(localStorage.getItem(CH_KEY))||[]; } catch(e){ return []; } }
     function saveChildren(c){ localStorage.setItem(CH_KEY, JSON.stringify(c)); }
 
-    function renderChildren(){
-        const cont = document.getElementById('childrenList');
-        const children = getChildren();
-        if (children.length === 0) {
-            cont.innerHTML = '<div class="empty-state">👶 Нет подключённых детей.<br>Нажми «Добавить ребёнка» и передай код.</div>';
-            return;
-        }
-        cont.innerHTML = '';
-        children.forEach(child => {
-            const card = document.createElement('div');
-            card.className = 'child-card';
-            const active = child.status === 'active';
-            const avInner = (child.photo && child.photo.startsWith('data:image'))
-                ? '<img src="'+child.photo+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">'
-                : (child.gender==='girl'?'👧':'👦');
-            card.innerHTML = `
-                <div class="child-top">
-                    <div class="child-avatar">${avInner}</div>
-                    <div class="child-info">
-                        <div class="child-name">${escapeHtml(child.name)}${child.age?', '+child.age:''}</div>
-                        <div class="child-status ${active?'active':'inactive'}">${active?'🟢 Активен сегодня':'⚪ Не заходил сегодня'}</div>
-                    </div>
-                </div>
-                <div class="child-stats">
-                    <div class="child-stat"><div class="child-stat-val">🔥 ${child.streak||0}</div><div class="child-stat-label">дней подряд</div></div>
-                    <div class="child-stat"><div class="child-stat-val">📊 ${child.progress||0}%</div><div class="child-stat-label">прогресс</div></div>
-                </div>
-                <div class="child-geo ${child.geolocation?'on':'off'}">${child.geolocation?'📍 Геолокация включена':'📍 Геолокация выключена'}</div>`;
-            card.addEventListener('click', () => {
-                localStorage.setItem('focus_selected_child', JSON.stringify(child));
-                location.href = 'control_child.html?id=' + child.id;
-            });
-            cont.appendChild(card);
-        });
+    const params = new URLSearchParams(location.search);
+    const childId = params.get('id');
+    let children = getChildren();
+    let child = children.find(c => String(c.id) === String(childId));
+    if (!child) { try { child = JSON.parse(localStorage.getItem('focus_selected_child')); } catch(e){} }
+    if (!child) child = { id:0, name:'Ребёнок', spheres:{}, notifs:{}, access:'full', geolocation:true };
+    // дефолты
+    child.spheres = child.spheres || { body:true, mental:true, energy:true, relations:true, faith:true, reward:true, oracle:false };
+    child.notifs = child.notifs || { workout:{child:true,parent:false}, meals:{child:true,parent:false}, sleep:{child:true,parent:false}, meds:{child:false,parent:false}, study:{child:false,parent:false}, streak:{child:true,parent:true} };
+
+    function persist(){
+        const idx = children.findIndex(c => String(c.id) === String(child.id));
+        if (idx >= 0) { children[idx] = child; saveChildren(children); }
     }
 
-    // модалка добавления
-    const addModal = document.getElementById('addModal');
-    function genCode(){ return Math.random().toString(36).substring(2,6).toUpperCase(); }
-    document.getElementById('addChildBtn').addEventListener('click', () => {
-        document.getElementById('childName').value = '';
-        document.getElementById('childAge').value = '';
-        document.getElementById('inviteCode').innerText = genCode();
-        addModal.classList.add('show');
+    // шапка
+    const chAvatar = document.getElementById('chAvatar');
+    const editIcon = '<div class="ch-avatar-edit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></div>';
+    function renderChildAvatar(){
+        if (child.photo && child.photo.startsWith('data:image')) {
+            chAvatar.innerHTML = '<img src="'+child.photo+'">' + editIcon;
+        } else {
+            chAvatar.innerHTML = (child.gender==='girl'?'👧':'👦') + editIcon;
+        }
+    }
+    renderChildAvatar();
+    chAvatar.addEventListener('click', () => document.getElementById('childAvatarInput').click());
+    document.getElementById('childAvatarInput').addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        if (file.size > 600*1024) { toast('Фото слишком большое (>600КБ)'); return; }
+        const reader = new FileReader();
+        reader.onload = () => { child.photo = reader.result; persist(); renderChildAvatar(); toast('Фото ребёнка обновлено'); };
+        reader.readAsDataURL(file);
+        e.target.value = '';
     });
-    document.getElementById('cancelAdd').addEventListener('click', () => addModal.classList.remove('show'));
-    addModal.addEventListener('click', (e)=>{ if(e.target.id==='addModal') addModal.classList.remove('show'); });
-    document.getElementById('saveChild').addEventListener('click', () => {
-        const name = document.getElementById('childName').value.trim();
-        const age = parseInt(document.getElementById('childAge').value) || null;
-        if (!name) { toast('Введи имя ребёнка'); return; }
-        const children = getChildren();
-        children.push({
-            id: Date.now(), name, age, gender:'boy', status:'inactive',
-            streak:0, progress:0, geolocation:true,
-            access:'full', spheres:{ body:true, mental:true, energy:true, relations:true, faith:true, reward:true, oracle:false },
-            notifs:{ workout:true, sleep:true, meds:false }
+    document.getElementById('chName').innerText = child.name;
+    document.getElementById('chMeta').innerText = (child.age?child.age+' лет · ':'') + (child.status==='active'?'🟢 Активен':'⚪ Не в сети');
+    document.getElementById('chStreak').innerText = '🔥 Стрик: ' + (child.streak||0) + ' дней';
+
+    // разделы ребёнка (клик → просмотр данных)
+    const SPHERES = [
+        {id:'body', name:'Тело', em:'💪', desc:'питание, тренировки, замеры'},
+        {id:'mental', name:'Менталка', em:'🧠', desc:'настроение, фокус'},
+        {id:'energy', name:'Энергия', em:'⚡', desc:'сон, отдых'},
+        {id:'relations', name:'Отношения', em:'👥', desc:'общение, связи'},
+        {id:'faith', name:'Вера', em:'🔥', desc:'благодарность, привычки'},
+        {id:'reward', name:'Награды', em:'🎁', desc:'монеты, достижения'},
+        {id:'progress', name:'Прогресс', em:'📊', desc:'общая статистика'}
+    ];
+    function renderSpheres(){
+        const cont = document.getElementById('spheresList');
+        cont.innerHTML = '';
+        SPHERES.forEach(s => {
+            const row = document.createElement('div');
+            row.className = 'view-card';
+            row.innerHTML = `
+                <div class="view-emoji">${s.em}</div>
+                <div class="view-info">
+                    <div class="view-name">${s.name}</div>
+                    <div class="view-desc">${s.desc}</div>
+                </div>
+                <div class="view-arrow">›</div>`;
+            row.addEventListener('click', () => {
+                // просмотр данных ребёнка по разделу (с бэкендом — реальные данные ребёнка)
+                toast('Просмотр раздела «' + s.name + '» ребёнка — откроется с подключением аккаунтов');
+            });
+            cont.appendChild(row);
         });
-        saveChildren(children);
-        addModal.classList.remove('show');
-        renderChildren();
-        toast('Ребёнок добавлен. Передай ему код для связи');
+    }
+    renderSpheres();
+
+    // уведомления
+    const NOTIFS = [
+        {id:'workout', name:'Зарядка', em:'⏰'},
+        {id:'meals', name:'Приём пищи', em:'🍽️'},
+        {id:'sleep', name:'Сон', em:'😴'},
+        {id:'meds', name:'Лекарства', em:'💊'},
+        {id:'study', name:'Учёба / уроки', em:'📚'},
+        {id:'streak', name:'Пропуск дня (стрик)', em:'🔥'}
+    ];
+    function renderNotifs(){
+        const cont = document.getElementById('notifsList');
+        cont.innerHTML = '';
+        NOTIFS.forEach(n => {
+            const nd = child.notifs[n.id] || { child:false, parent:false };
+            const row = document.createElement('div');
+            row.className = 'notif-row';
+            row.innerHTML = `
+                <div class="notif-name"><span class="em">${n.em}</span> ${n.name}</div>
+                <div class="notif-toggles">
+                    <div class="notif-tog ${nd.child?'on':''}" data-notif="${n.id}" data-who="child">
+                        <span class="notif-tog-label">ребёнку</span>
+                        <div class="mini-switch ${nd.child?'on':''}"><div class="mini-knob"></div></div>
+                    </div>
+                    <div class="notif-tog ${nd.parent?'on':''}" data-notif="${n.id}" data-who="parent">
+                        <span class="notif-tog-label">мне</span>
+                        <div class="mini-switch ${nd.parent?'on':''}"><div class="mini-knob"></div></div>
+                    </div>
+                </div>`;
+            cont.appendChild(row);
+        });
+        cont.querySelectorAll('[data-notif]').forEach(el => el.addEventListener('click', () => {
+            const id = el.dataset.notif, who = el.dataset.who;
+            if (!child.notifs[id] || typeof child.notifs[id] !== 'object') child.notifs[id] = { child:false, parent:false };
+            child.notifs[id][who] = !child.notifs[id][who];
+            persist(); renderNotifs();
+        }));
+    }
+    renderNotifs();
+
+    // геолокация
+    const geoToggle = document.getElementById('geoToggle');
+    geoToggle.classList.toggle('on', child.geolocation);
+    geoToggle.addEventListener('click', () => {
+        child.geolocation = !child.geolocation;
+        geoToggle.classList.toggle('on', child.geolocation);
+        persist();
+        toast(child.geolocation?'Геолокация включена':'Геолокация выключена');
     });
 
-    renderChildren();
+    // отвязать
+    document.getElementById('openMapBtn').addEventListener('click', () => {
+        location.href = 'location_map.html?id=' + child.id;
+    });
+    document.getElementById('removeChildBtn').addEventListener('click', () => {
+        children = children.filter(c => String(c.id) !== String(child.id));
+        saveChildren(children);
+        toast('Ребёнок отвязан');
+        setTimeout(()=>{ location.href = 'parental_control.html'; }, 900);
+    });
 
 </script>
 <script src="focus-chat-fab.js"></script>

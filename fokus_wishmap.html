@@ -231,6 +231,9 @@
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
                 Добавить песню
             </div>
+            <div style="font-size:9.5px;color:#8e8e9e;margin-top:7px;line-height:1.4;text-align:center;">
+                Можно добавить аудиофайл из «Файлов» (до ~3 МБ). Треки из Apple Music защищены и недоступны — это ограничение iPhone.
+            </div>
         </div>
     </div>
 
@@ -853,13 +856,27 @@ initAtmosphere(canvasId) {
     document.getElementById('addMusicBtn').addEventListener('click', () => document.getElementById('musicInput').click());
     document.getElementById('musicInput').addEventListener('change', (e) => {
         const file = e.target.files[0]; if (!file) return;
-        if (file.size > 8*1024*1024) { toast('Файл великоват (макс ~8МБ)'); return; }
+        // localStorage вмещает мало — лимит ~3МБ (base64 раздувает +33%)
+        if (file.size > 3*1024*1024) {
+            toast('Файл большой (макс ~3 МБ). Выбери короткий трек или сожми');
+            return;
+        }
         const reader = new FileReader();
         reader.onload = (ev) => {
             songs.push({ id: Date.now(), name: file.name.replace(/\.[^.]+$/, ''), dataUrl: ev.target.result });
-            saveSongs(); renderMusic(); toast('🎵 Песня добавлена');
+            try {
+                saveSongs();
+                renderMusic();
+                toast('🎵 Песня добавлена');
+            } catch(err) {
+                // переполнение localStorage
+                songs.pop();
+                toast('Не хватает места в памяти. Удали старую песню или выбери короче');
+            }
         };
+        reader.onerror = () => toast('Не удалось прочитать файл');
         reader.readAsDataURL(file);
+        e.target.value = '';
     });
 
     // Закрытие модалок по фону
@@ -877,5 +894,6 @@ initAtmosphere(canvasId) {
         window.addEventListener('load', ()=>{ navigator.serviceWorker.register('sw.js').catch(()=>{}); });
     }
 </script>
+    <script src="focus-chat-fab.js"></script>
 </body>
 </html>

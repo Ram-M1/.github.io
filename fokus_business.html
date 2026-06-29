@@ -10,7 +10,7 @@
 <link rel="apple-touch-icon" href="icon-192.png">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>Родительский контроль — FOCUS</title>
+<title>Работа и бизнес — FOCUS</title>
 <style>
     :root, [data-theme="original"] { --accent:#FFD966; --accent-rgb:255,217,102; --accent-2:#7C8CFF; --accent-2-rgb:124,140,255; --accent-light:#FFE9A8; --accent-dark:#C9952E; --bg-1:#131319; --bg-2:#0d0d12; --text-strong:#FFFFFF; }
     [data-theme="tron"] { --accent:#FF3B2E; --accent-rgb:255,59,46; --accent-2:#00E5FF; --accent-2-rgb:0,229,255; --accent-light:#FF8A6B; --accent-dark:#B8201A; --bg-1:#0a0a0d; --bg-2:#000000; --text-strong:#FFFFFF; }
@@ -149,68 +149,107 @@
     .modal, .slideshow, .session-area { border-radius: 0 !important; }
 }
 
-    /* ===== РОДИТЕЛЬСКИЙ КОНТРОЛЬ ===== */
+    /* ===== РАБОТА И БИЗНЕС (система целей) ===== */
     .scroll-area { flex:1; overflow-y:auto; scrollbar-width:none; }
     .scroll-area::-webkit-scrollbar { display:none; }
-    .pc-intro { background:linear-gradient(135deg, rgba(150,170,255,0.12), rgba(var(--accent-rgb),0.04)); border:1px solid rgba(150,170,255,0.25); border-radius:15px; padding:13px 14px; margin-bottom:14px; }
-    .pc-intro-title { font-size:14px; font-weight:700; color:#fff; margin-bottom:4px; }
-    .pc-intro-sub { font-size:11px; color:#9a9aab; line-height:1.5; }
-    .premium-lock { background:rgba(200,170,255,0.1); border:1px solid rgba(200,170,255,0.3); border-radius:12px; padding:11px 13px; margin-bottom:14px; font-size:11.5px; color:#C8AAFF; font-weight:600; display:flex; align-items:center; gap:8px; }
-    .child-card { background:linear-gradient(135deg, rgba(35,35,46,0.6), rgba(22,22,30,0.6)); border:0.5px solid rgba(150,170,255,0.16); border-radius:15px; padding:14px; margin-bottom:11px; cursor:pointer; transition:0.2s; }
-    .child-card:active { transform:scale(0.99); }
-    .child-top { display:flex; align-items:center; gap:11px; margin-bottom:10px; }
-    .child-avatar { width:46px; height:46px; border-radius:50%; flex-shrink:0; background:linear-gradient(135deg, #AAB9FF, var(--accent-2)); display:flex; align-items:center; justify-content:center; font-size:22px; }
-    .child-info { flex:1; min-width:0; }
-    .child-name { font-size:15px; font-weight:700; color:#fff; }
-    .child-status { font-size:10.5px; margin-top:2px; }
-    .child-status.active { color:#78DC96; }
-    .child-status.inactive { color:#8e8e9e; }
-    .child-stats { display:flex; gap:9px; }
-    .child-stat { flex:1; background:rgba(0,0,0,0.2); border-radius:10px; padding:8px; text-align:center; }
-    .child-stat-val { font-size:14px; font-weight:700; color:#fff; }
-    .child-stat-label { font-size:9px; color:#8e8e9e; margin-top:2px; }
-    .child-geo { font-size:10px; margin-top:8px; text-align:center; }
-    .child-geo.on { color:#78DC96; }
-    .child-geo.off { color:#8e8e9e; }
-    .btn-primary { padding:14px; border-radius:14px; background:linear-gradient(135deg, var(--accent), var(--accent-2)); color:#0a0a0f; font-weight:700; font-size:14px; text-align:center; cursor:pointer; margin-bottom:13px; }
-    .btn-primary:active { transform:scale(0.98); }
-    .empty-state { text-align:center; color:#6e6e7e; font-size:12px; padding:30px 16px; line-height:1.7; }
-    /* экран ребёнка */
-    .section-title { font-size:11px; font-weight:700; color:var(--accent); letter-spacing:0.4px; margin:16px 0 10px; }
-    .child-hero { background:linear-gradient(135deg, rgba(150,170,255,0.12), rgba(var(--accent-rgb),0.04)); border:1px solid rgba(150,170,255,0.25); border-radius:16px; padding:16px; margin-bottom:6px; text-align:center; }
-    .child-hero-avatar { width:64px; height:64px; border-radius:50%; margin:0 auto 9px; background:linear-gradient(135deg, #AAB9FF, var(--accent-2)); display:flex; align-items:center; justify-content:center; font-size:30px; }
-    .child-hero-name { font-size:18px; font-weight:700; color:#fff; }
-    .child-hero-meta { font-size:11px; color:#9a9aab; margin-top:3px; }
-    .child-hero-streak { font-size:12px; color:#FFD966; font-weight:600; margin-top:6px; }
-    .toggle-row { display:flex; align-items:center; justify-content:space-between; padding:12px 13px; background:rgba(35,35,46,0.5); border:0.5px solid rgba(var(--accent-rgb),0.1); border-radius:12px; margin-bottom:8px; }
-    .toggle-label { font-size:13px; color:#e8e8ee; font-weight:500; display:flex; align-items:center; gap:9px; }
-    .toggle-label .em { font-size:16px; }
-    .toggle-switch { width:44px; height:26px; border-radius:13px; background:rgba(255,255,255,0.12); position:relative; cursor:pointer; transition:0.25s; flex-shrink:0; }
-    .toggle-switch.on { background:linear-gradient(135deg, #78DC96, var(--accent-2)); }
-    .toggle-knob { width:20px; height:20px; border-radius:50%; background:#fff; position:absolute; top:3px; left:3px; transition:0.25s; }
-    .toggle-switch.on .toggle-knob { left:21px; }
-    .access-level { display:flex; gap:7px; margin-bottom:6px; }
-    .access-opt { flex:1; padding:10px 6px; border-radius:11px; text-align:center; font-size:11px; font-weight:600; cursor:pointer; background:rgba(255,255,255,0.05); color:#9a9aab; border:1px solid transparent; }
-    .access-opt.on { background:rgba(150,170,255,0.16); color:#AAB9FF; border-color:rgba(150,170,255,0.4); }
-    .danger-btn { padding:13px; border-radius:13px; background:rgba(255,120,120,0.1); border:1px solid rgba(255,120,120,0.3); color:#FF8A7C; font-weight:700; font-size:13px; text-align:center; cursor:pointer; margin-top:14px; }
-    .danger-btn:active { transform:scale(0.98); }
-    /* модалка добавления */
-    .modal { position:absolute; inset:0; z-index:400; background:rgba(0,0,0,0.88); backdrop-filter:blur(8px); display:none; align-items:center; justify-content:center; border-radius:52px; padding:14px; }
+    input[type=time]::-webkit-calendar-picker-indicator { filter:invert(1) brightness(1.5); }
+    .biz-intro { background:linear-gradient(135deg, rgba(150,170,255,0.12), rgba(var(--accent-rgb),0.04)); border:1px solid rgba(150,170,255,0.25); border-radius:15px; padding:13px 14px; margin-bottom:13px; }
+    .biz-intro-title { font-size:14px; font-weight:700; color:#fff; margin-bottom:4px; }
+    .biz-intro-sub { font-size:11px; color:#9a9aab; line-height:1.5; }
+    .biz-tabs { display:flex; gap:6px; background:rgba(0,0,0,0.25); border-radius:12px; padding:4px; margin-bottom:13px; }
+    .biz-tab { flex:1; text-align:center; padding:9px 4px; border-radius:9px; font-size:12px; font-weight:700; color:#8e8e9e; cursor:pointer; }
+    .biz-tab.on { background:linear-gradient(135deg, #AAB9FF, var(--accent-2)); color:#0a0a0f; }
+    .biz-pane { display:none; }
+    .biz-pane.on { display:block; }
+    .panel { background:linear-gradient(135deg, rgba(35,35,46,0.5), rgba(22,22,30,0.5)); border:0.5px solid rgba(var(--accent-rgb),0.12); border-radius:15px; padding:14px; margin-bottom:13px; }
+    .panel-title { font-size:13px; font-weight:700; color:var(--accent); margin-bottom:12px; display:flex; align-items:center; justify-content:space-between; }
+    .add-btn-sq { width:42px; flex-shrink:0; border-radius:11px; background:linear-gradient(135deg, var(--accent), var(--accent-2)); color:#0a0a0f; font-size:22px; font-weight:700; display:flex; align-items:center; justify-content:center; cursor:pointer; border:none; }
+    .add-btn-sq:active { transform:scale(0.94); }
+    .add-row { display:flex; gap:8px; margin-top:10px; }
+    .add-input { flex:1; background:rgba(0,0,0,0.3); border:1px solid rgba(var(--accent-rgb),0.16); border-radius:11px; padding:10px 13px; color:#fff; font-size:12.5px; font-family:inherit; outline:none; }
+    .add-input:focus { border-color:#AAB9FF; }
+    .add-input::placeholder { color:#6e6e7e; }
+    .time-input { width:92px; flex-shrink:0; background:rgba(0,0,0,0.3); border:1px solid rgba(var(--accent-rgb),0.16); border-radius:11px; padding:10px; color:#fff; font-size:12px; font-family:inherit; outline:none; }
+    .empty-row { text-align:center; color:#6e6e7e; font-size:11.5px; padding:16px; line-height:1.5; }
+
+    /* === ЦЕЛИ === */
+    .horizon-section { margin-bottom:6px; }
+    .horizon-head { display:flex; align-items:center; gap:8px; margin:14px 0 9px; }
+    .horizon-line { flex:1; height:1px; background:rgba(150,170,255,0.15); }
+    .horizon-label { font-size:11px; font-weight:700; color:#AAB9FF; background:rgba(150,170,255,0.12); padding:4px 11px; border-radius:8px; white-space:nowrap; }
+    .horizon-add { font-size:18px; color:#AAB9FF; cursor:pointer; padding:0 4px; }
+    .goal-card { background:rgba(0,0,0,0.22); border:0.5px solid rgba(150,170,255,0.14); border-radius:13px; padding:12px; margin-bottom:9px; cursor:pointer; transition:0.2s; }
+    .goal-card:active { transform:scale(0.99); }
+    .goal-card.done { opacity:0.6; }
+    .goal-card-top { display:flex; align-items:center; gap:9px; }
+    .goal-card-title { flex:1; min-width:0; font-size:13.5px; font-weight:600; color:#fff; }
+    .goal-card.done .goal-card-title { text-decoration:line-through; color:#8e8e9e; }
+    .goal-card-pct { font-size:11px; font-weight:700; color:#78DC96; flex-shrink:0; }
+    .goal-progress-track { height:6px; background:rgba(255,255,255,0.07); border-radius:4px; overflow:hidden; margin-top:9px; }
+    .goal-progress-fill { height:100%; border-radius:4px; background:linear-gradient(90deg, #AAB9FF, #78DC96); transition:width 0.4s ease; }
+    .goal-card-meta { font-size:10px; color:#8e8e9e; margin-top:7px; display:flex; justify-content:space-between; }
+    .goal-del { color:#ff6b6b; opacity:0.6; cursor:pointer; }
+
+    /* === ДЕТАЛИ ЦЕЛИ (шаги) === */
+    .goal-detail { position:absolute; inset:0; z-index:400; background:radial-gradient(ellipse at 50% 0%, #16161f, #0a0a0f 80%); border-radius:52px; display:none; flex-direction:column; padding:0; }
+    .goal-detail.show { display:flex; }
+    .gd-header { display:flex; align-items:center; gap:11px; padding:18px 18px 14px; }
+    .gd-back { width:36px; height:36px; border-radius:10px; background:rgba(255,255,255,0.06); display:flex; align-items:center; justify-content:center; color:#fff; cursor:pointer; flex-shrink:0; }
+    .gd-back svg { width:18px; height:18px; }
+    .gd-title-wrap { flex:1; min-width:0; }
+    .gd-horizon { font-size:10px; font-weight:700; color:#AAB9FF; }
+    .gd-title { font-size:16px; font-weight:700; color:#fff; line-height:1.3; }
+    .gd-body { flex:1; overflow-y:auto; scrollbar-width:none; padding:0 18px 18px; }
+    .gd-progress-card { background:linear-gradient(135deg, rgba(150,170,255,0.12), rgba(120,220,150,0.06)); border:1px solid rgba(150,170,255,0.25); border-radius:14px; padding:14px; margin-bottom:16px; }
+    .gd-progress-num { font-size:26px; font-weight:700; color:#78DC96; }
+    .gd-progress-label { font-size:11px; color:#9a9aab; margin-bottom:9px; }
+    .gd-progress-track { height:8px; background:rgba(255,255,255,0.08); border-radius:5px; overflow:hidden; }
+    .gd-progress-fill { height:100%; border-radius:5px; background:linear-gradient(90deg, #AAB9FF, #78DC96); transition:width 0.4s; }
+    .gd-section-label { font-size:11px; font-weight:700; color:var(--accent); margin-bottom:10px; }
+    .step-item { display:flex; align-items:center; gap:10px; padding:11px; background:rgba(255,255,255,0.04); border-radius:11px; margin-bottom:8px; }
+    .step-check { width:22px; height:22px; border-radius:7px; border:1.5px solid rgba(150,170,255,0.4); flex-shrink:0; display:flex; align-items:center; justify-content:center; cursor:pointer; }
+    .step-check.done { background:#78DC96; border-color:#78DC96; }
+    .step-check svg { width:13px; height:13px; color:#0a0a0f; opacity:0; }
+    .step-check.done svg { opacity:1; }
+    .step-text { flex:1; min-width:0; font-size:13px; color:#fff; }
+    .step-text.done { text-decoration:line-through; color:#6e6e7e; }
+    .step-today { font-size:9px; font-weight:700; padding:4px 9px; border-radius:7px; cursor:pointer; flex-shrink:0; background:rgba(255,217,102,0.14); color:#FFD966; border:1px solid rgba(255,217,102,0.3); }
+    .step-today.added { background:rgba(120,220,150,0.15); color:#78DC96; border-color:rgba(120,220,150,0.3); }
+    .step-del { color:#ff6b6b; opacity:0.5; cursor:pointer; flex-shrink:0; font-size:15px; }
+
+    /* === РАСПОРЯДОК НЕДЕЛИ === */
+    .week-row { display:flex; gap:5px; margin-bottom:14px; }
+    .day-chip { flex:1; padding:9px 2px; border-radius:11px; text-align:center; cursor:pointer; background:rgba(255,255,255,0.05); border:1px solid transparent; }
+    .day-chip.on { background:rgba(150,170,255,0.18); border-color:rgba(150,170,255,0.4); }
+    .day-chip.today { border-color:rgba(255,217,102,0.5); }
+    .day-name { font-size:10px; font-weight:700; color:#9a9aab; }
+    .day-chip.on .day-name { color:#AAB9FF; }
+    .day-dot { width:5px; height:5px; border-radius:50%; background:#78DC96; margin:3px auto 0; opacity:0; }
+    .day-dot.has { opacity:1; }
+    .note-item { display:flex; align-items:center; gap:10px; padding:10px; background:rgba(0,0,0,0.2); border-radius:11px; margin-bottom:8px; }
+    .note-check { width:22px; height:22px; border-radius:7px; border:1.5px solid rgba(150,170,255,0.4); flex-shrink:0; display:flex; align-items:center; justify-content:center; cursor:pointer; }
+    .note-check.done { background:#78DC96; border-color:#78DC96; }
+    .note-check svg { width:13px; height:13px; color:#0a0a0f; opacity:0; }
+    .note-check.done svg { opacity:1; }
+    .note-body { flex:1; min-width:0; }
+    .note-text { font-size:13px; color:#fff; }
+    .note-text.done { text-decoration:line-through; color:#6e6e7e; }
+    .note-meta { font-size:10px; color:#8e8e9e; margin-top:2px; display:flex; gap:8px; }
+    .note-from-goal { color:#FFD966; }
+    .note-del { font-size:15px; color:#ff6b6b; opacity:0.5; cursor:pointer; flex-shrink:0; padding-left:6px; }
+
+    /* модалки */
+    .modal { position:absolute; inset:0; z-index:450; background:rgba(0,0,0,0.88); backdrop-filter:blur(8px); display:none; align-items:center; justify-content:center; border-radius:52px; padding:14px; }
     .modal.show { display:flex; }
     .modal-box { background:linear-gradient(165deg,#1c1c26,#15151c); border-radius:22px; width:100%; padding:18px; border:0.5px solid rgba(150,170,255,0.25); }
-    .modal-title { font-size:16px; font-weight:700; color:#fff; margin-bottom:13px; }
-    .m-label { font-size:11px; color:var(--accent); font-weight:700; margin-bottom:7px; display:block; }
-    .m-input { width:100%; background:rgba(0,0,0,0.3); border:1px solid rgba(150,170,255,0.18); border-radius:11px; padding:12px 13px; color:#fff; font-size:14px; font-family:inherit; outline:none; margin-bottom:13px; }
-    .m-input:focus { border-color:#AAB9FF; }
-    .invite-code-box { background:rgba(0,0,0,0.3); border:1px dashed rgba(150,170,255,0.4); border-radius:12px; padding:14px; text-align:center; margin-bottom:13px; }
-    .invite-code { font-size:24px; font-weight:700; color:#AAB9FF; letter-spacing:3px; }
-    .invite-hint { font-size:10px; color:#8e8e9e; margin-top:6px; line-height:1.4; }
+    .modal-title { font-size:16px; font-weight:700; color:#AAB9FF; margin-bottom:13px; }
+    .m-input { width:100%; background:rgba(0,0,0,0.3); border:1px solid rgba(150,170,255,0.18); border-radius:11px; padding:11px 13px; color:#fff; font-size:13px; font-family:inherit; outline:none; margin-bottom:13px; }
     .modal-btns { display:flex; gap:9px; }
     .modal-btn { flex:1; padding:13px; border-radius:13px; font-size:13px; font-weight:700; cursor:pointer; text-align:center; border:none; font-family:inherit; }
     .modal-btn.cancel { background:rgba(255,255,255,0.07); color:#9a9aab; }
     .modal-btn.save { background:linear-gradient(135deg, #AAB9FF, var(--accent-2)); color:#0a0a0f; }
     .modal-btn:active { transform:scale(0.97); }
-    .toast { position:absolute; bottom:20px; left:50%; transform:translateX(-50%) translateY(20px); background:rgba(0,0,0,0.9); border:1px solid var(--accent); border-radius:16px; padding:11px 18px; color:var(--accent); font-size:12px; font-weight:600; z-index:500; opacity:0; transition:0.3s ease; pointer-events:none; max-width:300px; width:max-content; text-align:center; }
+    .toast { position:absolute; bottom:20px; left:50%; transform:translateX(-50%) translateY(20px); background:rgba(0,0,0,0.9); border:1px solid var(--accent); border-radius:16px; padding:11px 18px; color:var(--accent); font-size:12px; font-weight:600; z-index:600; opacity:0; transition:0.3s ease; pointer-events:none; max-width:300px; width:max-content; text-align:center; }
     .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
 
 </style>
@@ -222,39 +261,77 @@
             <div class="back-btn" onclick="location.href='fokus_profile.html'">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
             </div>
-            <div class="title">Родительский контроль</div>
-            <div class="title-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 7v6c0 4 3.5 7 8 9 4.5-2 8-5 8-9V7l-8-5Z"/></svg></div>
+            <div class="title">Работа и бизнес</div>
+            <div class="title-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg></div>
+        </div>
+
+        <div class="biz-tabs">
+            <div class="biz-tab on" data-btab="goals">🎯 Цели</div>
+            <div class="biz-tab" data-btab="week">📅 Распорядок</div>
         </div>
 
         <div class="scroll-area">
-            <div class="pc-intro">
-                <div class="pc-intro-title">🛡️ Контроль и забота</div>
-                <div class="pc-intro-sub">Следи за развитием ребёнка: прогресс по сферам, стрик, геолокация. Настраивай доступ к разделам и напоминания.</div>
+            <!-- ЦЕЛИ -->
+            <div class="biz-pane on" id="pane-goals">
+                <div class="biz-intro">
+                    <div class="biz-intro-title">🎯 От мечты к шагам</div>
+                    <div class="biz-intro-sub">Ставь цели на горизонты от месяца до 20 лет. Разбивай каждую на шаги, бери шаги в работу на сегодня — и двигайся к большому маленькими действиями.</div>
+                </div>
+                <div id="horizonsContainer"></div>
             </div>
 
-            <div class="premium-lock" id="premiumLock">🔐 Доступно на подписке Про</div>
+            <!-- РАСПОРЯДОК -->
+            <div class="biz-pane" id="pane-week">
+                <div class="biz-intro">
+                    <div class="biz-intro-title">📅 Распорядок недели</div>
+                    <div class="biz-intro-sub">Твой повторяющийся ритм по дням. Сюда же попадают шаги целей, которые ты взял «на сегодня».</div>
+                </div>
+                <div class="week-row" id="weekRow"></div>
+                <div class="panel">
+                    <div class="panel-title">📝 <span id="selectedDay"></span></div>
+                    <div id="notesList"></div>
+                    <div class="add-row">
+                        <input type="text" class="add-input" id="noteInput" placeholder="Дело на этот день...">
+                        <input type="time" class="time-input" id="noteTime">
+                        <button class="add-btn-sq" id="addNoteBtn">+</button>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-            <div class="btn-primary" id="addChildBtn">➕ Добавить ребёнка</div>
-
-            <div id="childrenList"></div>
+        <!-- ДЕТАЛИ ЦЕЛИ (шаги) -->
+        <div class="goal-detail" id="goalDetail">
+            <div class="gd-header">
+                <div class="gd-back" id="gdBack"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></div>
+                <div class="gd-title-wrap">
+                    <div class="gd-horizon" id="gdHorizon">1 год</div>
+                    <div class="gd-title" id="gdTitle">Цель</div>
+                </div>
+            </div>
+            <div class="gd-body">
+                <div class="gd-progress-card">
+                    <div class="gd-progress-num" id="gdPct">0%</div>
+                    <div class="gd-progress-label" id="gdProgLabel">0 из 0 шагов выполнено</div>
+                    <div class="gd-progress-track"><div class="gd-progress-fill" id="gdProgFill" style="width:0%"></div></div>
+                </div>
+                <div class="gd-section-label">ШАГИ К ЦЕЛИ</div>
+                <div id="stepsList"></div>
+                <div class="add-row">
+                    <input type="text" class="add-input" id="stepInput" placeholder="Добавить шаг...">
+                    <button class="add-btn-sq" id="addStepBtn">+</button>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- Модалка добавления ребёнка -->
-    <div class="modal" id="addModal">
+    <!-- Модалка новой цели -->
+    <div class="modal" id="goalModal">
         <div class="modal-box">
-            <div class="modal-title">Добавить ребёнка</div>
-            <div class="m-label">ИМЯ РЕБЁНКА</div>
-            <input type="text" class="m-input" id="childName" placeholder="Например: Дима">
-            <div class="m-label">ВОЗРАСТ</div>
-            <input type="number" class="m-input" id="childAge" placeholder="14" inputmode="numeric">
-            <div class="invite-code-box">
-                <div class="invite-code" id="inviteCode">— — — —</div>
-                <div class="invite-hint">Ребёнок вводит этот код в своём приложении FOCUS, чтобы связать аккаунты. Связь активируется с серверной частью.</div>
-            </div>
+            <div class="modal-title" id="goalModalTitle">Новая цель</div>
+            <input type="text" class="m-input" id="goalText" placeholder="Чего хочешь достичь...">
             <div class="modal-btns">
-                <button class="modal-btn cancel" id="cancelAdd">Отмена</button>
-                <button class="modal-btn save" id="saveChild">Добавить</button>
+                <button class="modal-btn cancel" id="cancelGoal">Отмена</button>
+                <button class="modal-btn save" id="saveGoal">Создать</button>
             </div>
         </div>
     </div>
@@ -446,78 +523,251 @@ initAtmosphere(canvasId) {
     FocusCore.applyStoredTheme();
     FocusCore.initAtmosphere('atmosCanvas');
 
-    function toast(msg){ const t=document.getElementById('toast'); t.innerText=msg; t.classList.add('show'); clearTimeout(window._tt); window._tt=setTimeout(()=>t.classList.remove('show'),2200); }
+    function toast(msg){ const t=document.getElementById('toast'); t.innerText=msg; t.classList.add('show'); clearTimeout(window._tt); window._tt=setTimeout(()=>t.classList.remove('show'),2000); }
     function escapeHtml(s){ const d=document.createElement('div'); d.innerText=String(s==null?'':s); return d.innerHTML; }
+    function uid(){ return Date.now() + '_' + Math.floor(Math.random()*1000); }
 
-    const CH_KEY = 'focus_controlled_children';
-    function getChildren(){ try { return JSON.parse(localStorage.getItem(CH_KEY))||[]; } catch(e){ return []; } }
-    function saveChildren(c){ localStorage.setItem(CH_KEY, JSON.stringify(c)); }
+    const HORIZONS = [
+        { id:'m1', name:'1 месяц' }, { id:'m3', name:'3 месяца' }, { id:'y1', name:'1 год' },
+        { id:'y3', name:'3 года' }, { id:'y5', name:'5 лет' }, { id:'y10', name:'10 лет' }, { id:'y20', name:'20 лет' }
+    ];
+    const DAYS = ['ПН','ВТ','СР','ЧТ','ПТ','СБ','ВС'];
+    const DAYS_FULL = ['Понедельник','Вторник','Среда','Четверг','Пятница','Суббота','Воскресенье'];
 
-    function renderChildren(){
-        const cont = document.getElementById('childrenList');
-        const children = getChildren();
-        if (children.length === 0) {
-            cont.innerHTML = '<div class="empty-state">👶 Нет подключённых детей.<br>Нажми «Добавить ребёнка» и передай код.</div>';
+    // ===== данные =====
+    // goals: [{id, horizon, title, steps:[{id,text,done,today}]}]
+    let goals = [];
+    let week = {}; // {'ПН':[{id,text,time,done,fromGoal}]}
+    function load(){
+        try { goals = JSON.parse(localStorage.getItem('focus_biz_goals'))||[]; } catch(e){ goals=[]; }
+        try { week = JSON.parse(localStorage.getItem('focus_biz_week'))||{}; } catch(e){ week={}; }
+    }
+    function saveGoals(){ localStorage.setItem('focus_biz_goals', JSON.stringify(goals)); }
+    function saveWeek(){ localStorage.setItem('focus_biz_week', JSON.stringify(week)); }
+
+    function goalProgress(g){
+        if (!g.steps || g.steps.length === 0) return 0;
+        const done = g.steps.filter(s => s.done).length;
+        return Math.round(done / g.steps.length * 100);
+    }
+
+    // ===== Вкладки =====
+    document.querySelectorAll('.biz-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+            document.querySelectorAll('.biz-tab').forEach(t => t.classList.remove('on'));
+            document.querySelectorAll('.biz-pane').forEach(p => p.classList.remove('on'));
+            tab.classList.add('on');
+            document.getElementById('pane-' + tab.dataset.btab).classList.add('on');
+            if (tab.dataset.btab === 'week') { renderWeek(); renderNotes(); }
+        });
+    });
+
+    // ===== ЦЕЛИ по горизонтам =====
+    function renderGoals(){
+        const cont = document.getElementById('horizonsContainer');
+        cont.innerHTML = '';
+        HORIZONS.forEach(h => {
+            const hGoals = goals.filter(g => g.horizon === h.id);
+            const section = document.createElement('div');
+            section.className = 'horizon-section';
+            section.innerHTML = `
+                <div class="horizon-head">
+                    <span class="horizon-label">${h.name}</span>
+                    <div class="horizon-line"></div>
+                    <span class="horizon-add" data-add="${h.id}">+</span>
+                </div>`;
+            hGoals.forEach(g => {
+                const pct = goalProgress(g);
+                const stepsCount = (g.steps||[]).length;
+                const done = (g.steps||[]).filter(s=>s.done).length;
+                const card = document.createElement('div');
+                card.className = 'goal-card' + (pct===100 && stepsCount>0 ? ' done' : '');
+                card.innerHTML = `
+                    <div class="goal-card-top">
+                        <div class="goal-card-title">${escapeHtml(g.title)}</div>
+                        <div class="goal-card-pct">${pct}%</div>
+                    </div>
+                    <div class="goal-progress-track"><div class="goal-progress-fill" style="width:${pct}%"></div></div>
+                    <div class="goal-card-meta">
+                        <span>${stepsCount>0 ? done+' из '+stepsCount+' шагов' : 'Нажми, чтобы добавить шаги'}</span>
+                        <span class="goal-del" data-del="${g.id}">🗑 удалить</span>
+                    </div>`;
+                card.addEventListener('click', (e) => {
+                    if (e.target.dataset.del) return;
+                    openGoalDetail(g.id);
+                });
+                section.appendChild(card);
+            });
+            cont.appendChild(section);
+        });
+        // добавить цель
+        cont.querySelectorAll('[data-add]').forEach(el => el.addEventListener('click', () => openGoalModal(el.dataset.add)));
+        cont.querySelectorAll('[data-del]').forEach(el => el.addEventListener('click', (e) => {
+            e.stopPropagation();
+            goals = goals.filter(g => g.id !== el.dataset.del);
+            saveGoals(); renderGoals();
+        }));
+    }
+
+    // модалка новой цели
+    const goalModal = document.getElementById('goalModal');
+    let addHorizon = 'm1';
+    function openGoalModal(horizon){
+        addHorizon = horizon;
+        const h = HORIZONS.find(x=>x.id===horizon);
+        document.getElementById('goalModalTitle').innerText = 'Цель на ' + h.name;
+        document.getElementById('goalText').value = '';
+        goalModal.classList.add('show');
+        setTimeout(()=>document.getElementById('goalText').focus(), 100);
+    }
+    document.getElementById('cancelGoal').addEventListener('click', ()=>goalModal.classList.remove('show'));
+    goalModal.addEventListener('click', (e)=>{ if(e.target.id==='goalModal') goalModal.classList.remove('show'); });
+    document.getElementById('saveGoal').addEventListener('click', () => {
+        const title = document.getElementById('goalText').value.trim();
+        if (!title) { toast('Введи цель'); return; }
+        goals.push({ id:uid(), horizon:addHorizon, title, steps:[] });
+        saveGoals(); goalModal.classList.remove('show'); renderGoals();
+        toast('Цель создана 🎯');
+    });
+
+    // ===== ДЕТАЛИ ЦЕЛИ (шаги) =====
+    const goalDetail = document.getElementById('goalDetail');
+    let currentGoalId = null;
+    function openGoalDetail(goalId){
+        currentGoalId = goalId;
+        const g = goals.find(x => x.id === goalId);
+        if (!g) return;
+        const h = HORIZONS.find(x=>x.id===g.horizon);
+        document.getElementById('gdHorizon').innerText = h ? h.name : '';
+        document.getElementById('gdTitle').innerText = g.title;
+        renderSteps();
+        goalDetail.classList.add('show');
+    }
+    document.getElementById('gdBack').addEventListener('click', () => { goalDetail.classList.remove('show'); renderGoals(); });
+
+    function renderSteps(){
+        const g = goals.find(x => x.id === currentGoalId);
+        if (!g) return;
+        const pct = goalProgress(g);
+        const done = (g.steps||[]).filter(s=>s.done).length;
+        document.getElementById('gdPct').innerText = pct + '%';
+        document.getElementById('gdProgLabel').innerText = done + ' из ' + (g.steps||[]).length + ' шагов выполнено';
+        document.getElementById('gdProgFill').style.width = pct + '%';
+
+        const cont = document.getElementById('stepsList');
+        if (!g.steps || g.steps.length === 0) {
+            cont.innerHTML = '<div class="empty-row">Разбей цель на конкретные шаги.<br>Маленькие действия ведут к большому.</div>';
             return;
         }
         cont.innerHTML = '';
-        children.forEach(child => {
-            const card = document.createElement('div');
-            card.className = 'child-card';
-            const active = child.status === 'active';
-            const avInner = (child.photo && child.photo.startsWith('data:image'))
-                ? '<img src="'+child.photo+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">'
-                : (child.gender==='girl'?'👧':'👦');
-            card.innerHTML = `
-                <div class="child-top">
-                    <div class="child-avatar">${avInner}</div>
-                    <div class="child-info">
-                        <div class="child-name">${escapeHtml(child.name)}${child.age?', '+child.age:''}</div>
-                        <div class="child-status ${active?'active':'inactive'}">${active?'🟢 Активен сегодня':'⚪ Не заходил сегодня'}</div>
-                    </div>
-                </div>
-                <div class="child-stats">
-                    <div class="child-stat"><div class="child-stat-val">🔥 ${child.streak||0}</div><div class="child-stat-label">дней подряд</div></div>
-                    <div class="child-stat"><div class="child-stat-val">📊 ${child.progress||0}%</div><div class="child-stat-label">прогресс</div></div>
-                </div>
-                <div class="child-geo ${child.geolocation?'on':'off'}">${child.geolocation?'📍 Геолокация включена':'📍 Геолокация выключена'}</div>`;
-            card.addEventListener('click', () => {
-                localStorage.setItem('focus_selected_child', JSON.stringify(child));
-                location.href = 'control_child.html?id=' + child.id;
-            });
-            cont.appendChild(card);
+        g.steps.forEach(step => {
+            const div = document.createElement('div');
+            div.className = 'step-item';
+            div.innerHTML = `
+                <div class="step-check ${step.done?'done':''}" data-toggle="${step.id}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>
+                <div class="step-text ${step.done?'done':''}">${escapeHtml(step.text)}</div>
+                <div class="step-today ${step.today?'added':''}" data-today="${step.id}">${step.today?'✓ в плане':'+ на сегодня'}</div>
+                <div class="step-del" data-delstep="${step.id}">×</div>`;
+            cont.appendChild(div);
         });
+        cont.querySelectorAll('[data-toggle]').forEach(el => el.addEventListener('click', () => {
+            const step = g.steps.find(s => s.id === el.dataset.toggle);
+            if (step) { step.done = !step.done; saveGoals(); renderSteps(); }
+        }));
+        cont.querySelectorAll('[data-delstep]').forEach(el => el.addEventListener('click', () => {
+            g.steps = g.steps.filter(s => s.id !== el.dataset.delstep);
+            saveGoals(); renderSteps();
+        }));
+        // "взять на сегодня" → в распорядок текущего дня
+        cont.querySelectorAll('[data-today]').forEach(el => el.addEventListener('click', () => {
+            const step = g.steps.find(s => s.id === el.dataset.today);
+            if (!step) return;
+            const today = DAYS[(new Date().getDay()+6)%7];
+            if (!week[today]) week[today] = [];
+            if (step.today) {
+                // убрать из дня
+                week[today] = week[today].filter(n => n.stepRef !== step.id);
+                step.today = false;
+            } else {
+                week[today].push({ id:uid(), text:step.text, time:'', done:false, fromGoal:g.title, stepRef:step.id });
+                step.today = true;
+            }
+            saveGoals(); saveWeek(); renderSteps();
+            toast(step.today ? 'Шаг добавлен в задачи на сегодня' : 'Шаг убран из сегодня');
+        }));
     }
 
-    // модалка добавления
-    const addModal = document.getElementById('addModal');
-    function genCode(){ return Math.random().toString(36).substring(2,6).toUpperCase(); }
-    document.getElementById('addChildBtn').addEventListener('click', () => {
-        document.getElementById('childName').value = '';
-        document.getElementById('childAge').value = '';
-        document.getElementById('inviteCode').innerText = genCode();
-        addModal.classList.add('show');
-    });
-    document.getElementById('cancelAdd').addEventListener('click', () => addModal.classList.remove('show'));
-    addModal.addEventListener('click', (e)=>{ if(e.target.id==='addModal') addModal.classList.remove('show'); });
-    document.getElementById('saveChild').addEventListener('click', () => {
-        const name = document.getElementById('childName').value.trim();
-        const age = parseInt(document.getElementById('childAge').value) || null;
-        if (!name) { toast('Введи имя ребёнка'); return; }
-        const children = getChildren();
-        children.push({
-            id: Date.now(), name, age, gender:'boy', status:'inactive',
-            streak:0, progress:0, geolocation:true,
-            access:'full', spheres:{ body:true, mental:true, energy:true, relations:true, faith:true, reward:true, oracle:false },
-            notifs:{ workout:true, sleep:true, meds:false }
-        });
-        saveChildren(children);
-        addModal.classList.remove('show');
-        renderChildren();
-        toast('Ребёнок добавлен. Передай ему код для связи');
+    document.getElementById('addStepBtn').addEventListener('click', () => {
+        const text = document.getElementById('stepInput').value.trim();
+        if (!text) { toast('Введи шаг'); return; }
+        const g = goals.find(x => x.id === currentGoalId);
+        if (!g.steps) g.steps = [];
+        g.steps.push({ id:uid(), text, done:false, today:false });
+        saveGoals();
+        document.getElementById('stepInput').value = '';
+        renderSteps();
     });
 
-    renderChildren();
+    // ===== РАСПОРЯДОК НЕДЕЛИ =====
+    let selectedDay = DAYS[(new Date().getDay()+6)%7];
+    function renderWeek(){
+        const row = document.getElementById('weekRow');
+        const today = DAYS[(new Date().getDay()+6)%7];
+        row.innerHTML = '';
+        DAYS.forEach((d,i) => {
+            const has = (week[d]||[]).length > 0;
+            const chip = document.createElement('div');
+            chip.className = 'day-chip' + (d===selectedDay?' on':'') + (d===today?' today':'');
+            chip.innerHTML = `<div class="day-name">${d}</div><div class="day-dot ${has?'has':''}"></div>`;
+            chip.addEventListener('click', () => { selectedDay = d; renderWeek(); renderNotes(); });
+            row.appendChild(chip);
+        });
+        document.getElementById('selectedDay').innerText = DAYS_FULL[DAYS.indexOf(selectedDay)];
+    }
+    function renderNotes(){
+        const cont = document.getElementById('notesList');
+        const list = week[selectedDay] || [];
+        if (list.length === 0) { cont.innerHTML = '<div class="empty-row">Нет дел на этот день</div>'; return; }
+        list.sort((a,b)=>(a.time||'99').localeCompare(b.time||'99'));
+        cont.innerHTML = '';
+        list.forEach(note => {
+            const div = document.createElement('div');
+            div.className = 'note-item';
+            div.innerHTML = `
+                <div class="note-check ${note.done?'done':''}" data-toggle="${note.id}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>
+                <div class="note-body">
+                    <div class="note-text ${note.done?'done':''}">${escapeHtml(note.text)}</div>
+                    <div class="note-meta">
+                        <span>⏰ ${note.time || 'без времени'}</span>
+                        ${note.fromGoal ? '<span class="note-from-goal">🎯 '+escapeHtml(note.fromGoal)+'</span>' : ''}
+                    </div>
+                </div>
+                <div class="note-del" data-del="${note.id}">🗑</div>`;
+            cont.appendChild(div);
+        });
+        cont.querySelectorAll('[data-toggle]').forEach(el => el.addEventListener('click', () => {
+            const note = week[selectedDay].find(n => n.id === el.dataset.toggle);
+            if (note) { note.done = !note.done; saveWeek(); renderNotes(); }
+        }));
+        cont.querySelectorAll('[data-del]').forEach(el => el.addEventListener('click', () => {
+            week[selectedDay] = week[selectedDay].filter(n => n.id !== el.dataset.del);
+            saveWeek(); renderNotes(); renderWeek();
+        }));
+    }
+    document.getElementById('addNoteBtn').addEventListener('click', () => {
+        const text = document.getElementById('noteInput').value.trim();
+        const time = document.getElementById('noteTime').value;
+        if (!text) { toast('Введи дело'); return; }
+        if (!week[selectedDay]) week[selectedDay] = [];
+        week[selectedDay].push({ id:uid(), text, time, done:false });
+        saveWeek();
+        document.getElementById('noteInput').value = '';
+        document.getElementById('noteTime').value = '';
+        renderNotes(); renderWeek();
+    });
+
+    load();
+    renderGoals();
 
 </script>
 <script src="focus-chat-fab.js"></script>

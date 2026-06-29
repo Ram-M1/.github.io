@@ -10,7 +10,7 @@
 <link rel="apple-touch-icon" href="icon-192.png">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>Родительский контроль — FOCUS</title>
+<title>Кабинет Оракула — FOCUS</title>
 <style>
     :root, [data-theme="original"] { --accent:#FFD966; --accent-rgb:255,217,102; --accent-2:#7C8CFF; --accent-2-rgb:124,140,255; --accent-light:#FFE9A8; --accent-dark:#C9952E; --bg-1:#131319; --bg-2:#0d0d12; --text-strong:#FFFFFF; }
     [data-theme="tron"] { --accent:#FF3B2E; --accent-rgb:255,59,46; --accent-2:#00E5FF; --accent-2-rgb:0,229,255; --accent-light:#FF8A6B; --accent-dark:#B8201A; --bg-1:#0a0a0d; --bg-2:#000000; --text-strong:#FFFFFF; }
@@ -149,68 +149,70 @@
     .modal, .slideshow, .session-area { border-radius: 0 !important; }
 }
 
-    /* ===== РОДИТЕЛЬСКИЙ КОНТРОЛЬ ===== */
+    /* ===== КАБИНЕТ ОРАКУЛА ===== */
+    .oracle-profile-row { display:flex; align-items:center; gap:13px; margin-bottom:14px; }
+    .oracle-avatar { width:64px; height:64px; border-radius:50%; flex-shrink:0; background:linear-gradient(135deg, #C8AAFF, var(--accent-2)); display:flex; align-items:center; justify-content:center; color:#0a0a0f; position:relative; cursor:pointer; overflow:visible; }
+    .oracle-avatar svg { width:30px; height:30px; }
+    .oracle-avatar img { width:100%; height:100%; object-fit:cover; border-radius:50%; }
+    .oracle-avatar-edit { position:absolute; bottom:-2px; right:-2px; width:24px; height:24px; border-radius:50%; background:var(--accent); border:2.5px solid #15151c; display:flex; align-items:center; justify-content:center; }
+    .oracle-avatar-edit svg { width:11px; height:11px; color:#0a0a0f; }
+    .oracle-profile-info { flex:1; }
+    .oracle-profile-name { font-size:17px; font-weight:700; color:#fff; }
+    .oracle-profile-sub { font-size:11px; color:#9a9aab; margin-top:2px; }
     .scroll-area { flex:1; overflow-y:auto; scrollbar-width:none; }
     .scroll-area::-webkit-scrollbar { display:none; }
-    .pc-intro { background:linear-gradient(135deg, rgba(150,170,255,0.12), rgba(var(--accent-rgb),0.04)); border:1px solid rgba(150,170,255,0.25); border-radius:15px; padding:13px 14px; margin-bottom:14px; }
-    .pc-intro-title { font-size:14px; font-weight:700; color:#fff; margin-bottom:4px; }
-    .pc-intro-sub { font-size:11px; color:#9a9aab; line-height:1.5; }
-    .premium-lock { background:rgba(200,170,255,0.1); border:1px solid rgba(200,170,255,0.3); border-radius:12px; padding:11px 13px; margin-bottom:14px; font-size:11.5px; color:#C8AAFF; font-weight:600; display:flex; align-items:center; gap:8px; }
-    .child-card { background:linear-gradient(135deg, rgba(35,35,46,0.6), rgba(22,22,30,0.6)); border:0.5px solid rgba(150,170,255,0.16); border-radius:15px; padding:14px; margin-bottom:11px; cursor:pointer; transition:0.2s; }
-    .child-card:active { transform:scale(0.99); }
-    .child-top { display:flex; align-items:center; gap:11px; margin-bottom:10px; }
-    .child-avatar { width:46px; height:46px; border-radius:50%; flex-shrink:0; background:linear-gradient(135deg, #AAB9FF, var(--accent-2)); display:flex; align-items:center; justify-content:center; font-size:22px; }
-    .child-info { flex:1; min-width:0; }
-    .child-name { font-size:15px; font-weight:700; color:#fff; }
-    .child-status { font-size:10.5px; margin-top:2px; }
-    .child-status.active { color:#78DC96; }
-    .child-status.inactive { color:#8e8e9e; }
-    .child-stats { display:flex; gap:9px; }
-    .child-stat { flex:1; background:rgba(0,0,0,0.2); border-radius:10px; padding:8px; text-align:center; }
-    .child-stat-val { font-size:14px; font-weight:700; color:#fff; }
-    .child-stat-label { font-size:9px; color:#8e8e9e; margin-top:2px; }
-    .child-geo { font-size:10px; margin-top:8px; text-align:center; }
-    .child-geo.on { color:#78DC96; }
-    .child-geo.off { color:#8e8e9e; }
-    .btn-primary { padding:14px; border-radius:14px; background:linear-gradient(135deg, var(--accent), var(--accent-2)); color:#0a0a0f; font-weight:700; font-size:14px; text-align:center; cursor:pointer; margin-bottom:13px; }
-    .btn-primary:active { transform:scale(0.98); }
-    .empty-state { text-align:center; color:#6e6e7e; font-size:12px; padding:30px 16px; line-height:1.7; }
-    /* экран ребёнка */
-    .section-title { font-size:11px; font-weight:700; color:var(--accent); letter-spacing:0.4px; margin:16px 0 10px; }
-    .child-hero { background:linear-gradient(135deg, rgba(150,170,255,0.12), rgba(var(--accent-rgb),0.04)); border:1px solid rgba(150,170,255,0.25); border-radius:16px; padding:16px; margin-bottom:6px; text-align:center; }
-    .child-hero-avatar { width:64px; height:64px; border-radius:50%; margin:0 auto 9px; background:linear-gradient(135deg, #AAB9FF, var(--accent-2)); display:flex; align-items:center; justify-content:center; font-size:30px; }
-    .child-hero-name { font-size:18px; font-weight:700; color:#fff; }
-    .child-hero-meta { font-size:11px; color:#9a9aab; margin-top:3px; }
-    .child-hero-streak { font-size:12px; color:#FFD966; font-weight:600; margin-top:6px; }
-    .toggle-row { display:flex; align-items:center; justify-content:space-between; padding:12px 13px; background:rgba(35,35,46,0.5); border:0.5px solid rgba(var(--accent-rgb),0.1); border-radius:12px; margin-bottom:8px; }
-    .toggle-label { font-size:13px; color:#e8e8ee; font-weight:500; display:flex; align-items:center; gap:9px; }
-    .toggle-label .em { font-size:16px; }
-    .toggle-switch { width:44px; height:26px; border-radius:13px; background:rgba(255,255,255,0.12); position:relative; cursor:pointer; transition:0.25s; flex-shrink:0; }
-    .toggle-switch.on { background:linear-gradient(135deg, #78DC96, var(--accent-2)); }
-    .toggle-knob { width:20px; height:20px; border-radius:50%; background:#fff; position:absolute; top:3px; left:3px; transition:0.25s; }
-    .toggle-switch.on .toggle-knob { left:21px; }
-    .access-level { display:flex; gap:7px; margin-bottom:6px; }
-    .access-opt { flex:1; padding:10px 6px; border-radius:11px; text-align:center; font-size:11px; font-weight:600; cursor:pointer; background:rgba(255,255,255,0.05); color:#9a9aab; border:1px solid transparent; }
-    .access-opt.on { background:rgba(150,170,255,0.16); color:#AAB9FF; border-color:rgba(150,170,255,0.4); }
-    .danger-btn { padding:13px; border-radius:13px; background:rgba(255,120,120,0.1); border:1px solid rgba(255,120,120,0.3); color:#FF8A7C; font-weight:700; font-size:13px; text-align:center; cursor:pointer; margin-top:14px; }
-    .danger-btn:active { transform:scale(0.98); }
-    /* модалка добавления */
+    input[type=number]::-webkit-outer-spin-button, input[type=number]::-webkit-inner-spin-button { -webkit-appearance:none; margin:0; }
+    input[type=number] { -moz-appearance:textfield; appearance:textfield; }
+    .balance-card { background:linear-gradient(135deg, rgba(200,170,255,0.14), rgba(var(--accent-rgb),0.05)); border:1px solid rgba(200,170,255,0.3); border-radius:16px; padding:15px; margin-bottom:14px; position:relative; overflow:hidden; }
+    .balance-card::before { content:''; position:absolute; top:0; left:0; width:48px; height:3px; background:linear-gradient(90deg, #C8AAFF, var(--accent)); border-radius:16px 0 6px 0; }
+    .balance-label { font-size:10.5px; color:#9a9aab; font-weight:600; margin-bottom:4px; }
+    .balance-value { font-size:28px; font-weight:700; color:#FFD966; display:flex; align-items:baseline; gap:6px; }
+    .balance-value small { font-size:13px; color:#9a9aab; font-weight:600; }
+    .balance-withdraw { margin-top:10px; padding:10px; border-radius:11px; background:rgba(255,217,102,0.12); border:1px solid rgba(255,217,102,0.3); color:#FFD966; font-weight:700; font-size:12px; text-align:center; cursor:pointer; }
+    .balance-withdraw:active { transform:scale(0.98); }
+    .dash-section { margin-bottom:16px; }
+    .dash-section-title { font-size:12px; font-weight:700; color:#C8AAFF; margin-bottom:10px; display:flex; align-items:center; justify-content:space-between; }
+    .add-mini { font-size:11px; color:#C8AAFF; background:rgba(200,170,255,0.12); border:1px solid rgba(200,170,255,0.3); border-radius:9px; padding:5px 11px; cursor:pointer; font-weight:700; }
+    .add-mini:active { transform:scale(0.95); }
+    .cat-grid { display:flex; flex-wrap:wrap; gap:7px; }
+    .cat-check { padding:8px 13px; border-radius:11px; font-size:11.5px; font-weight:600; cursor:pointer; background:rgba(255,255,255,0.05); color:#9a9aab; border:1px solid transparent; user-select:none; }
+    .cat-check.on { background:rgba(200,170,255,0.16); color:#C8AAFF; border-color:rgba(200,170,255,0.4); }
+    .cat-warn { font-size:10px; color:#FF8A7C; margin-top:6px; min-height:12px; }
+    .service-card { background:rgba(35,35,46,0.5); border:0.5px solid rgba(200,170,255,0.12); border-radius:12px; padding:11px 13px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; }
+    .service-info { flex:1; min-width:0; }
+    .service-name { font-size:13px; font-weight:600; color:#fff; }
+    .service-price { font-size:11px; color:#FFD966; font-weight:700; margin-top:2px; }
+    .service-net { font-size:9.5px; color:#78DC96; margin-top:1px; }
+    .service-del { font-size:18px; color:#ff6b6b; opacity:0.5; cursor:pointer; padding-left:10px; flex-shrink:0; }
+    .req-card { background:linear-gradient(135deg, rgba(35,35,46,0.6), rgba(22,22,30,0.6)); border:0.5px solid rgba(200,170,255,0.14); border-radius:13px; padding:13px; margin-bottom:9px; }
+    .req-card-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
+    .req-client { font-size:13px; font-weight:700; color:#fff; }
+    .req-price { font-size:12px; color:#FFD966; font-weight:700; }
+    .req-format { font-size:11px; color:#b8b8c8; margin-bottom:9px; }
+    .req-date { font-size:10px; color:#8e8e9e; }
+    .req-actions { display:flex; gap:8px; margin-top:9px; }
+    .req-btn { flex:1; padding:8px; border-radius:9px; font-size:11px; font-weight:700; cursor:pointer; text-align:center; }
+    .req-btn.accept { background:linear-gradient(135deg, #78DC96, var(--accent-2)); color:#0a0a0f; }
+    .req-btn.done { background:rgba(120,220,150,0.15); border:1px solid rgba(120,220,150,0.35); color:#78DC96; }
+    .req-btn:active { transform:scale(0.96); }
+    .empty-state { text-align:center; color:#6e6e7e; font-size:11.5px; padding:24px 16px; line-height:1.6; }
+    .commission-note { font-size:9.5px; color:#8e8e9e; text-align:center; margin-top:4px; line-height:1.4; }
+    /* модалка добавления услуги */
     .modal { position:absolute; inset:0; z-index:400; background:rgba(0,0,0,0.88); backdrop-filter:blur(8px); display:none; align-items:center; justify-content:center; border-radius:52px; padding:14px; }
     .modal.show { display:flex; }
-    .modal-box { background:linear-gradient(165deg,#1c1c26,#15151c); border-radius:22px; width:100%; padding:18px; border:0.5px solid rgba(150,170,255,0.25); }
-    .modal-title { font-size:16px; font-weight:700; color:#fff; margin-bottom:13px; }
-    .m-label { font-size:11px; color:var(--accent); font-weight:700; margin-bottom:7px; display:block; }
-    .m-input { width:100%; background:rgba(0,0,0,0.3); border:1px solid rgba(150,170,255,0.18); border-radius:11px; padding:12px 13px; color:#fff; font-size:14px; font-family:inherit; outline:none; margin-bottom:13px; }
-    .m-input:focus { border-color:#AAB9FF; }
-    .invite-code-box { background:rgba(0,0,0,0.3); border:1px dashed rgba(150,170,255,0.4); border-radius:12px; padding:14px; text-align:center; margin-bottom:13px; }
-    .invite-code { font-size:24px; font-weight:700; color:#AAB9FF; letter-spacing:3px; }
-    .invite-hint { font-size:10px; color:#8e8e9e; margin-top:6px; line-height:1.4; }
-    .modal-btns { display:flex; gap:9px; }
+    .modal-box { background:linear-gradient(165deg,#1c1c26,#15151c); border-radius:22px; width:100%; max-height:calc(100% - 16px); overflow-y:auto; scrollbar-width:thin; padding:18px; border:0.5px solid rgba(200,170,255,0.25); }
+    .modal-title { font-size:16px; font-weight:700; color:#C8AAFF; margin-bottom:13px; }
+    .m-field { margin-bottom:12px; }
+    .m-label { font-size:11px; color:#C8AAFF; font-weight:700; margin-bottom:6px; display:block; }
+    .m-input { width:100%; background:rgba(0,0,0,0.3); border:1px solid rgba(200,170,255,0.18); border-radius:11px; padding:11px 13px; color:#fff; font-size:14px; font-family:inherit; outline:none; }
+    .m-input:focus { border-color:#C8AAFF; }
+    .m-net { font-size:10.5px; color:#78DC96; margin-top:6px; }
+    .modal-btns { display:flex; gap:9px; margin-top:6px; }
     .modal-btn { flex:1; padding:13px; border-radius:13px; font-size:13px; font-weight:700; cursor:pointer; text-align:center; border:none; font-family:inherit; }
     .modal-btn.cancel { background:rgba(255,255,255,0.07); color:#9a9aab; }
-    .modal-btn.save { background:linear-gradient(135deg, #AAB9FF, var(--accent-2)); color:#0a0a0f; }
+    .modal-btn.save { background:linear-gradient(135deg, #C8AAFF, var(--accent-2)); color:#0a0a0f; }
     .modal-btn:active { transform:scale(0.97); }
-    .toast { position:absolute; bottom:20px; left:50%; transform:translateX(-50%) translateY(20px); background:rgba(0,0,0,0.9); border:1px solid var(--accent); border-radius:16px; padding:11px 18px; color:var(--accent); font-size:12px; font-weight:600; z-index:500; opacity:0; transition:0.3s ease; pointer-events:none; max-width:300px; width:max-content; text-align:center; }
+    .toast { position:absolute; bottom:74px; left:50%; transform:translateX(-50%) translateY(20px); background:rgba(0,0,0,0.9); border:1px solid var(--accent); border-radius:16px; padding:11px 18px; color:var(--accent); font-size:12px; font-weight:600; z-index:500; opacity:0; transition:0.3s ease; pointer-events:none; max-width:300px; width:max-content; text-align:center; line-height:1.4; }
     .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
 
 </style>
@@ -219,42 +221,74 @@
     <canvas id="atmosCanvas" width="375" height="700" style="width:375px;height:700px;"></canvas>
     <div class="screen">
         <div class="header-row">
-            <div class="back-btn" onclick="location.href='fokus_profile.html'">
+            <div class="back-btn" onclick="location.href='oracle_menu.html'">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
             </div>
-            <div class="title">Родительский контроль</div>
+            <div class="title">Кабинет Оракула</div>
             <div class="title-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 7v6c0 4 3.5 7 8 9 4.5-2 8-5 8-9V7l-8-5Z"/></svg></div>
         </div>
 
         <div class="scroll-area">
-            <div class="pc-intro">
-                <div class="pc-intro-title">🛡️ Контроль и забота</div>
-                <div class="pc-intro-sub">Следи за развитием ребёнка: прогресс по сферам, стрик, геолокация. Настраивай доступ к разделам и напоминания.</div>
+            <div class="oracle-profile-row">
+                <div class="oracle-avatar" id="oracleAvatar">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.6"/><path d="M5 20c0-3.8 3.1-6.8 7-6.8s7 3 7 6.8"/></svg>
+                    <div class="oracle-avatar-edit">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+                    </div>
+                </div>
+                <div class="oracle-profile-info">
+                    <div class="oracle-profile-name" id="oracleName">Оракул</div>
+                    <div class="oracle-profile-sub">Твой публичный профиль</div>
+                </div>
+            </div>
+            <input type="file" id="oracleAvatarInput" accept="image/*" style="display:none;">
+
+            <div class="balance-card">
+                <div class="balance-label">💰 Заработано (за вычетом комиссии)</div>
+                <div class="balance-value"><span id="earnBalance">0</span><small>F-coins</small></div>
+                <div class="balance-withdraw" id="withdrawBtn">Вывести средства</div>
             </div>
 
-            <div class="premium-lock" id="premiumLock">🔐 Доступно на подписке Про</div>
+            <div class="dash-section">
+                <div class="dash-section-title">Мои категории (до 3)</div>
+                <div class="cat-grid" id="catGrid"></div>
+                <div class="cat-warn" id="catWarn"></div>
+            </div>
 
-            <div class="btn-primary" id="addChildBtn">➕ Добавить ребёнка</div>
+            <div class="dash-section">
+                <div class="dash-section-title">Мои услуги <span class="add-mini" id="addServiceBtn">+ Добавить</span></div>
+                <div id="servicesList"></div>
+                <div class="commission-note">FOCUS удерживает комиссию <span id="commPct">25</span>% с каждой услуги</div>
+            </div>
 
-            <div id="childrenList"></div>
+            <div class="dash-section">
+                <div class="dash-section-title">Новые заявки</div>
+                <div id="requestsList"></div>
+            </div>
+
+            <div class="dash-section">
+                <div class="dash-section-title">Выполненные заказы</div>
+                <div id="doneList"></div>
+            </div>
         </div>
     </div>
 
-    <!-- Модалка добавления ребёнка -->
-    <div class="modal" id="addModal">
+    <!-- Модалка добавления услуги -->
+    <div class="modal" id="serviceModal">
         <div class="modal-box">
-            <div class="modal-title">Добавить ребёнка</div>
-            <div class="m-label">ИМЯ РЕБЁНКА</div>
-            <input type="text" class="m-input" id="childName" placeholder="Например: Дима">
-            <div class="m-label">ВОЗРАСТ</div>
-            <input type="number" class="m-input" id="childAge" placeholder="14" inputmode="numeric">
-            <div class="invite-code-box">
-                <div class="invite-code" id="inviteCode">— — — —</div>
-                <div class="invite-hint">Ребёнок вводит этот код в своём приложении FOCUS, чтобы связать аккаунты. Связь активируется с серверной частью.</div>
+            <div class="modal-title">Новая услуга</div>
+            <div class="m-field">
+                <label class="m-label">НАЗВАНИЕ УСЛУГИ</label>
+                <input type="text" class="m-input" id="svcName" placeholder="Напр: Расклад «Что меня ждёт»">
+            </div>
+            <div class="m-field">
+                <label class="m-label">ЦЕНА (F-coins, мин. 100)</label>
+                <input type="number" class="m-input" id="svcPrice" value="300" inputmode="numeric">
+                <div class="m-net" id="svcNet">Ты получишь: 225 F-coins (после комиссии 25%)</div>
             </div>
             <div class="modal-btns">
-                <button class="modal-btn cancel" id="cancelAdd">Отмена</button>
-                <button class="modal-btn save" id="saveChild">Добавить</button>
+                <button class="modal-btn cancel" id="cancelSvc">Отмена</button>
+                <button class="modal-btn save" id="saveSvc">Добавить</button>
             </div>
         </div>
     </div>
@@ -446,83 +480,246 @@ initAtmosphere(canvasId) {
     FocusCore.applyStoredTheme();
     FocusCore.initAtmosphere('atmosCanvas');
 
-    function toast(msg){ const t=document.getElementById('toast'); t.innerText=msg; t.classList.add('show'); clearTimeout(window._tt); window._tt=setTimeout(()=>t.classList.remove('show'),2200); }
+    function toast(msg){
+        const t=document.getElementById('toast');
+        t.innerText=msg; t.classList.add('show');
+        clearTimeout(window._tt); window._tt=setTimeout(()=>t.classList.remove('show'), 2200);
+    }
     function escapeHtml(s){ const d=document.createElement('div'); d.innerText=String(s==null?'':s); return d.innerHTML; }
+    function num(v){ const n=parseInt(v); return isNaN(n)?0:n; }
 
-    const CH_KEY = 'focus_controlled_children';
-    function getChildren(){ try { return JSON.parse(localStorage.getItem(CH_KEY))||[]; } catch(e){ return []; } }
-    function saveChildren(c){ localStorage.setItem(CH_KEY, JSON.stringify(c)); }
+    // ===== КОМИССИЯ FOCUS (настраиваемая) =====
+    const ORACLE_COMMISSION = 0.25;  // 25% — поменять тут на 0.30 / 0.50 при необходимости
+    document.getElementById('commPct').innerText = Math.round(ORACLE_COMMISSION*100);
 
-    function renderChildren(){
-        const cont = document.getElementById('childrenList');
-        const children = getChildren();
-        if (children.length === 0) {
-            cont.innerHTML = '<div class="empty-state">👶 Нет подключённых детей.<br>Нажми «Добавить ребёнка» и передай код.</div>';
+    function netAmount(price){ return Math.round(price * (1 - ORACLE_COMMISSION)); }
+
+    const CATEGORIES = [
+        { id:'tarot', label:'Таролог' },
+        { id:'astrology', label:'Астролог' },
+        { id:'numerology', label:'Нумеролог' },
+        { id:'runes', label:'Рунолог' },
+        { id:'palmistry', label:'Хиромант' },
+        { id:'clairvoyant', label:'Ясновидящий' },
+        { id:'shaman', label:'Шаман' },
+        { id:'lead_pour', label:'Отлив воском' }
+    ];
+
+    // данные оракула
+    const PSY_KEY = 'focus_my_psychic';
+    function getPsychic(){
+        try { return JSON.parse(localStorage.getItem(PSY_KEY)) || { categories:[], services:[], earned:0 }; }
+        catch(e){ return { categories:[], services:[], earned:0 }; }
+    }
+    function savePsychic(p){ localStorage.setItem(PSY_KEY, JSON.stringify(p)); }
+    let psychic = getPsychic();
+    // подтянем категории из заявки если есть
+    if (psychic.categories.length === 0) {
+        try {
+            const apps = JSON.parse(localStorage.getItem('focus_psychic_applications')||'[]');
+            const u = FocusStorage.getUser();
+            const mine = apps.filter(a=>a.email===(u.email||'')).sort((x,y)=>y.id-x.id)[0];
+            if (mine && mine.categories) { psychic.categories = mine.categories.slice(0,3); savePsychic(psychic); }
+        } catch(e){}
+    }
+
+    function getRequests(){ try { return JSON.parse(localStorage.getItem('focus_oracle_requests'))||[]; } catch(e){ return []; } }
+    function saveRequests(r){ localStorage.setItem('focus_oracle_requests', JSON.stringify(r)); }
+
+    // ===== Баланс =====
+    function renderBalance(){
+        document.getElementById('earnBalance').innerText = psychic.earned || 0;
+    }
+    document.getElementById('withdrawBtn').addEventListener('click', () => {
+        if ((psychic.earned||0) <= 0) { toast('Пока нечего выводить'); return; }
+        toast('Вывод средств подключается с серверной частью');
+    });
+
+    // ===== Категории =====
+    function renderCats(){
+        const grid = document.getElementById('catGrid');
+        grid.innerHTML = '';
+        CATEGORIES.forEach(cat => {
+            const on = psychic.categories.includes(cat.id);
+            const chip = document.createElement('div');
+            chip.className = 'cat-check' + (on ? ' on' : '');
+            chip.innerText = cat.label;
+            chip.addEventListener('click', () => {
+                const i = psychic.categories.indexOf(cat.id);
+                if (i >= 0) { psychic.categories.splice(i,1); }
+                else {
+                    if (psychic.categories.length >= 3) { document.getElementById('catWarn').innerText = 'Максимум 3 категории'; return; }
+                    psychic.categories.push(cat.id);
+                }
+                document.getElementById('catWarn').innerText = '';
+                savePsychic(psychic); renderCats();
+            });
+            grid.appendChild(chip);
+        });
+    }
+
+    // ===== Услуги =====
+    function renderServices(){
+        const cont = document.getElementById('servicesList');
+        if (!psychic.services || psychic.services.length === 0) {
+            cont.innerHTML = '<div class="empty-state">Пока нет услуг. Добавь первую — клиенты увидят твои предложения.</div>';
             return;
         }
         cont.innerHTML = '';
-        children.forEach(child => {
+        psychic.services.forEach(s => {
             const card = document.createElement('div');
-            card.className = 'child-card';
-            const active = child.status === 'active';
-            const avInner = (child.photo && child.photo.startsWith('data:image'))
-                ? '<img src="'+child.photo+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">'
-                : (child.gender==='girl'?'👧':'👦');
+            card.className = 'service-card';
             card.innerHTML = `
-                <div class="child-top">
-                    <div class="child-avatar">${avInner}</div>
-                    <div class="child-info">
-                        <div class="child-name">${escapeHtml(child.name)}${child.age?', '+child.age:''}</div>
-                        <div class="child-status ${active?'active':'inactive'}">${active?'🟢 Активен сегодня':'⚪ Не заходил сегодня'}</div>
-                    </div>
+                <div class="service-info">
+                    <div class="service-name">${escapeHtml(s.name)}</div>
+                    <div class="service-price">${s.price} F-coins</div>
+                    <div class="service-net">тебе: ${netAmount(s.price)} F-coins</div>
                 </div>
-                <div class="child-stats">
-                    <div class="child-stat"><div class="child-stat-val">🔥 ${child.streak||0}</div><div class="child-stat-label">дней подряд</div></div>
-                    <div class="child-stat"><div class="child-stat-val">📊 ${child.progress||0}%</div><div class="child-stat-label">прогресс</div></div>
+                <div class="service-del" data-del="${s.id}">×</div>`;
+            cont.appendChild(card);
+        });
+        cont.querySelectorAll('[data-del]').forEach(el => el.addEventListener('click', () => {
+            psychic.services = psychic.services.filter(s => String(s.id) !== String(el.dataset.del));
+            savePsychic(psychic); renderServices();
+        }));
+    }
+
+    // модалка услуги
+    const svcModal = document.getElementById('serviceModal');
+    document.getElementById('addServiceBtn').addEventListener('click', () => {
+        document.getElementById('svcName').value = '';
+        document.getElementById('svcPrice').value = 300;
+        updateSvcNet();
+        svcModal.classList.add('show');
+    });
+    document.getElementById('cancelSvc').addEventListener('click', () => svcModal.classList.remove('show'));
+    svcModal.addEventListener('click', (e)=>{ if(e.target.id==='serviceModal') svcModal.classList.remove('show'); });
+    function updateSvcNet(){
+        const p = num(document.getElementById('svcPrice').value);
+        document.getElementById('svcNet').innerText = 'Ты получишь: ' + netAmount(p) + ' F-coins (после комиссии ' + Math.round(ORACLE_COMMISSION*100) + '%)';
+    }
+    document.getElementById('svcPrice').addEventListener('input', updateSvcNet);
+    document.getElementById('saveSvc').addEventListener('click', () => {
+        const name = document.getElementById('svcName').value.trim();
+        const price = num(document.getElementById('svcPrice').value);
+        if (!name) { toast('Введи название услуги'); return; }
+        if (price < 100) { toast('Минимальная цена — 100 F-coins'); return; }
+        if (!psychic.services) psychic.services = [];
+        psychic.services.push({ id: Date.now(), name, price });
+        savePsychic(psychic);
+        svcModal.classList.remove('show');
+        renderServices();
+        toast('Услуга добавлена');
+    });
+
+    // ===== Заявки =====
+    function renderRequests(){
+        const cont = document.getElementById('requestsList');
+        const reqs = getRequests().filter(r => r.status === 'pending');
+        if (reqs.length === 0) {
+            cont.innerHTML = '<div class="empty-state">Нет новых заявок. Когда клиент закажет услугу — она появится здесь.</div>';
+            return;
+        }
+        cont.innerHTML = '';
+        reqs.slice().reverse().forEach(r => {
+            const card = document.createElement('div');
+            card.className = 'req-card';
+            card.innerHTML = `
+                <div class="req-card-top">
+                    <div class="req-client">${escapeHtml(r.clientName||'Клиент')}</div>
+                    <div class="req-price">${r.price} F-coins</div>
                 </div>
-                <div class="child-geo ${child.geolocation?'on':'off'}">${child.geolocation?'📍 Геолокация включена':'📍 Геолокация выключена'}</div>`;
-            card.addEventListener('click', () => {
-                localStorage.setItem('focus_selected_child', JSON.stringify(child));
-                location.href = 'control_child.html?id=' + child.id;
-            });
+                <div class="req-format">${escapeHtml(r.format||'Консультация')}</div>
+                <div class="req-date">📅 ${new Date(r.createdAt).toLocaleDateString('ru-RU')}</div>
+                <div class="req-actions">
+                    <div class="req-btn done" data-done="${r.id}">✓ Выполнено (+${netAmount(r.price)})</div>
+                </div>`;
+            cont.appendChild(card);
+        });
+        cont.querySelectorAll('[data-done]').forEach(el => el.addEventListener('click', () => {
+            const reqs2 = getRequests();
+            const r = reqs2.find(x => String(x.id) === String(el.dataset.done));
+            if (r) {
+                r.status = 'done';
+                r.completedAt = new Date().toISOString();
+                saveRequests(reqs2);
+                psychic.earned = (psychic.earned||0) + netAmount(r.price);
+                savePsychic(psychic);
+                renderBalance(); renderRequests(); renderDone();
+                toast('Заказ выполнен! +' + netAmount(r.price) + ' F-coins');
+            }
+        }));
+    }
+
+    function renderDone(){
+        const cont = document.getElementById('doneList');
+        const reqs = getRequests().filter(r => r.status === 'done');
+        if (reqs.length === 0) {
+            cont.innerHTML = '<div class="empty-state">Выполненные заказы появятся здесь.</div>';
+            return;
+        }
+        cont.innerHTML = '';
+        reqs.slice().reverse().forEach(r => {
+            const card = document.createElement('div');
+            card.className = 'req-card';
+            card.innerHTML = `
+                <div class="req-card-top">
+                    <div class="req-client">${escapeHtml(r.clientName||'Клиент')}</div>
+                    <div class="req-price" style="color:#78DC96;">+${netAmount(r.price)} F-coins</div>
+                </div>
+                <div class="req-format">${escapeHtml(r.format||'Консультация')}</div>
+                <div class="req-date">✓ ${new Date(r.completedAt||r.createdAt).toLocaleDateString('ru-RU')}</div>`;
             cont.appendChild(card);
         });
     }
 
-    // модалка добавления
-    const addModal = document.getElementById('addModal');
-    function genCode(){ return Math.random().toString(36).substring(2,6).toUpperCase(); }
-    document.getElementById('addChildBtn').addEventListener('click', () => {
-        document.getElementById('childName').value = '';
-        document.getElementById('childAge').value = '';
-        document.getElementById('inviteCode').innerText = genCode();
-        addModal.classList.add('show');
-    });
-    document.getElementById('cancelAdd').addEventListener('click', () => addModal.classList.remove('show'));
-    addModal.addEventListener('click', (e)=>{ if(e.target.id==='addModal') addModal.classList.remove('show'); });
-    document.getElementById('saveChild').addEventListener('click', () => {
-        const name = document.getElementById('childName').value.trim();
-        const age = parseInt(document.getElementById('childAge').value) || null;
-        if (!name) { toast('Введи имя ребёнка'); return; }
-        const children = getChildren();
-        children.push({
-            id: Date.now(), name, age, gender:'boy', status:'inactive',
-            streak:0, progress:0, geolocation:true,
-            access:'full', spheres:{ body:true, mental:true, energy:true, relations:true, faith:true, reward:true, oracle:false },
-            notifs:{ workout:true, sleep:true, meds:false }
-        });
-        saveChildren(children);
-        addModal.classList.remove('show');
-        renderChildren();
-        toast('Ребёнок добавлен. Передай ему код для связи');
-    });
+    renderBalance();
+    renderCats();
+    renderServices();
+    renderRequests();
+    renderDone();
 
-    renderChildren();
+    // ===== Аватар и имя оракула =====
+    (function(){
+        // имя из заявки или профиля
+        let oracleName = 'Оракул';
+        try {
+            const apps = JSON.parse(localStorage.getItem('focus_psychic_applications')||'[]');
+            const u = FocusStorage.getUser();
+            const mine = apps.filter(a=>a.email===(u.email||'')).sort((x,y)=>y.id-x.id)[0];
+            if (mine && mine.name) oracleName = mine.name;
+        } catch(e){}
+        document.getElementById('oracleName').innerText = oracleName;
+
+        // аватар (сохранён в psychic.photo)
+        const avEl = document.getElementById('oracleAvatar');
+        function renderOracleAvatar(){
+            if (psychic.photo && psychic.photo.startsWith('data:image')) {
+                avEl.innerHTML = '<img src="'+psychic.photo+'"><div class="oracle-avatar-edit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></div>';
+            }
+        }
+        renderOracleAvatar();
+        avEl.addEventListener('click', () => document.getElementById('oracleAvatarInput').click());
+        document.getElementById('oracleAvatarInput').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            if (file.size > 600*1024) { toast('Фото слишком большое (>600КБ)'); return; }
+            const reader = new FileReader();
+            reader.onload = () => {
+                psychic.photo = reader.result;
+                savePsychic(psychic);
+                renderOracleAvatar();
+                toast('Фото оракула обновлено');
+            };
+            reader.readAsDataURL(file);
+            e.target.value = '';
+        });
+    })();
 
 </script>
-<script src="focus-chat-fab.js"></script>
 <script>
     if ("serviceWorker" in navigator) { window.addEventListener("load", ()=>{ navigator.serviceWorker.register("sw.js").catch(()=>{}); }); }
 </script>
+    <script src="focus-chat-fab.js"></script>
 </body>
 </html>

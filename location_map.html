@@ -10,7 +10,8 @@
 <link rel="apple-touch-icon" href="icon-192.png">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>Родительский контроль — FOCUS</title>
+<title>Где ребёнок — FOCUS</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
 <style>
     :root, [data-theme="original"] { --accent:#FFD966; --accent-rgb:255,217,102; --accent-2:#7C8CFF; --accent-2-rgb:124,140,255; --accent-light:#FFE9A8; --accent-dark:#C9952E; --bg-1:#131319; --bg-2:#0d0d12; --text-strong:#FFFFFF; }
     [data-theme="tron"] { --accent:#FF3B2E; --accent-rgb:255,59,46; --accent-2:#00E5FF; --accent-2-rgb:0,229,255; --accent-light:#FF8A6B; --accent-dark:#B8201A; --bg-1:#0a0a0d; --bg-2:#000000; --text-strong:#FFFFFF; }
@@ -149,68 +150,55 @@
     .modal, .slideshow, .session-area { border-radius: 0 !important; }
 }
 
-    /* ===== РОДИТЕЛЬСКИЙ КОНТРОЛЬ ===== */
+    /* ===== КАРТА РЕБЁНКА ===== */
     .scroll-area { flex:1; overflow-y:auto; scrollbar-width:none; }
     .scroll-area::-webkit-scrollbar { display:none; }
-    .pc-intro { background:linear-gradient(135deg, rgba(150,170,255,0.12), rgba(var(--accent-rgb),0.04)); border:1px solid rgba(150,170,255,0.25); border-radius:15px; padding:13px 14px; margin-bottom:14px; }
-    .pc-intro-title { font-size:14px; font-weight:700; color:#fff; margin-bottom:4px; }
-    .pc-intro-sub { font-size:11px; color:#9a9aab; line-height:1.5; }
-    .premium-lock { background:rgba(200,170,255,0.1); border:1px solid rgba(200,170,255,0.3); border-radius:12px; padding:11px 13px; margin-bottom:14px; font-size:11.5px; color:#C8AAFF; font-weight:600; display:flex; align-items:center; gap:8px; }
-    .child-card { background:linear-gradient(135deg, rgba(35,35,46,0.6), rgba(22,22,30,0.6)); border:0.5px solid rgba(150,170,255,0.16); border-radius:15px; padding:14px; margin-bottom:11px; cursor:pointer; transition:0.2s; }
-    .child-card:active { transform:scale(0.99); }
-    .child-top { display:flex; align-items:center; gap:11px; margin-bottom:10px; }
-    .child-avatar { width:46px; height:46px; border-radius:50%; flex-shrink:0; background:linear-gradient(135deg, #AAB9FF, var(--accent-2)); display:flex; align-items:center; justify-content:center; font-size:22px; }
-    .child-info { flex:1; min-width:0; }
-    .child-name { font-size:15px; font-weight:700; color:#fff; }
-    .child-status { font-size:10.5px; margin-top:2px; }
-    .child-status.active { color:#78DC96; }
-    .child-status.inactive { color:#8e8e9e; }
-    .child-stats { display:flex; gap:9px; }
-    .child-stat { flex:1; background:rgba(0,0,0,0.2); border-radius:10px; padding:8px; text-align:center; }
-    .child-stat-val { font-size:14px; font-weight:700; color:#fff; }
-    .child-stat-label { font-size:9px; color:#8e8e9e; margin-top:2px; }
-    .child-geo { font-size:10px; margin-top:8px; text-align:center; }
-    .child-geo.on { color:#78DC96; }
-    .child-geo.off { color:#8e8e9e; }
-    .btn-primary { padding:14px; border-radius:14px; background:linear-gradient(135deg, var(--accent), var(--accent-2)); color:#0a0a0f; font-weight:700; font-size:14px; text-align:center; cursor:pointer; margin-bottom:13px; }
-    .btn-primary:active { transform:scale(0.98); }
-    .empty-state { text-align:center; color:#6e6e7e; font-size:12px; padding:30px 16px; line-height:1.7; }
-    /* экран ребёнка */
-    .section-title { font-size:11px; font-weight:700; color:var(--accent); letter-spacing:0.4px; margin:16px 0 10px; }
-    .child-hero { background:linear-gradient(135deg, rgba(150,170,255,0.12), rgba(var(--accent-rgb),0.04)); border:1px solid rgba(150,170,255,0.25); border-radius:16px; padding:16px; margin-bottom:6px; text-align:center; }
-    .child-hero-avatar { width:64px; height:64px; border-radius:50%; margin:0 auto 9px; background:linear-gradient(135deg, #AAB9FF, var(--accent-2)); display:flex; align-items:center; justify-content:center; font-size:30px; }
-    .child-hero-name { font-size:18px; font-weight:700; color:#fff; }
-    .child-hero-meta { font-size:11px; color:#9a9aab; margin-top:3px; }
-    .child-hero-streak { font-size:12px; color:#FFD966; font-weight:600; margin-top:6px; }
-    .toggle-row { display:flex; align-items:center; justify-content:space-between; padding:12px 13px; background:rgba(35,35,46,0.5); border:0.5px solid rgba(var(--accent-rgb),0.1); border-radius:12px; margin-bottom:8px; }
-    .toggle-label { font-size:13px; color:#e8e8ee; font-weight:500; display:flex; align-items:center; gap:9px; }
-    .toggle-label .em { font-size:16px; }
-    .toggle-switch { width:44px; height:26px; border-radius:13px; background:rgba(255,255,255,0.12); position:relative; cursor:pointer; transition:0.25s; flex-shrink:0; }
-    .toggle-switch.on { background:linear-gradient(135deg, #78DC96, var(--accent-2)); }
-    .toggle-knob { width:20px; height:20px; border-radius:50%; background:#fff; position:absolute; top:3px; left:3px; transition:0.25s; }
-    .toggle-switch.on .toggle-knob { left:21px; }
-    .access-level { display:flex; gap:7px; margin-bottom:6px; }
-    .access-opt { flex:1; padding:10px 6px; border-radius:11px; text-align:center; font-size:11px; font-weight:600; cursor:pointer; background:rgba(255,255,255,0.05); color:#9a9aab; border:1px solid transparent; }
-    .access-opt.on { background:rgba(150,170,255,0.16); color:#AAB9FF; border-color:rgba(150,170,255,0.4); }
-    .danger-btn { padding:13px; border-radius:13px; background:rgba(255,120,120,0.1); border:1px solid rgba(255,120,120,0.3); color:#FF8A7C; font-weight:700; font-size:13px; text-align:center; cursor:pointer; margin-top:14px; }
-    .danger-btn:active { transform:scale(0.98); }
-    /* модалка добавления */
-    .modal { position:absolute; inset:0; z-index:400; background:rgba(0,0,0,0.88); backdrop-filter:blur(8px); display:none; align-items:center; justify-content:center; border-radius:52px; padding:14px; }
+    #childMap { width:100%; height:240px; border-radius:16px; margin-bottom:13px; border:0.5px solid rgba(var(--accent-rgb),0.2); background:#1a1a22; z-index:1; }
+    .leaflet-container { background:#1a1a22 !important; font-family:inherit !important; }
+    .leaflet-control-attribution { font-size:7px !important; background:rgba(0,0,0,0.5) !important; color:#888 !important; }
+    .leaflet-control-zoom a { background:#23232e !important; color:#fff !important; border-color:rgba(255,255,255,0.1) !important; }
+    .map-info-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-bottom:14px; }
+    .map-info-cell { background:rgba(35,35,46,0.5); border:0.5px solid rgba(var(--accent-rgb),0.1); border-radius:12px; padding:10px 8px; text-align:center; }
+    .map-info-val { font-size:13px; font-weight:700; color:#fff; }
+    .map-info-label { font-size:9px; color:#8e8e9e; margin-top:3px; }
+    .location-bar { background:linear-gradient(135deg, rgba(150,170,255,0.12), rgba(var(--accent-rgb),0.04)); border:1px solid rgba(150,170,255,0.25); border-radius:13px; padding:12px 14px; margin-bottom:14px; }
+    .location-addr { font-size:13px; font-weight:600; color:#fff; }
+    .location-time { font-size:10.5px; color:#9a9aab; margin-top:3px; }
+    .section-title { font-size:11px; font-weight:700; color:var(--accent); letter-spacing:0.4px; margin:4px 0 10px; display:flex; justify-content:space-between; align-items:center; }
+    .add-zone-mini { font-size:11px; color:var(--accent-2); background:rgba(var(--accent-2-rgb),0.12); border:1px solid rgba(var(--accent-2-rgb),0.3); border-radius:9px; padding:4px 11px; cursor:pointer; font-weight:700; }
+    .zone-card { display:flex; align-items:center; gap:11px; padding:12px; background:rgba(35,35,46,0.5); border:0.5px solid rgba(var(--accent-rgb),0.1); border-radius:13px; margin-bottom:8px; }
+    .zone-emoji { font-size:22px; flex-shrink:0; }
+    .zone-info { flex:1; min-width:0; }
+    .zone-name { font-size:13.5px; font-weight:600; color:#fff; }
+    .zone-status { font-size:10.5px; margin-top:2px; }
+    .zone-status.in { color:#78DC96; }
+    .zone-status.out { color:#8e8e9e; }
+    .zone-del { color:#ff6b6b; opacity:0.5; cursor:pointer; flex-shrink:0; }
+    .event-item { display:flex; align-items:center; gap:10px; padding:9px 0; border-bottom:0.5px solid rgba(255,255,255,0.05); }
+    .event-item:last-child { border-bottom:none; }
+    .event-icon { font-size:16px; flex-shrink:0; }
+    .event-text { flex:1; min-width:0; font-size:12px; color:#d8d8e0; }
+    .event-text b { color:#fff; }
+    .event-time { font-size:10px; color:#8e8e9e; flex-shrink:0; }
+    .refresh-btn { padding:13px; border-radius:13px; background:rgba(var(--accent-rgb),0.1); border:1px solid rgba(var(--accent-rgb),0.3); color:var(--accent); font-weight:700; font-size:13px; text-align:center; cursor:pointer; margin-bottom:8px; }
+    .refresh-btn:active { transform:scale(0.98); }
+    .map-note { font-size:9.5px; color:#8e8e9e; text-align:center; line-height:1.5; margin-top:6px; padding:0 8px; }
+    .panel { background:linear-gradient(135deg, rgba(35,35,46,0.5), rgba(22,22,30,0.5)); border:0.5px solid rgba(var(--accent-rgb),0.12); border-radius:15px; padding:14px; margin-bottom:13px; }
+    /* модалка зоны */
+    .modal { position:absolute; inset:0; z-index:1000; background:rgba(0,0,0,0.88); backdrop-filter:blur(8px); display:none; align-items:center; justify-content:center; border-radius:52px; padding:14px; }
     .modal.show { display:flex; }
     .modal-box { background:linear-gradient(165deg,#1c1c26,#15151c); border-radius:22px; width:100%; padding:18px; border:0.5px solid rgba(150,170,255,0.25); }
     .modal-title { font-size:16px; font-weight:700; color:#fff; margin-bottom:13px; }
     .m-label { font-size:11px; color:var(--accent); font-weight:700; margin-bottom:7px; display:block; }
     .m-input { width:100%; background:rgba(0,0,0,0.3); border:1px solid rgba(150,170,255,0.18); border-radius:11px; padding:12px 13px; color:#fff; font-size:14px; font-family:inherit; outline:none; margin-bottom:13px; }
-    .m-input:focus { border-color:#AAB9FF; }
-    .invite-code-box { background:rgba(0,0,0,0.3); border:1px dashed rgba(150,170,255,0.4); border-radius:12px; padding:14px; text-align:center; margin-bottom:13px; }
-    .invite-code { font-size:24px; font-weight:700; color:#AAB9FF; letter-spacing:3px; }
-    .invite-hint { font-size:10px; color:#8e8e9e; margin-top:6px; line-height:1.4; }
+    .emoji-pick { display:flex; flex-wrap:wrap; gap:7px; margin-bottom:13px; }
+    .emoji-pick-opt { width:42px; height:42px; border-radius:11px; display:flex; align-items:center; justify-content:center; font-size:20px; cursor:pointer; background:rgba(255,255,255,0.05); border:1px solid transparent; }
+    .emoji-pick-opt.on { background:rgba(150,170,255,0.16); border-color:rgba(150,170,255,0.4); }
     .modal-btns { display:flex; gap:9px; }
     .modal-btn { flex:1; padding:13px; border-radius:13px; font-size:13px; font-weight:700; cursor:pointer; text-align:center; border:none; font-family:inherit; }
     .modal-btn.cancel { background:rgba(255,255,255,0.07); color:#9a9aab; }
     .modal-btn.save { background:linear-gradient(135deg, #AAB9FF, var(--accent-2)); color:#0a0a0f; }
-    .modal-btn:active { transform:scale(0.97); }
-    .toast { position:absolute; bottom:20px; left:50%; transform:translateX(-50%) translateY(20px); background:rgba(0,0,0,0.9); border:1px solid var(--accent); border-radius:16px; padding:11px 18px; color:var(--accent); font-size:12px; font-weight:600; z-index:500; opacity:0; transition:0.3s ease; pointer-events:none; max-width:300px; width:max-content; text-align:center; }
+    .toast { position:absolute; bottom:20px; left:50%; transform:translateX(-50%) translateY(20px); background:rgba(0,0,0,0.9); border:1px solid var(--accent); border-radius:16px; padding:11px 18px; color:var(--accent); font-size:12px; font-weight:600; z-index:1100; opacity:0; transition:0.3s ease; pointer-events:none; max-width:300px; width:max-content; text-align:center; }
     .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
 
 </style>
@@ -219,42 +207,58 @@
     <canvas id="atmosCanvas" width="375" height="700" style="width:375px;height:700px;"></canvas>
     <div class="screen">
         <div class="header-row">
-            <div class="back-btn" onclick="location.href='fokus_profile.html'">
+            <div class="back-btn" onclick="location.href='control_child.html'">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
             </div>
-            <div class="title">Родительский контроль</div>
-            <div class="title-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 7v6c0 4 3.5 7 8 9 4.5-2 8-5 8-9V7l-8-5Z"/></svg></div>
+            <div class="title">Где ребёнок</div>
+            <div class="title-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.7-7-12a7 7 0 0 1 14 0c0 5.3-7 12-7 12Z"/><circle cx="12" cy="9" r="2.5"/></svg></div>
         </div>
 
         <div class="scroll-area">
-            <div class="pc-intro">
-                <div class="pc-intro-title">🛡️ Контроль и забота</div>
-                <div class="pc-intro-sub">Следи за развитием ребёнка: прогресс по сферам, стрик, геолокация. Настраивай доступ к разделам и напоминания.</div>
+            <div id="childMap"></div>
+
+            <div class="location-bar">
+                <div class="location-addr" id="locAddr">📍 Определение местоположения...</div>
+                <div class="location-time" id="locTime">🕐 Обновлено только что</div>
             </div>
 
-            <div class="premium-lock" id="premiumLock">🔐 Доступно на подписке Про</div>
+            <div class="map-info-grid">
+                <div class="map-info-cell"><div class="map-info-val" id="batteryVal">—</div><div class="map-info-label">🔋 Батарея</div></div>
+                <div class="map-info-cell"><div class="map-info-val" id="signalVal">—</div><div class="map-info-label">📶 Связь</div></div>
+                <div class="map-info-cell"><div class="map-info-val" id="speedVal">—</div><div class="map-info-label">🚶 Движение</div></div>
+            </div>
 
-            <div class="btn-primary" id="addChildBtn">➕ Добавить ребёнка</div>
+            <div class="section-title">🏠 ГЕОЗОНЫ <span class="add-zone-mini" id="addZoneBtn">+ Зона</span></div>
+            <div id="zonesList"></div>
 
-            <div id="childrenList"></div>
+            <div class="panel">
+                <div class="section-title" style="margin:0 0 10px;">🔔 ИСТОРИЯ ПЕРЕМЕЩЕНИЙ</div>
+                <div id="eventsList"></div>
+            </div>
+
+            <div class="refresh-btn" id="refreshBtn">🔄 Обновить местоположение</div>
+            <div class="map-note">Отслеживание в реальном времени и уведомления о входе/выходе из зон работают с серверной частью. Сейчас — демонстрация.</div>
         </div>
     </div>
 
-    <!-- Модалка добавления ребёнка -->
-    <div class="modal" id="addModal">
+    <!-- Модалка геозоны -->
+    <div class="modal" id="zoneModal">
         <div class="modal-box">
-            <div class="modal-title">Добавить ребёнка</div>
-            <div class="m-label">ИМЯ РЕБЁНКА</div>
-            <input type="text" class="m-input" id="childName" placeholder="Например: Дима">
-            <div class="m-label">ВОЗРАСТ</div>
-            <input type="number" class="m-input" id="childAge" placeholder="14" inputmode="numeric">
-            <div class="invite-code-box">
-                <div class="invite-code" id="inviteCode">— — — —</div>
-                <div class="invite-hint">Ребёнок вводит этот код в своём приложении FOCUS, чтобы связать аккаунты. Связь активируется с серверной частью.</div>
+            <div class="modal-title">Новая геозона</div>
+            <div class="m-label">НАЗВАНИЕ</div>
+            <input type="text" class="m-input" id="zoneName" placeholder="Например: Бабушка, Кружок...">
+            <div class="m-label">ЗНАЧОК</div>
+            <div class="emoji-pick" id="zoneEmojiPick"></div>
+            <div class="m-label">УВЕДОМЛЯТЬ</div>
+            <div class="zone-card" style="margin-bottom:0;cursor:pointer;" id="zoneNotifToggle">
+                <div class="zone-emoji">🔔</div>
+                <div class="zone-info"><div class="zone-name">Когда входит и выходит</div></div>
+                <div class="toggle-switch on" id="zoneNotifSwitch" style="width:44px;height:26px;border-radius:13px;background:linear-gradient(135deg,#78DC96,var(--accent-2));position:relative;flex-shrink:0;"><div style="width:20px;height:20px;border-radius:50%;background:#fff;position:absolute;top:3px;left:21px;transition:0.25s;" id="zoneNotifKnob"></div></div>
             </div>
+            <div class="map-note" style="margin:10px 0 13px;">Зона ставится на текущую точку на карте (в реальной версии — выберешь на карте).</div>
             <div class="modal-btns">
-                <button class="modal-btn cancel" id="cancelAdd">Отмена</button>
-                <button class="modal-btn save" id="saveChild">Добавить</button>
+                <button class="modal-btn cancel" id="cancelZone">Отмена</button>
+                <button class="modal-btn save" id="saveZone">Создать</button>
             </div>
         </div>
     </div>
@@ -262,6 +266,7 @@
     <div class="toast" id="toast"></div>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script src="focus-storage.js"></script>
 <script src="focus-core.js"></script>
 <script>
@@ -449,75 +454,158 @@ initAtmosphere(canvasId) {
     function toast(msg){ const t=document.getElementById('toast'); t.innerText=msg; t.classList.add('show'); clearTimeout(window._tt); window._tt=setTimeout(()=>t.classList.remove('show'),2200); }
     function escapeHtml(s){ const d=document.createElement('div'); d.innerText=String(s==null?'':s); return d.innerHTML; }
 
-    const CH_KEY = 'focus_controlled_children';
-    function getChildren(){ try { return JSON.parse(localStorage.getItem(CH_KEY))||[]; } catch(e){ return []; } }
-    function saveChildren(c){ localStorage.setItem(CH_KEY, JSON.stringify(c)); }
+    // ребёнок (демо-позиция — Москва, центр)
+    let child = {};
+    try { child = JSON.parse(localStorage.getItem('focus_selected_child')) || {}; } catch(e){}
+    const childName = child.name || 'Ребёнок';
+    document.getElementById('childMap'); // placeholder
 
-    function renderChildren(){
-        const cont = document.getElementById('childrenList');
-        const children = getChildren();
-        if (children.length === 0) {
-            cont.innerHTML = '<div class="empty-state">👶 Нет подключённых детей.<br>Нажми «Добавить ребёнка» и передай код.</div>';
+    // демо-координаты ребёнка
+    const childPos = { lat: 55.7558, lng: 37.6173 };
+
+    // геозоны (демо + сохранённые)
+    const ZONES_KEY = 'focus_geozones_' + (child.id || '0');
+    function getZones(){
+        try { const z = JSON.parse(localStorage.getItem(ZONES_KEY)); if (z) return z; } catch(e){}
+        return [
+            { id:'z1', name:'Дом', emoji:'🏠', lat:55.7558, lng:37.6173, radius:200, notif:true },
+            { id:'z2', name:'Школа', emoji:'🏫', lat:55.7620, lng:37.6280, radius:250, notif:true },
+            { id:'z3', name:'Тренировка', emoji:'🏋️', lat:55.7490, lng:37.6050, radius:200, notif:false }
+        ];
+    }
+    function saveZones(z){ localStorage.setItem(ZONES_KEY, JSON.stringify(z)); }
+    let zones = getZones();
+
+    // расстояние между точками (метры)
+    function distance(lat1,lng1,lat2,lng2){
+        const R=6371000, toRad=x=>x*Math.PI/180;
+        const dLat=toRad(lat2-lat1), dLng=toRad(lng2-lng1);
+        const a=Math.sin(dLat/2)**2 + Math.cos(toRad(lat1))*Math.cos(toRad(lat2))*Math.sin(dLng/2)**2;
+        return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+    }
+    function inZone(zone){ return distance(childPos.lat, childPos.lng, zone.lat, zone.lng) <= zone.radius; }
+
+    // === Leaflet карта ===
+    let map, childMarker, zoneCircles = [];
+    function initMap(){
+        if (typeof L === 'undefined') {
+            document.getElementById('childMap').innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#8e8e9e;font-size:12px;">Карта недоступна (нет соединения)</div>';
             return;
         }
-        cont.innerHTML = '';
-        children.forEach(child => {
-            const card = document.createElement('div');
-            card.className = 'child-card';
-            const active = child.status === 'active';
-            const avInner = (child.photo && child.photo.startsWith('data:image'))
-                ? '<img src="'+child.photo+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">'
-                : (child.gender==='girl'?'👧':'👦');
-            card.innerHTML = `
-                <div class="child-top">
-                    <div class="child-avatar">${avInner}</div>
-                    <div class="child-info">
-                        <div class="child-name">${escapeHtml(child.name)}${child.age?', '+child.age:''}</div>
-                        <div class="child-status ${active?'active':'inactive'}">${active?'🟢 Активен сегодня':'⚪ Не заходил сегодня'}</div>
-                    </div>
-                </div>
-                <div class="child-stats">
-                    <div class="child-stat"><div class="child-stat-val">🔥 ${child.streak||0}</div><div class="child-stat-label">дней подряд</div></div>
-                    <div class="child-stat"><div class="child-stat-val">📊 ${child.progress||0}%</div><div class="child-stat-label">прогресс</div></div>
-                </div>
-                <div class="child-geo ${child.geolocation?'on':'off'}">${child.geolocation?'📍 Геолокация включена':'📍 Геолокация выключена'}</div>`;
-            card.addEventListener('click', () => {
-                localStorage.setItem('focus_selected_child', JSON.stringify(child));
-                location.href = 'control_child.html?id=' + child.id;
-            });
-            cont.appendChild(card);
+        map = L.map('childMap', { zoomControl:true, attributionControl:true }).setView([childPos.lat, childPos.lng], 14);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19, attribution: '© OpenStreetMap'
+        }).addTo(map);
+        drawZones();
+        // маркер ребёнка
+        const childIcon = L.divIcon({
+            className:'', html:'<div style="font-size:28px;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.5));">📍</div>',
+            iconSize:[30,30], iconAnchor:[15,28]
+        });
+        childMarker = L.marker([childPos.lat, childPos.lng], { icon:childIcon }).addTo(map);
+        childMarker.bindPopup('<b>'+escapeHtml(childName)+'</b><br>здесь сейчас');
+    }
+    function drawZones(){
+        zoneCircles.forEach(c => map.removeLayer(c));
+        zoneCircles = [];
+        zones.forEach(z => {
+            const circle = L.circle([z.lat, z.lng], {
+                radius:z.radius, color:'#AAB9FF', fillColor:'#AAB9FF', fillOpacity:0.12, weight:1.5
+            }).addTo(map);
+            circle.bindPopup(z.emoji + ' ' + escapeHtml(z.name));
+            zoneCircles.push(circle);
         });
     }
 
-    // модалка добавления
-    const addModal = document.getElementById('addModal');
-    function genCode(){ return Math.random().toString(36).substring(2,6).toUpperCase(); }
-    document.getElementById('addChildBtn').addEventListener('click', () => {
-        document.getElementById('childName').value = '';
-        document.getElementById('childAge').value = '';
-        document.getElementById('inviteCode').innerText = genCode();
-        addModal.classList.add('show');
-    });
-    document.getElementById('cancelAdd').addEventListener('click', () => addModal.classList.remove('show'));
-    addModal.addEventListener('click', (e)=>{ if(e.target.id==='addModal') addModal.classList.remove('show'); });
-    document.getElementById('saveChild').addEventListener('click', () => {
-        const name = document.getElementById('childName').value.trim();
-        const age = parseInt(document.getElementById('childAge').value) || null;
-        if (!name) { toast('Введи имя ребёнка'); return; }
-        const children = getChildren();
-        children.push({
-            id: Date.now(), name, age, gender:'boy', status:'inactive',
-            streak:0, progress:0, geolocation:true,
-            access:'full', spheres:{ body:true, mental:true, energy:true, relations:true, faith:true, reward:true, oracle:false },
-            notifs:{ workout:true, sleep:true, meds:false }
+    // === статусы зон ===
+    function renderZones(){
+        const cont = document.getElementById('zonesList');
+        cont.innerHTML = '';
+        zones.forEach(z => {
+            const isIn = inZone(z);
+            const card = document.createElement('div');
+            card.className = 'zone-card';
+            card.innerHTML = `
+                <div class="zone-emoji">${z.emoji}</div>
+                <div class="zone-info">
+                    <div class="zone-name">${escapeHtml(z.name)}</div>
+                    <div class="zone-status ${isIn?'in':'out'}">${isIn?'🟢 Сейчас здесь':'⚪ Не в зоне'} ${z.notif?'· 🔔':''}</div>
+                </div>
+                <div class="zone-del" data-delzone="${z.id}">🗑</div>`;
+            cont.appendChild(card);
         });
-        saveChildren(children);
-        addModal.classList.remove('show');
-        renderChildren();
-        toast('Ребёнок добавлен. Передай ему код для связи');
+        cont.querySelectorAll('[data-delzone]').forEach(el => el.addEventListener('click', () => {
+            zones = zones.filter(z => z.id !== el.dataset.delzone);
+            saveZones(zones); renderZones(); if(map) drawZones();
+        }));
+    }
+
+    // === история (демо) ===
+    function renderEvents(){
+        const events = [
+            { icon:'🏫', text:'<b>'+childName+'</b> пришёл в Школу', time:'08:42' },
+            { icon:'🏫', text:'<b>'+childName+'</b> вышел из Школы', time:'14:15' },
+            { icon:'🏠', text:'<b>'+childName+'</b> пришёл Домой', time:'14:53' }
+        ];
+        document.getElementById('eventsList').innerHTML = events.map(e =>
+            `<div class="event-item"><div class="event-icon">${e.icon}</div><div class="event-text">${e.text}</div><div class="event-time">${e.time}</div></div>`
+        ).join('');
+    }
+
+    // инфо
+    function renderInfo(){
+        document.getElementById('locAddr').innerText = '📍 ул. Тверская, 15, Москва';
+        document.getElementById('locTime').innerText = '🕐 Обновлено 2 мин назад';
+        document.getElementById('batteryVal').innerText = '78%';
+        document.getElementById('signalVal').innerText = 'Хор.';
+        document.getElementById('speedVal').innerText = 'Стоит';
+    }
+
+    // добавление зоны
+    const zoneModal = document.getElementById('zoneModal');
+    const ZONE_EMOJIS = ['🏠','🏫','🏋️','👵','📚','🎨','⚽','🏥','🛒','🎭'];
+    let zoneEmoji = ZONE_EMOJIS[0], zoneNotif = true;
+    document.getElementById('addZoneBtn').addEventListener('click', () => {
+        document.getElementById('zoneName').value = '';
+        zoneEmoji = ZONE_EMOJIS[0]; zoneNotif = true;
+        const pick = document.getElementById('zoneEmojiPick');
+        pick.innerHTML = '';
+        ZONE_EMOJIS.forEach((em,i) => {
+            const opt = document.createElement('div');
+            opt.className = 'emoji-pick-opt'+(i===0?' on':'');
+            opt.innerText = em;
+            opt.addEventListener('click', ()=>{ pick.querySelectorAll('.emoji-pick-opt').forEach(x=>x.classList.remove('on')); opt.classList.add('on'); zoneEmoji=em; });
+            pick.appendChild(opt);
+        });
+        updateZoneNotif();
+        zoneModal.classList.add('show');
+    });
+    function updateZoneNotif(){
+        const sw = document.getElementById('zoneNotifSwitch');
+        const knob = document.getElementById('zoneNotifKnob');
+        if (zoneNotif) { sw.style.background='linear-gradient(135deg,#78DC96,var(--accent-2))'; knob.style.left='21px'; }
+        else { sw.style.background='rgba(255,255,255,0.12)'; knob.style.left='3px'; }
+    }
+    document.getElementById('zoneNotifToggle').addEventListener('click', ()=>{ zoneNotif=!zoneNotif; updateZoneNotif(); });
+    document.getElementById('cancelZone').addEventListener('click', ()=>zoneModal.classList.remove('show'));
+    zoneModal.addEventListener('click', (e)=>{ if(e.target.id==='zoneModal') zoneModal.classList.remove('show'); });
+    document.getElementById('saveZone').addEventListener('click', () => {
+        const name = document.getElementById('zoneName').value.trim();
+        if (!name) { toast('Введи название зоны'); return; }
+        zones.push({ id:'z'+Date.now(), name, emoji:zoneEmoji, lat:childPos.lat+(Math.random()-0.5)*0.01, lng:childPos.lng+(Math.random()-0.5)*0.01, radius:200, notif:zoneNotif });
+        saveZones(zones); renderZones(); if(map) drawZones();
+        zoneModal.classList.remove('show');
+        toast('Геозона добавлена');
     });
 
-    renderChildren();
+    document.getElementById('refreshBtn').addEventListener('click', () => {
+        renderInfo(); toast('Местоположение обновлено');
+    });
+
+    // запуск (карту инициализируем после загрузки Leaflet)
+    renderInfo(); renderZones(); renderEvents();
+    if (typeof L !== 'undefined') initMap();
+    else window.addEventListener('load', () => setTimeout(initMap, 300));
 
 </script>
 <script src="focus-chat-fab.js"></script>

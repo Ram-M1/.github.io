@@ -10,7 +10,7 @@
 <link rel="apple-touch-icon" href="icon-192.png">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>Родительский контроль — FOCUS</title>
+<title>Галерея — FOCUS</title>
 <style>
     :root, [data-theme="original"] { --accent:#FFD966; --accent-rgb:255,217,102; --accent-2:#7C8CFF; --accent-2-rgb:124,140,255; --accent-light:#FFE9A8; --accent-dark:#C9952E; --bg-1:#131319; --bg-2:#0d0d12; --text-strong:#FFFFFF; }
     [data-theme="tron"] { --accent:#FF3B2E; --accent-rgb:255,59,46; --accent-2:#00E5FF; --accent-2-rgb:0,229,255; --accent-light:#FF8A6B; --accent-dark:#B8201A; --bg-1:#0a0a0d; --bg-2:#000000; --text-strong:#FFFFFF; }
@@ -149,67 +149,64 @@
     .modal, .slideshow, .session-area { border-radius: 0 !important; }
 }
 
-    /* ===== РОДИТЕЛЬСКИЙ КОНТРОЛЬ ===== */
+    /* ===== ГАЛЕРЕЯ / ФОТОРЕДАКТОР ===== */
     .scroll-area { flex:1; overflow-y:auto; scrollbar-width:none; }
     .scroll-area::-webkit-scrollbar { display:none; }
-    .pc-intro { background:linear-gradient(135deg, rgba(150,170,255,0.12), rgba(var(--accent-rgb),0.04)); border:1px solid rgba(150,170,255,0.25); border-radius:15px; padding:13px 14px; margin-bottom:14px; }
-    .pc-intro-title { font-size:14px; font-weight:700; color:#fff; margin-bottom:4px; }
-    .pc-intro-sub { font-size:11px; color:#9a9aab; line-height:1.5; }
-    .premium-lock { background:rgba(200,170,255,0.1); border:1px solid rgba(200,170,255,0.3); border-radius:12px; padding:11px 13px; margin-bottom:14px; font-size:11.5px; color:#C8AAFF; font-weight:600; display:flex; align-items:center; gap:8px; }
-    .child-card { background:linear-gradient(135deg, rgba(35,35,46,0.6), rgba(22,22,30,0.6)); border:0.5px solid rgba(150,170,255,0.16); border-radius:15px; padding:14px; margin-bottom:11px; cursor:pointer; transition:0.2s; }
-    .child-card:active { transform:scale(0.99); }
-    .child-top { display:flex; align-items:center; gap:11px; margin-bottom:10px; }
-    .child-avatar { width:46px; height:46px; border-radius:50%; flex-shrink:0; background:linear-gradient(135deg, #AAB9FF, var(--accent-2)); display:flex; align-items:center; justify-content:center; font-size:22px; }
-    .child-info { flex:1; min-width:0; }
-    .child-name { font-size:15px; font-weight:700; color:#fff; }
-    .child-status { font-size:10.5px; margin-top:2px; }
-    .child-status.active { color:#78DC96; }
-    .child-status.inactive { color:#8e8e9e; }
-    .child-stats { display:flex; gap:9px; }
-    .child-stat { flex:1; background:rgba(0,0,0,0.2); border-radius:10px; padding:8px; text-align:center; }
-    .child-stat-val { font-size:14px; font-weight:700; color:#fff; }
-    .child-stat-label { font-size:9px; color:#8e8e9e; margin-top:2px; }
-    .child-geo { font-size:10px; margin-top:8px; text-align:center; }
-    .child-geo.on { color:#78DC96; }
-    .child-geo.off { color:#8e8e9e; }
-    .btn-primary { padding:14px; border-radius:14px; background:linear-gradient(135deg, var(--accent), var(--accent-2)); color:#0a0a0f; font-weight:700; font-size:14px; text-align:center; cursor:pointer; margin-bottom:13px; }
-    .btn-primary:active { transform:scale(0.98); }
-    .empty-state { text-align:center; color:#6e6e7e; font-size:12px; padding:30px 16px; line-height:1.7; }
-    /* экран ребёнка */
-    .section-title { font-size:11px; font-weight:700; color:var(--accent); letter-spacing:0.4px; margin:16px 0 10px; }
-    .child-hero { background:linear-gradient(135deg, rgba(150,170,255,0.12), rgba(var(--accent-rgb),0.04)); border:1px solid rgba(150,170,255,0.25); border-radius:16px; padding:16px; margin-bottom:6px; text-align:center; }
-    .child-hero-avatar { width:64px; height:64px; border-radius:50%; margin:0 auto 9px; background:linear-gradient(135deg, #AAB9FF, var(--accent-2)); display:flex; align-items:center; justify-content:center; font-size:30px; }
-    .child-hero-name { font-size:18px; font-weight:700; color:#fff; }
-    .child-hero-meta { font-size:11px; color:#9a9aab; margin-top:3px; }
-    .child-hero-streak { font-size:12px; color:#FFD966; font-weight:600; margin-top:6px; }
-    .toggle-row { display:flex; align-items:center; justify-content:space-between; padding:12px 13px; background:rgba(35,35,46,0.5); border:0.5px solid rgba(var(--accent-rgb),0.1); border-radius:12px; margin-bottom:8px; }
-    .toggle-label { font-size:13px; color:#e8e8ee; font-weight:500; display:flex; align-items:center; gap:9px; }
-    .toggle-label .em { font-size:16px; }
-    .toggle-switch { width:44px; height:26px; border-radius:13px; background:rgba(255,255,255,0.12); position:relative; cursor:pointer; transition:0.25s; flex-shrink:0; }
-    .toggle-switch.on { background:linear-gradient(135deg, #78DC96, var(--accent-2)); }
-    .toggle-knob { width:20px; height:20px; border-radius:50%; background:#fff; position:absolute; top:3px; left:3px; transition:0.25s; }
-    .toggle-switch.on .toggle-knob { left:21px; }
-    .access-level { display:flex; gap:7px; margin-bottom:6px; }
-    .access-opt { flex:1; padding:10px 6px; border-radius:11px; text-align:center; font-size:11px; font-weight:600; cursor:pointer; background:rgba(255,255,255,0.05); color:#9a9aab; border:1px solid transparent; }
-    .access-opt.on { background:rgba(150,170,255,0.16); color:#AAB9FF; border-color:rgba(150,170,255,0.4); }
-    .danger-btn { padding:13px; border-radius:13px; background:rgba(255,120,120,0.1); border:1px solid rgba(255,120,120,0.3); color:#FF8A7C; font-weight:700; font-size:13px; text-align:center; cursor:pointer; margin-top:14px; }
-    .danger-btn:active { transform:scale(0.98); }
-    /* модалка добавления */
-    .modal { position:absolute; inset:0; z-index:400; background:rgba(0,0,0,0.88); backdrop-filter:blur(8px); display:none; align-items:center; justify-content:center; border-radius:52px; padding:14px; }
-    .modal.show { display:flex; }
-    .modal-box { background:linear-gradient(165deg,#1c1c26,#15151c); border-radius:22px; width:100%; padding:18px; border:0.5px solid rgba(150,170,255,0.25); }
-    .modal-title { font-size:16px; font-weight:700; color:#fff; margin-bottom:13px; }
-    .m-label { font-size:11px; color:var(--accent); font-weight:700; margin-bottom:7px; display:block; }
-    .m-input { width:100%; background:rgba(0,0,0,0.3); border:1px solid rgba(150,170,255,0.18); border-radius:11px; padding:12px 13px; color:#fff; font-size:14px; font-family:inherit; outline:none; margin-bottom:13px; }
-    .m-input:focus { border-color:#AAB9FF; }
-    .invite-code-box { background:rgba(0,0,0,0.3); border:1px dashed rgba(150,170,255,0.4); border-radius:12px; padding:14px; text-align:center; margin-bottom:13px; }
-    .invite-code { font-size:24px; font-weight:700; color:#AAB9FF; letter-spacing:3px; }
-    .invite-hint { font-size:10px; color:#8e8e9e; margin-top:6px; line-height:1.4; }
-    .modal-btns { display:flex; gap:9px; }
-    .modal-btn { flex:1; padding:13px; border-radius:13px; font-size:13px; font-weight:700; cursor:pointer; text-align:center; border:none; font-family:inherit; }
-    .modal-btn.cancel { background:rgba(255,255,255,0.07); color:#9a9aab; }
-    .modal-btn.save { background:linear-gradient(135deg, #AAB9FF, var(--accent-2)); color:#0a0a0f; }
-    .modal-btn:active { transform:scale(0.97); }
+    .g-tabs { display:flex; gap:6px; background:rgba(0,0,0,0.25); border-radius:12px; padding:4px; margin-bottom:13px; }
+    .g-tab { flex:1; text-align:center; padding:9px 4px; border-radius:9px; font-size:12px; font-weight:700; color:#8e8e9e; cursor:pointer; }
+    .g-tab.on { background:linear-gradient(135deg, var(--accent), var(--accent-2)); color:#0a0a0f; }
+    .g-pane { display:none; }
+    .g-pane.on { display:block; }
+    /* холст редактора */
+    .canvas-wrap { position:relative; width:100%; aspect-ratio:1; background:rgba(0,0,0,0.3); border:1px dashed rgba(var(--accent-rgb),0.25); border-radius:16px; overflow:hidden; margin-bottom:12px; display:flex; align-items:center; justify-content:center; }
+    #editorCanvas { max-width:100%; max-height:100%; display:none; }
+    .canvas-empty { text-align:center; color:#6e6e7e; font-size:12px; padding:20px; line-height:1.6; }
+    .canvas-empty svg { width:40px; height:40px; margin-bottom:10px; opacity:0.5; }
+    /* кнопки добавления фото */
+    .add-photos-row { display:flex; gap:8px; margin-bottom:13px; }
+    .add-photo-btn { flex:1; padding:11px; border-radius:12px; background:rgba(var(--accent-2-rgb),0.12); border:1px solid rgba(var(--accent-2-rgb),0.3); color:var(--accent-2); font-weight:700; font-size:12px; text-align:center; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px; }
+    .add-photo-btn svg { width:16px; height:16px; }
+    .add-photo-btn:active { transform:scale(0.97); }
+    .photos-count { font-size:10px; color:#8e8e9e; text-align:center; margin-bottom:13px; }
+    /* секции инструментов */
+    .tool-section { margin-bottom:15px; }
+    .tool-label { font-size:11px; font-weight:700; color:var(--accent); margin-bottom:9px; letter-spacing:0.3px; }
+    .layout-grid, .filter-grid { display:flex; gap:8px; flex-wrap:wrap; }
+    .layout-opt { flex:1; min-width:60px; padding:10px 6px; border-radius:11px; background:rgba(255,255,255,0.05); border:1px solid transparent; text-align:center; font-size:10.5px; font-weight:600; color:#9a9aab; cursor:pointer; }
+    .layout-opt.on { background:rgba(var(--accent-rgb),0.14); color:var(--accent); border-color:rgba(var(--accent-rgb),0.4); }
+    .filter-opt { padding:8px 13px; border-radius:10px; background:rgba(255,255,255,0.05); border:1px solid transparent; font-size:11.5px; font-weight:600; color:#9a9aab; cursor:pointer; }
+    .filter-opt.on { background:rgba(var(--accent-rgb),0.14); color:var(--accent); border-color:rgba(var(--accent-rgb),0.4); }
+    .caption-input { width:100%; background:rgba(0,0,0,0.3); border:1px solid rgba(var(--accent-rgb),0.16); border-radius:12px; padding:11px 14px; color:#fff; font-size:13px; font-family:inherit; outline:none; }
+    .caption-input:focus { border-color:var(--accent-2); }
+    .caption-input::placeholder { color:#6e6e7e; }
+    /* облачка с текстом */
+    .bubble-add-row { display:flex; gap:8px; }
+    .bubble-input { flex:1; background:rgba(0,0,0,0.3); border:1px solid rgba(var(--accent-rgb),0.16); border-radius:11px; padding:10px 13px; color:#fff; font-size:12.5px; font-family:inherit; outline:none; }
+    .bubble-input:focus { border-color:var(--accent-2); }
+    .bubble-input::placeholder { color:#6e6e7e; }
+    .bubble-add-btn { padding:10px 16px; border-radius:11px; background:rgba(var(--accent-2-rgb),0.14); border:1px solid rgba(var(--accent-2-rgb),0.3); color:var(--accent-2); font-weight:700; font-size:12px; cursor:pointer; flex-shrink:0; }
+    .bubble-add-btn:active { transform:scale(0.95); }
+    .bubble-hint { font-size:9.5px; color:#8e8e9e; margin-top:6px; }
+    /* облачко на холсте */
+    .canvas-bubble { position:absolute; background:#fff; color:#1a1a22; padding:7px 11px; border-radius:14px; font-size:12px; font-weight:600; max-width:55%; cursor:move; box-shadow:0 3px 10px rgba(0,0,0,0.3); user-select:none; touch-action:none; }
+    .canvas-bubble::after { content:''; position:absolute; bottom:-7px; left:16px; border:7px solid transparent; border-top-color:#fff; border-bottom:0; }
+    .canvas-bubble .bub-del { position:absolute; top:-8px; right:-8px; width:18px; height:18px; border-radius:50%; background:#FF3B3B; color:#fff; font-size:12px; display:flex; align-items:center; justify-content:center; cursor:pointer; }
+    /* ИИ заглушка */
+    .ai-edit-btn { padding:13px; border-radius:13px; background:linear-gradient(135deg, rgba(200,170,255,0.16), rgba(var(--accent-rgb),0.05)); border:1px solid rgba(200,170,255,0.3); color:#C8AAFF; font-weight:700; font-size:12.5px; text-align:center; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; }
+    .ai-edit-btn svg { width:16px; height:16px; }
+    /* действия */
+    .g-actions { display:flex; gap:9px; margin:15px 0; }
+    .g-action-btn { flex:1; padding:13px; border-radius:13px; font-size:13px; font-weight:700; cursor:pointer; text-align:center; display:flex; align-items:center; justify-content:center; gap:7px; }
+    .g-action-btn svg { width:16px; height:16px; }
+    .g-action-btn.save { background:linear-gradient(135deg, var(--accent), var(--accent-2)); color:#0a0a0f; }
+    .g-action-btn.share { background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.15); color:#d8d8e0; }
+    .g-action-btn:active { transform:scale(0.97); }
+    /* альбом */
+    .album-grid { display:grid; grid-template-columns:1fr 1fr; gap:9px; }
+    .album-item { aspect-ratio:1; border-radius:13px; overflow:hidden; background:rgba(0,0,0,0.3); cursor:pointer; position:relative; }
+    .album-item img { width:100%; height:100%; object-fit:cover; }
+    .album-item .al-del { position:absolute; top:6px; right:6px; width:24px; height:24px; border-radius:50%; background:rgba(0,0,0,0.6); color:#fff; font-size:14px; display:flex; align-items:center; justify-content:center; }
+    .album-empty { text-align:center; color:#6e6e7e; font-size:12px; padding:40px 20px; line-height:1.6; grid-column:1/-1; }
     .toast { position:absolute; bottom:20px; left:50%; transform:translateX(-50%) translateY(20px); background:rgba(0,0,0,0.9); border:1px solid var(--accent); border-radius:16px; padding:11px 18px; color:var(--accent); font-size:12px; font-weight:600; z-index:500; opacity:0; transition:0.3s ease; pointer-events:none; max-width:300px; width:max-content; text-align:center; }
     .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
 
@@ -222,43 +219,101 @@
             <div class="back-btn" onclick="location.href='fokus_profile.html'">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
             </div>
-            <div class="title">Родительский контроль</div>
-            <div class="title-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 7v6c0 4 3.5 7 8 9 4.5-2 8-5 8-9V7l-8-5Z"/></svg></div>
+            <div class="title">Галерея</div>
+            <div class="title-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.5-3.5L9 20"/></svg></div>
+        </div>
+
+        <div class="g-tabs">
+            <div class="g-tab on" data-gtab="editor">Редактор</div>
+            <div class="g-tab" data-gtab="album">Мой альбом</div>
         </div>
 
         <div class="scroll-area">
-            <div class="pc-intro">
-                <div class="pc-intro-title">🛡️ Контроль и забота</div>
-                <div class="pc-intro-sub">Следи за развитием ребёнка: прогресс по сферам, стрик, геолокация. Настраивай доступ к разделам и напоминания.</div>
+            <!-- РЕДАКТОР -->
+            <div class="g-pane on" id="pane-editor">
+                <div class="canvas-wrap" id="canvasWrap">
+                    <canvas id="editorCanvas"></canvas>
+                    <div class="canvas-empty" id="canvasEmpty">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.5-3.5L9 20"/></svg>
+                        Добавь до 3 фото<br>для создания коллажа
+                    </div>
+                </div>
+
+                <div class="add-photos-row">
+                    <div class="add-photo-btn" id="addPhotoBtn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+                        Добавить фото
+                    </div>
+                    <div class="add-photo-btn" id="clearPhotosBtn" style="flex:0 0 auto;background:rgba(255,120,120,0.1);border-color:rgba(255,120,120,0.3);color:#FF8A7C;">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg>
+                    </div>
+                </div>
+                <div class="photos-count" id="photosCount">Фото: 0 / 3</div>
+
+                <div class="tool-section" id="layoutSection" style="display:none;">
+                    <div class="tool-label">РАСКЛАДКА КОЛЛАЖА</div>
+                    <div class="layout-grid" id="layoutGrid">
+                        <div class="layout-opt on" data-layout="horizontal">▤ Рядом</div>
+                        <div class="layout-opt" data-layout="vertical">▥ Стопкой</div>
+                        <div class="layout-opt" data-layout="grid">▦ Сеткой</div>
+                    </div>
+                </div>
+
+                <div class="tool-section" id="filterSection" style="display:none;">
+                    <div class="tool-label">ФИЛЬТР</div>
+                    <div class="filter-grid" id="filterGrid">
+                        <div class="filter-opt on" data-filter="none">Без</div>
+                        <div class="filter-opt" data-filter="bw">Ч/Б</div>
+                        <div class="filter-opt" data-filter="sepia">Сепия</div>
+                        <div class="filter-opt" data-filter="vintage">Винтаж</div>
+                        <div class="filter-opt" data-filter="cold">Холод</div>
+                        <div class="filter-opt" data-filter="warm">Тепло</div>
+                        <div class="filter-opt" data-filter="bright">Ярко</div>
+                    </div>
+                </div>
+
+                <div class="tool-section" id="bubbleSection" style="display:none;">
+                    <div class="tool-label">ОБЛАЧКО С ТЕКСТОМ</div>
+                    <div class="bubble-add-row">
+                        <input type="text" class="bubble-input" id="bubbleInput" placeholder="Текст реплики...">
+                        <div class="bubble-add-btn" id="bubbleAddBtn">+ Облачко</div>
+                    </div>
+                    <div class="bubble-hint">Облачко появится на фото — перетащи его пальцем куда нужно</div>
+                </div>
+
+                <div class="tool-section" id="captionSection" style="display:none;">
+                    <div class="tool-label">ПОДПИСЬ</div>
+                    <input type="text" class="caption-input" id="captionInput" placeholder="Добавь комментарий к фото...">
+                </div>
+
+                <div class="tool-section" id="aiSection" style="display:none;">
+                    <div class="tool-label">ИИ-ОБРАБОТКА</div>
+                    <div class="ai-edit-btn" id="aiEditBtn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4M12 18v4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M2 12h4M18 12h4"/></svg>
+                        Обработать фото по описанию (ИИ)
+                    </div>
+                </div>
+
+                <div class="g-actions" id="gActions" style="display:none;">
+                    <div class="g-action-btn save" id="saveToAlbumBtn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg>
+                        В альбом
+                    </div>
+                    <div class="g-action-btn share" id="shareBtn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13"/></svg>
+                        Поделиться
+                    </div>
+                </div>
             </div>
 
-            <div class="premium-lock" id="premiumLock">🔐 Доступно на подписке Про</div>
-
-            <div class="btn-primary" id="addChildBtn">➕ Добавить ребёнка</div>
-
-            <div id="childrenList"></div>
+            <!-- АЛЬБОМ -->
+            <div class="g-pane" id="pane-album">
+                <div class="album-grid" id="albumGrid"></div>
+            </div>
         </div>
     </div>
 
-    <!-- Модалка добавления ребёнка -->
-    <div class="modal" id="addModal">
-        <div class="modal-box">
-            <div class="modal-title">Добавить ребёнка</div>
-            <div class="m-label">ИМЯ РЕБЁНКА</div>
-            <input type="text" class="m-input" id="childName" placeholder="Например: Дима">
-            <div class="m-label">ВОЗРАСТ</div>
-            <input type="number" class="m-input" id="childAge" placeholder="14" inputmode="numeric">
-            <div class="invite-code-box">
-                <div class="invite-code" id="inviteCode">— — — —</div>
-                <div class="invite-hint">Ребёнок вводит этот код в своём приложении FOCUS, чтобы связать аккаунты. Связь активируется с серверной частью.</div>
-            </div>
-            <div class="modal-btns">
-                <button class="modal-btn cancel" id="cancelAdd">Отмена</button>
-                <button class="modal-btn save" id="saveChild">Добавить</button>
-            </div>
-        </div>
-    </div>
-
+    <input type="file" id="photoFileInput" accept="image/*" style="display:none;">
     <div class="toast" id="toast"></div>
 </div>
 
@@ -446,78 +501,282 @@ initAtmosphere(canvasId) {
     FocusCore.applyStoredTheme();
     FocusCore.initAtmosphere('atmosCanvas');
 
-    function toast(msg){ const t=document.getElementById('toast'); t.innerText=msg; t.classList.add('show'); clearTimeout(window._tt); window._tt=setTimeout(()=>t.classList.remove('show'),2200); }
+    function toast(msg){
+        const t=document.getElementById('toast');
+        t.innerText=msg; t.classList.add('show');
+        clearTimeout(window._tt); window._tt=setTimeout(()=>t.classList.remove('show'), 2000);
+    }
     function escapeHtml(s){ const d=document.createElement('div'); d.innerText=String(s==null?'':s); return d.innerHTML; }
 
-    const CH_KEY = 'focus_controlled_children';
-    function getChildren(){ try { return JSON.parse(localStorage.getItem(CH_KEY))||[]; } catch(e){ return []; } }
-    function saveChildren(c){ localStorage.setItem(CH_KEY, JSON.stringify(c)); }
+    // ===== Вкладки =====
+    document.querySelectorAll('.g-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+            document.querySelectorAll('.g-tab').forEach(t => t.classList.remove('on'));
+            document.querySelectorAll('.g-pane').forEach(p => p.classList.remove('on'));
+            tab.classList.add('on');
+            document.getElementById('pane-' + tab.dataset.gtab).classList.add('on');
+            if (tab.dataset.gtab === 'album') renderAlbum();
+        });
+    });
 
-    function renderChildren(){
-        const cont = document.getElementById('childrenList');
-        const children = getChildren();
-        if (children.length === 0) {
-            cont.innerHTML = '<div class="empty-state">👶 Нет подключённых детей.<br>Нажми «Добавить ребёнка» и передай код.</div>';
+    // ===== Редактор =====
+    const CANVAS_SIZE = 1000;
+    const canvas = document.getElementById('editorCanvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = CANVAS_SIZE; canvas.height = CANVAS_SIZE;
+
+    let photos = [];          // загруженные Image
+    let layout = 'horizontal';
+    let filter = 'none';
+    let bubbles = [];         // {text, x, y} в долях 0..1
+
+    const filterMap = {
+        none:   'none',
+        bw:     'grayscale(1)',
+        sepia:  'sepia(0.8)',
+        vintage:'sepia(0.4) contrast(1.1) brightness(0.95) saturate(1.2)',
+        cold:   'saturate(1.1) hue-rotate(-12deg) brightness(1.02)',
+        warm:   'sepia(0.25) saturate(1.3) brightness(1.05)',
+        bright: 'brightness(1.18) contrast(1.05) saturate(1.15)'
+    };
+
+    function drawCollage(){
+        if (photos.length === 0) {
+            canvas.style.display = 'none';
+            document.getElementById('canvasEmpty').style.display = 'block';
             return;
         }
-        cont.innerHTML = '';
-        children.forEach(child => {
-            const card = document.createElement('div');
-            card.className = 'child-card';
-            const active = child.status === 'active';
-            const avInner = (child.photo && child.photo.startsWith('data:image'))
-                ? '<img src="'+child.photo+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">'
-                : (child.gender==='girl'?'👧':'👦');
-            card.innerHTML = `
-                <div class="child-top">
-                    <div class="child-avatar">${avInner}</div>
-                    <div class="child-info">
-                        <div class="child-name">${escapeHtml(child.name)}${child.age?', '+child.age:''}</div>
-                        <div class="child-status ${active?'active':'inactive'}">${active?'🟢 Активен сегодня':'⚪ Не заходил сегодня'}</div>
-                    </div>
-                </div>
-                <div class="child-stats">
-                    <div class="child-stat"><div class="child-stat-val">🔥 ${child.streak||0}</div><div class="child-stat-label">дней подряд</div></div>
-                    <div class="child-stat"><div class="child-stat-val">📊 ${child.progress||0}%</div><div class="child-stat-label">прогресс</div></div>
-                </div>
-                <div class="child-geo ${child.geolocation?'on':'off'}">${child.geolocation?'📍 Геолокация включена':'📍 Геолокация выключена'}</div>`;
-            card.addEventListener('click', () => {
-                localStorage.setItem('focus_selected_child', JSON.stringify(child));
-                location.href = 'control_child.html?id=' + child.id;
-            });
-            cont.appendChild(card);
+        canvas.style.display = 'block';
+        document.getElementById('canvasEmpty').style.display = 'none';
+
+        ctx.clearRect(0,0,CANVAS_SIZE,CANVAS_SIZE);
+        ctx.fillStyle = '#0d0d12';
+        ctx.fillRect(0,0,CANVAS_SIZE,CANVAS_SIZE);
+        ctx.filter = filterMap[filter] || 'none';
+
+        const gap = 8;
+        const n = photos.length;
+        // вычисляем прямоугольники под раскладку
+        let rects = [];
+        if (n === 1) {
+            rects = [[0,0,CANVAS_SIZE,CANVAS_SIZE]];
+        } else if (layout === 'horizontal') {
+            const w = (CANVAS_SIZE - gap*(n-1))/n;
+            rects = photos.map((_,i)=>[i*(w+gap),0,w,CANVAS_SIZE]);
+        } else if (layout === 'vertical') {
+            const h = (CANVAS_SIZE - gap*(n-1))/n;
+            rects = photos.map((_,i)=>[0,i*(h+gap),CANVAS_SIZE,h]);
+        } else { // grid
+            if (n === 2) {
+                const w=(CANVAS_SIZE-gap)/2;
+                rects=[[0,0,w,CANVAS_SIZE],[w+gap,0,w,CANVAS_SIZE]];
+            } else { // 3 — одно большое сверху, два снизу
+                const h=(CANVAS_SIZE-gap)/2, w=(CANVAS_SIZE-gap)/2;
+                rects=[[0,0,CANVAS_SIZE,h],[0,h+gap,w,h],[w+gap,h+gap,w,h]];
+            }
+        }
+        // рисуем фото с object-fit:cover
+        photos.forEach((img, i) => {
+            const [x,y,w,h] = rects[i];
+            const ir = img.width/img.height, rr = w/h;
+            let sw,sh,sx,sy;
+            if (ir > rr) { sh=img.height; sw=img.height*rr; sx=(img.width-sw)/2; sy=0; }
+            else { sw=img.width; sh=img.width/rr; sx=0; sy=(img.height-sh)/2; }
+            ctx.drawImage(img, sx,sy,sw,sh, x,y,w,h);
         });
+        ctx.filter = 'none';
     }
 
-    // модалка добавления
-    const addModal = document.getElementById('addModal');
-    function genCode(){ return Math.random().toString(36).substring(2,6).toUpperCase(); }
-    document.getElementById('addChildBtn').addEventListener('click', () => {
-        document.getElementById('childName').value = '';
-        document.getElementById('childAge').value = '';
-        document.getElementById('inviteCode').innerText = genCode();
-        addModal.classList.add('show');
+    // загрузка фото
+    document.getElementById('addPhotoBtn').addEventListener('click', () => {
+        if (photos.length >= 3) { toast('Максимум 3 фото'); return; }
+        document.getElementById('photoFileInput').click();
     });
-    document.getElementById('cancelAdd').addEventListener('click', () => addModal.classList.remove('show'));
-    addModal.addEventListener('click', (e)=>{ if(e.target.id==='addModal') addModal.classList.remove('show'); });
-    document.getElementById('saveChild').addEventListener('click', () => {
-        const name = document.getElementById('childName').value.trim();
-        const age = parseInt(document.getElementById('childAge').value) || null;
-        if (!name) { toast('Введи имя ребёнка'); return; }
-        const children = getChildren();
-        children.push({
-            id: Date.now(), name, age, gender:'boy', status:'inactive',
-            streak:0, progress:0, geolocation:true,
-            access:'full', spheres:{ body:true, mental:true, energy:true, relations:true, faith:true, reward:true, oracle:false },
-            notifs:{ workout:true, sleep:true, meds:false }
-        });
-        saveChildren(children);
-        addModal.classList.remove('show');
-        renderChildren();
-        toast('Ребёнок добавлен. Передай ему код для связи');
+    document.getElementById('photoFileInput').addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        if (file.size > 1500*1024) { toast('Фото великовато (>1.5МБ) для демо'); return; }
+        const reader = new FileReader();
+        reader.onload = () => {
+            const img = new Image();
+            img.onload = () => {
+                photos.push(img);
+                updateEditorUI();
+                drawCollage();
+            };
+            img.src = reader.result;
+        };
+        reader.readAsDataURL(file);
+        e.target.value = '';
     });
 
-    renderChildren();
+    document.getElementById('clearPhotosBtn').addEventListener('click', () => {
+        photos = []; bubbles = []; renderBubbles();
+        updateEditorUI(); drawCollage();
+        document.getElementById('captionInput').value = '';
+    });
+
+    function updateEditorUI(){
+        document.getElementById('photosCount').innerText = 'Фото: ' + photos.length + ' / 3';
+        const show = photos.length > 0 ? 'block' : 'none';
+        ['filterSection','bubbleSection','captionSection','aiSection'].forEach(id => document.getElementById(id).style.display = show);
+        document.getElementById('gActions').style.display = photos.length>0 ? 'flex' : 'none';
+        document.getElementById('layoutSection').style.display = photos.length > 1 ? 'block' : 'none';
+    }
+
+    // раскладка
+    document.querySelectorAll('.layout-opt').forEach(o => o.addEventListener('click', () => {
+        document.querySelectorAll('.layout-opt').forEach(x => x.classList.remove('on'));
+        o.classList.add('on'); layout = o.dataset.layout; drawCollage();
+    }));
+    // фильтр
+    document.querySelectorAll('.filter-opt').forEach(o => o.addEventListener('click', () => {
+        document.querySelectorAll('.filter-opt').forEach(x => x.classList.remove('on'));
+        o.classList.add('on'); filter = o.dataset.filter; drawCollage();
+    }));
+
+    // ===== Облачка с текстом =====
+    const canvasWrap = document.getElementById('canvasWrap');
+    document.getElementById('bubbleAddBtn').addEventListener('click', () => {
+        const text = document.getElementById('bubbleInput').value.trim();
+        if (!text) { toast('Введи текст облачка'); return; }
+        if (photos.length === 0) { toast('Сначала добавь фото'); return; }
+        bubbles.push({ text, x:0.1, y:0.1 });
+        document.getElementById('bubbleInput').value = '';
+        renderBubbles();
+    });
+
+    function renderBubbles(){
+        // удалить старые DOM-облачка
+        canvasWrap.querySelectorAll('.canvas-bubble').forEach(b => b.remove());
+        bubbles.forEach((b, idx) => {
+            const el = document.createElement('div');
+            el.className = 'canvas-bubble';
+            el.style.left = (b.x*100) + '%';
+            el.style.top = (b.y*100) + '%';
+            el.innerHTML = escapeHtml(b.text) + '<div class="bub-del" data-bub="'+idx+'">×</div>';
+            canvasWrap.appendChild(el);
+            makeBubbleDraggable(el, b);
+        });
+        canvasWrap.querySelectorAll('.bub-del').forEach(el => el.addEventListener('click', (e) => {
+            e.stopPropagation();
+            bubbles.splice(parseInt(el.dataset.bub), 1);
+            renderBubbles();
+        }));
+    }
+
+    function makeBubbleDraggable(el, bub){
+        let dragging = false;
+        function down(e){ dragging = true; e.preventDefault(); }
+        function move(e){
+            if (!dragging) return;
+            const rect = canvasWrap.getBoundingClientRect();
+            const cx = (e.touches?e.touches[0].clientX:e.clientX) - rect.left;
+            const cy = (e.touches?e.touches[0].clientY:e.clientY) - rect.top;
+            bub.x = Math.max(0, Math.min(0.8, cx/rect.width));
+            bub.y = Math.max(0, Math.min(0.9, cy/rect.height));
+            el.style.left = (bub.x*100)+'%'; el.style.top = (bub.y*100)+'%';
+            e.preventDefault();
+        }
+        function up(){ dragging = false; }
+        el.addEventListener('mousedown', down); window.addEventListener('mousemove', move); window.addEventListener('mouseup', up);
+        el.addEventListener('touchstart', down, {passive:false}); window.addEventListener('touchmove', move, {passive:false}); window.addEventListener('touchend', up);
+    }
+
+    // ===== Финальная отрисовка (фото + облачка) для сохранения/шеринга =====
+    function renderFinal(){
+        drawCollage(); // фото с фильтром
+        // дорисовываем облачка
+        bubbles.forEach(b => {
+            const x = b.x*CANVAS_SIZE, y = b.y*CANVAS_SIZE;
+            ctx.font = 'bold 34px -apple-system, sans-serif';
+            const metrics = ctx.measureText(b.text);
+            const padX=20, padY=14, tw=Math.min(metrics.width, CANVAS_SIZE*0.55), th=40;
+            ctx.fillStyle = '#fff';
+            // скруглённый прямоугольник
+            const rx=x, ry=y, rw=tw+padX*2, rh=th+padY;
+            ctx.beginPath();
+            ctx.roundRect(rx, ry, rw, rh, 18);
+            ctx.fill();
+            // хвостик
+            ctx.beginPath(); ctx.moveTo(rx+30, ry+rh); ctx.lineTo(rx+44, ry+rh); ctx.lineTo(rx+30, ry+rh+14); ctx.closePath(); ctx.fill();
+            ctx.fillStyle = '#1a1a22';
+            ctx.fillText(b.text, rx+padX, ry+padY+26, CANVAS_SIZE*0.55);
+        });
+        // подпись снизу
+        const caption = document.getElementById('captionInput').value.trim();
+        if (caption) {
+            ctx.fillStyle = 'rgba(0,0,0,0.55)';
+            ctx.fillRect(0, CANVAS_SIZE-70, CANVAS_SIZE, 70);
+            ctx.fillStyle = '#fff';
+            ctx.font = '28px -apple-system, sans-serif';
+            ctx.fillText(caption, 24, CANVAS_SIZE-28, CANVAS_SIZE-48);
+        }
+    }
+
+    // ===== Сохранение в альбом =====
+    const ALBUM_KEY = 'focus_gallery_album';
+    function getAlbum(){ try { return JSON.parse(localStorage.getItem(ALBUM_KEY))||[]; } catch(e){ return []; } }
+    function saveAlbum(a){ localStorage.setItem(ALBUM_KEY, JSON.stringify(a)); }
+
+    document.getElementById('saveToAlbumBtn').addEventListener('click', () => {
+        if (photos.length === 0) { toast('Добавь фото'); return; }
+        renderFinal();
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+        const album = getAlbum();
+        album.push({ id:Date.now(), img:dataUrl, date:new Date().toISOString() });
+        saveAlbum(album);
+        toast('✓ Сохранено в альбом');
+    });
+
+    // ===== Поделиться =====
+    document.getElementById('shareBtn').addEventListener('click', async () => {
+        if (photos.length === 0) { toast('Добавь фото'); return; }
+        renderFinal();
+        canvas.toBlob(async (blob) => {
+            const file = new File([blob], 'focus-photo.jpg', { type:'image/jpeg' });
+            if (navigator.canShare && navigator.canShare({ files:[file] })) {
+                try { await navigator.share({ files:[file], text:'Создано в FOCUS 🎯' }); }
+                catch(e){}
+            } else {
+                // фолбэк — скачать
+                const a = document.createElement('a');
+                a.href = canvas.toDataURL('image/jpeg', 0.8);
+                a.download = 'focus-photo.jpg'; a.click();
+                toast('Фото скачано — делись в любой соцсети');
+            }
+        }, 'image/jpeg', 0.8);
+    });
+
+    // ИИ-обработка — заглушка
+    document.getElementById('aiEditBtn').addEventListener('click', () => {
+        toast('ИИ-обработка фото — в разработке, появится с ИИ');
+    });
+
+    // ===== Альбом =====
+    function renderAlbum(){
+        const grid = document.getElementById('albumGrid');
+        const album = getAlbum();
+        if (album.length === 0) {
+            grid.innerHTML = '<div class="album-empty">📸 Альбом пуст.<br>Создай первый коллаж в редакторе.</div>';
+            return;
+        }
+        grid.innerHTML = '';
+        album.slice().reverse().forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'album-item';
+            div.innerHTML = `<img src="${item.img}"><div class="al-del" data-del="${item.id}">×</div>`;
+            grid.appendChild(div);
+        });
+        grid.querySelectorAll('.al-del').forEach(el => el.addEventListener('click', () => {
+            const album2 = getAlbum().filter(x => String(x.id) !== String(el.dataset.del));
+            saveAlbum(album2); renderAlbum();
+            toast('Удалено');
+        }));
+    }
+
+    updateEditorUI();
+    drawCollage();
 
 </script>
 <script src="focus-chat-fab.js"></script>

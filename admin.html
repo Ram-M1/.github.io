@@ -10,7 +10,7 @@
 <link rel="apple-touch-icon" href="icon-192.png">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>Родительский контроль — FOCUS</title>
+<title>Админка — FOCUS</title>
 <style>
     :root, [data-theme="original"] { --accent:#FFD966; --accent-rgb:255,217,102; --accent-2:#7C8CFF; --accent-2-rgb:124,140,255; --accent-light:#FFE9A8; --accent-dark:#C9952E; --bg-1:#131319; --bg-2:#0d0d12; --text-strong:#FFFFFF; }
     [data-theme="tron"] { --accent:#FF3B2E; --accent-rgb:255,59,46; --accent-2:#00E5FF; --accent-2-rgb:0,229,255; --accent-light:#FF8A6B; --accent-dark:#B8201A; --bg-1:#0a0a0d; --bg-2:#000000; --text-strong:#FFFFFF; }
@@ -149,68 +149,62 @@
     .modal, .slideshow, .session-area { border-radius: 0 !important; }
 }
 
-    /* ===== РОДИТЕЛЬСКИЙ КОНТРОЛЬ ===== */
-    .scroll-area { flex:1; overflow-y:auto; scrollbar-width:none; }
+    /* ===== АДМИНКА ===== */
+    .scroll-area { flex:1; overflow-y:auto; scrollbar-width:none; padding-bottom:70px; }
     .scroll-area::-webkit-scrollbar { display:none; }
-    .pc-intro { background:linear-gradient(135deg, rgba(150,170,255,0.12), rgba(var(--accent-rgb),0.04)); border:1px solid rgba(150,170,255,0.25); border-radius:15px; padding:13px 14px; margin-bottom:14px; }
-    .pc-intro-title { font-size:14px; font-weight:700; color:#fff; margin-bottom:4px; }
-    .pc-intro-sub { font-size:11px; color:#9a9aab; line-height:1.5; }
-    .premium-lock { background:rgba(200,170,255,0.1); border:1px solid rgba(200,170,255,0.3); border-radius:12px; padding:11px 13px; margin-bottom:14px; font-size:11.5px; color:#C8AAFF; font-weight:600; display:flex; align-items:center; gap:8px; }
-    .child-card { background:linear-gradient(135deg, rgba(35,35,46,0.6), rgba(22,22,30,0.6)); border:0.5px solid rgba(150,170,255,0.16); border-radius:15px; padding:14px; margin-bottom:11px; cursor:pointer; transition:0.2s; }
-    .child-card:active { transform:scale(0.99); }
-    .child-top { display:flex; align-items:center; gap:11px; margin-bottom:10px; }
-    .child-avatar { width:46px; height:46px; border-radius:50%; flex-shrink:0; background:linear-gradient(135deg, #AAB9FF, var(--accent-2)); display:flex; align-items:center; justify-content:center; font-size:22px; }
-    .child-info { flex:1; min-width:0; }
-    .child-name { font-size:15px; font-weight:700; color:#fff; }
-    .child-status { font-size:10.5px; margin-top:2px; }
-    .child-status.active { color:#78DC96; }
-    .child-status.inactive { color:#8e8e9e; }
-    .child-stats { display:flex; gap:9px; }
-    .child-stat { flex:1; background:rgba(0,0,0,0.2); border-radius:10px; padding:8px; text-align:center; }
-    .child-stat-val { font-size:14px; font-weight:700; color:#fff; }
-    .child-stat-label { font-size:9px; color:#8e8e9e; margin-top:2px; }
-    .child-geo { font-size:10px; margin-top:8px; text-align:center; }
-    .child-geo.on { color:#78DC96; }
-    .child-geo.off { color:#8e8e9e; }
-    .btn-primary { padding:14px; border-radius:14px; background:linear-gradient(135deg, var(--accent), var(--accent-2)); color:#0a0a0f; font-weight:700; font-size:14px; text-align:center; cursor:pointer; margin-bottom:13px; }
-    .btn-primary:active { transform:scale(0.98); }
-    .empty-state { text-align:center; color:#6e6e7e; font-size:12px; padding:30px 16px; line-height:1.7; }
-    /* экран ребёнка */
-    .section-title { font-size:11px; font-weight:700; color:var(--accent); letter-spacing:0.4px; margin:16px 0 10px; }
-    .child-hero { background:linear-gradient(135deg, rgba(150,170,255,0.12), rgba(var(--accent-rgb),0.04)); border:1px solid rgba(150,170,255,0.25); border-radius:16px; padding:16px; margin-bottom:6px; text-align:center; }
-    .child-hero-avatar { width:64px; height:64px; border-radius:50%; margin:0 auto 9px; background:linear-gradient(135deg, #AAB9FF, var(--accent-2)); display:flex; align-items:center; justify-content:center; font-size:30px; }
-    .child-hero-name { font-size:18px; font-weight:700; color:#fff; }
-    .child-hero-meta { font-size:11px; color:#9a9aab; margin-top:3px; }
-    .child-hero-streak { font-size:12px; color:#FFD966; font-weight:600; margin-top:6px; }
-    .toggle-row { display:flex; align-items:center; justify-content:space-between; padding:12px 13px; background:rgba(35,35,46,0.5); border:0.5px solid rgba(var(--accent-rgb),0.1); border-radius:12px; margin-bottom:8px; }
-    .toggle-label { font-size:13px; color:#e8e8ee; font-weight:500; display:flex; align-items:center; gap:9px; }
-    .toggle-label .em { font-size:16px; }
-    .toggle-switch { width:44px; height:26px; border-radius:13px; background:rgba(255,255,255,0.12); position:relative; cursor:pointer; transition:0.25s; flex-shrink:0; }
-    .toggle-switch.on { background:linear-gradient(135deg, #78DC96, var(--accent-2)); }
-    .toggle-knob { width:20px; height:20px; border-radius:50%; background:#fff; position:absolute; top:3px; left:3px; transition:0.25s; }
-    .toggle-switch.on .toggle-knob { left:21px; }
-    .access-level { display:flex; gap:7px; margin-bottom:6px; }
-    .access-opt { flex:1; padding:10px 6px; border-radius:11px; text-align:center; font-size:11px; font-weight:600; cursor:pointer; background:rgba(255,255,255,0.05); color:#9a9aab; border:1px solid transparent; }
-    .access-opt.on { background:rgba(150,170,255,0.16); color:#AAB9FF; border-color:rgba(150,170,255,0.4); }
-    .danger-btn { padding:13px; border-radius:13px; background:rgba(255,120,120,0.1); border:1px solid rgba(255,120,120,0.3); color:#FF8A7C; font-weight:700; font-size:13px; text-align:center; cursor:pointer; margin-top:14px; }
-    .danger-btn:active { transform:scale(0.98); }
-    /* модалка добавления */
-    .modal { position:absolute; inset:0; z-index:400; background:rgba(0,0,0,0.88); backdrop-filter:blur(8px); display:none; align-items:center; justify-content:center; border-radius:52px; padding:14px; }
-    .modal.show { display:flex; }
-    .modal-box { background:linear-gradient(165deg,#1c1c26,#15151c); border-radius:22px; width:100%; padding:18px; border:0.5px solid rgba(150,170,255,0.25); }
-    .modal-title { font-size:16px; font-weight:700; color:#fff; margin-bottom:13px; }
-    .m-label { font-size:11px; color:var(--accent); font-weight:700; margin-bottom:7px; display:block; }
-    .m-input { width:100%; background:rgba(0,0,0,0.3); border:1px solid rgba(150,170,255,0.18); border-radius:11px; padding:12px 13px; color:#fff; font-size:14px; font-family:inherit; outline:none; margin-bottom:13px; }
-    .m-input:focus { border-color:#AAB9FF; }
-    .invite-code-box { background:rgba(0,0,0,0.3); border:1px dashed rgba(150,170,255,0.4); border-radius:12px; padding:14px; text-align:center; margin-bottom:13px; }
-    .invite-code { font-size:24px; font-weight:700; color:#AAB9FF; letter-spacing:3px; }
-    .invite-hint { font-size:10px; color:#8e8e9e; margin-top:6px; line-height:1.4; }
-    .modal-btns { display:flex; gap:9px; }
-    .modal-btn { flex:1; padding:13px; border-radius:13px; font-size:13px; font-weight:700; cursor:pointer; text-align:center; border:none; font-family:inherit; }
-    .modal-btn.cancel { background:rgba(255,255,255,0.07); color:#9a9aab; }
-    .modal-btn.save { background:linear-gradient(135deg, #AAB9FF, var(--accent-2)); color:#0a0a0f; }
-    .modal-btn:active { transform:scale(0.97); }
-    .toast { position:absolute; bottom:20px; left:50%; transform:translateX(-50%) translateY(20px); background:rgba(0,0,0,0.9); border:1px solid var(--accent); border-radius:16px; padding:11px 18px; color:var(--accent); font-size:12px; font-weight:600; z-index:500; opacity:0; transition:0.3s ease; pointer-events:none; max-width:300px; width:max-content; text-align:center; }
+    .admin-alert { background:rgba(255,140,90,0.12); border:1px solid rgba(255,140,90,0.3); border-radius:13px; padding:11px 13px; margin-bottom:14px; font-size:11.5px; color:#FFB088; line-height:1.5; font-weight:600; }
+    .stat-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:16px; }
+    .stat-card { background:linear-gradient(135deg, rgba(35,35,46,0.6), rgba(22,22,30,0.6)); border:0.5px solid rgba(var(--accent-rgb),0.14); border-radius:15px; padding:14px; }
+    .stat-value { font-size:22px; font-weight:700; color:#fff; }
+    .stat-value.gold { color:#FFD966; }
+    .stat-value.green { color:#78DC96; }
+    .stat-value.purple { color:#C8AAFF; }
+    .stat-label { font-size:10.5px; color:#9a9aab; margin-top:3px; font-weight:600; }
+    .panel { background:linear-gradient(135deg, rgba(35,35,46,0.5), rgba(22,22,30,0.5)); border:0.5px solid rgba(var(--accent-rgb),0.12); border-radius:15px; padding:14px; margin-bottom:13px; }
+    .panel-title { font-size:13px; font-weight:700; color:var(--accent); margin-bottom:12px; display:flex; align-items:center; justify-content:space-between; }
+    .panel-title .count-badge { font-size:10px; background:rgba(255,140,90,0.2); color:#FFB088; padding:2px 9px; border-radius:8px; }
+    .admin-search { width:100%; background:rgba(0,0,0,0.3); border:1px solid rgba(var(--accent-rgb),0.16); border-radius:11px; padding:10px 13px; color:#fff; font-size:12.5px; font-family:inherit; outline:none; margin-bottom:11px; }
+    .admin-search:focus { border-color:var(--accent); }
+    .admin-search::placeholder { color:#6e6e7e; }
+    .row-item { display:flex; align-items:center; gap:10px; padding:10px 4px; border-bottom:0.5px solid rgba(255,255,255,0.05); }
+    .row-item:last-child { border-bottom:none; }
+    .row-avatar { width:36px; height:36px; border-radius:50%; flex-shrink:0; background:linear-gradient(135deg, var(--accent), var(--accent-2)); display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; color:#0a0a0f; }
+    .row-avatar.purple { background:linear-gradient(135deg, #C8AAFF, var(--accent-2)); }
+    .row-info { flex:1; min-width:0; }
+    .row-name { font-size:13px; font-weight:600; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .row-sub { font-size:10.5px; color:#8e8e9e; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .row-tag { font-size:9px; font-weight:700; padding:2px 8px; border-radius:6px; flex-shrink:0; }
+    .row-tag.elite { background:rgba(255,217,102,0.15); color:#FFD966; }
+    .row-tag.fighter { background:rgba(200,170,255,0.15); color:#C8AAFF; }
+    .row-tag.newbie { background:rgba(255,255,255,0.08); color:#9a9aab; }
+    .row-tag.pending { background:rgba(255,200,90,0.15); color:#FFD98A; }
+    .row-tag.approved { background:rgba(120,220,150,0.15); color:#78DC96; }
+    .row-tag.rejected { background:rgba(255,120,120,0.15); color:#FF8A7C; }
+    .row-tag.active { background:rgba(120,220,150,0.15); color:#78DC96; }
+    .row-tag.blocked { background:rgba(255,120,120,0.15); color:#FF8A7C; }
+    .row-actions { display:flex; gap:6px; flex-shrink:0; }
+    .act-btn { width:30px; height:30px; border-radius:8px; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:14px; }
+    .act-btn.approve { background:rgba(120,220,150,0.15); color:#78DC96; }
+    .act-btn.reject { background:rgba(255,120,120,0.15); color:#FF8A7C; }
+    .act-btn.block { background:rgba(255,160,90,0.12); color:#FFB088; }
+    .act-btn:active { transform:scale(0.9); }
+    .empty-row { text-align:center; color:#6e6e7e; font-size:11.5px; padding:18px; }
+    .sphere-bar-row { display:flex; align-items:center; gap:10px; margin-bottom:9px; }
+    .sphere-bar-label { font-size:11px; color:#c8c8d0; width:80px; flex-shrink:0; }
+    .sphere-bar-track { flex:1; height:8px; background:rgba(255,255,255,0.06); border-radius:5px; overflow:hidden; }
+    .sphere-bar-fill { height:100%; border-radius:5px; background:linear-gradient(90deg, var(--accent-2), var(--accent)); }
+    .sphere-bar-val { font-size:10.5px; color:#9a9aab; width:30px; text-align:right; flex-shrink:0; }
+    .withdraw-card { display:flex; align-items:center; gap:10px; padding:11px 4px; border-bottom:0.5px solid rgba(255,255,255,0.05); }
+    .withdraw-card:last-child { border-bottom:none; }
+    .withdraw-amount { font-size:14px; font-weight:700; color:#FFD966; flex-shrink:0; }
+    /* нижняя навигация */
+    .admin-nav { position:absolute; bottom:0; left:0; right:0; height:60px; background:rgba(13,13,18,0.96); backdrop-filter:blur(10px); border-top:0.5px solid rgba(var(--accent-rgb),0.12); display:flex; align-items:center; justify-content:space-around; z-index:100; border-radius:0 0 52px 52px; }
+    .admin-nav-item { display:flex; flex-direction:column; align-items:center; gap:2px; cursor:pointer; color:#6e6e7e; font-size:8.5px; font-weight:600; padding:6px; flex:1; }
+    .admin-nav-item svg { width:20px; height:20px; }
+    .admin-nav-item.on { color:var(--accent); }
+    .admin-tab-content { display:none; }
+    .admin-tab-content.on { display:block; }
+    .toast { position:absolute; bottom:74px; left:50%; transform:translateX(-50%) translateY(20px); background:rgba(0,0,0,0.9); border:1px solid var(--accent); border-radius:16px; padding:11px 18px; color:var(--accent); font-size:12px; font-weight:600; z-index:500; opacity:0; transition:0.3s ease; pointer-events:none; max-width:300px; width:max-content; text-align:center; }
     .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
 
 </style>
@@ -219,46 +213,90 @@
     <canvas id="atmosCanvas" width="375" height="700" style="width:375px;height:700px;"></canvas>
     <div class="screen">
         <div class="header-row">
-            <div class="back-btn" onclick="location.href='fokus_profile.html'">
+            <div class="back-btn" onclick="location.href='index.html'">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
             </div>
-            <div class="title">Родительский контроль</div>
-            <div class="title-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 7v6c0 4 3.5 7 8 9 4.5-2 8-5 8-9V7l-8-5Z"/></svg></div>
+            <div class="title">Админка</div>
+            <div class="title-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 7v6c0 4 3.5 7 8 9 4.5-2 8-5 8-9V7l-8-5Z"/><path d="m9 12 2 2 4-4"/></svg></div>
         </div>
 
         <div class="scroll-area">
-            <div class="pc-intro">
-                <div class="pc-intro-title">🛡️ Контроль и забота</div>
-                <div class="pc-intro-sub">Следи за развитием ребёнка: прогресс по сферам, стрик, геолокация. Настраивай доступ к разделам и напоминания.</div>
+            <!-- ДАШБОРД -->
+            <div class="admin-tab-content on" id="tab-dashboard">
+                <div class="admin-alert" id="dashAlert">🚨 Загрузка сводки...</div>
+                <div class="stat-grid">
+                    <div class="stat-card"><div class="stat-value" id="statUsers">—</div><div class="stat-label">👥 Пользователей</div></div>
+                    <div class="stat-card"><div class="stat-value gold" id="statRevenue">—</div><div class="stat-label">💰 Доход (₽)</div></div>
+                    <div class="stat-card"><div class="stat-value green" id="statActive">—</div><div class="stat-label">📈 Активны сегодня</div></div>
+                    <div class="stat-card"><div class="stat-value purple" id="statOracles">—</div><div class="stat-label">🔮 Оракулов</div></div>
+                </div>
+                <div class="panel">
+                    <div class="panel-title">📊 Активность по сферам</div>
+                    <div id="sphereStats"></div>
+                </div>
+                <div class="panel">
+                    <div class="panel-title">🕐 Последние события</div>
+                    <div id="eventsLog"></div>
+                </div>
             </div>
 
-            <div class="premium-lock" id="premiumLock">🔐 Доступно на подписке Про</div>
+            <!-- ЗАЯВКИ ОРАКУЛОВ -->
+            <div class="admin-tab-content" id="tab-requests">
+                <div class="panel">
+                    <div class="panel-title">📨 Заявки на роль Оракула <span class="count-badge" id="reqCount">0</span></div>
+                    <div id="applicationsList"></div>
+                </div>
+            </div>
 
-            <div class="btn-primary" id="addChildBtn">➕ Добавить ребёнка</div>
+            <!-- ОРАКУЛЫ + ЗАКАЗЫ -->
+            <div class="admin-tab-content" id="tab-oracles">
+                <div class="panel">
+                    <div class="panel-title">🔮 Предсказатели</div>
+                    <div id="oraclesList"></div>
+                </div>
+                <div class="panel">
+                    <div class="panel-title">📋 Заказы клиентов</div>
+                    <div id="ordersList"></div>
+                </div>
+            </div>
 
-            <div id="childrenList"></div>
+            <!-- ФИНАНСЫ -->
+            <div class="admin-tab-content" id="tab-finance">
+                <div class="stat-grid">
+                    <div class="stat-card"><div class="stat-value gold" id="finRevenue">—</div><div class="stat-label">💰 Общий доход</div></div>
+                    <div class="stat-card"><div class="stat-value purple" id="finCommission">—</div><div class="stat-label">🏦 Комиссия с оракулов</div></div>
+                </div>
+                <div class="panel">
+                    <div class="panel-title">💸 Запросы на вывод <span class="count-badge" id="wdCount">0</span></div>
+                    <div id="withdrawList"></div>
+                </div>
+                <div class="panel">
+                    <div class="panel-title">📊 Подписки</div>
+                    <div id="subsStats"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Нижняя навигация -->
+        <div class="admin-nav">
+            <div class="admin-nav-item on" data-tab="dashboard">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
+                Дашборд
+            </div>
+            <div class="admin-nav-item" data-tab="requests">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v12H5.2L4 17.2Z"/></svg>
+                Заявки
+            </div>
+            <div class="admin-nav-item" data-tab="oracles">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M7 12h10"/></svg>
+                Оракулы
+            </div>
+            <div class="admin-nav-item" data-tab="finance">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                Финансы
+            </div>
         </div>
     </div>
-
-    <!-- Модалка добавления ребёнка -->
-    <div class="modal" id="addModal">
-        <div class="modal-box">
-            <div class="modal-title">Добавить ребёнка</div>
-            <div class="m-label">ИМЯ РЕБЁНКА</div>
-            <input type="text" class="m-input" id="childName" placeholder="Например: Дима">
-            <div class="m-label">ВОЗРАСТ</div>
-            <input type="number" class="m-input" id="childAge" placeholder="14" inputmode="numeric">
-            <div class="invite-code-box">
-                <div class="invite-code" id="inviteCode">— — — —</div>
-                <div class="invite-hint">Ребёнок вводит этот код в своём приложении FOCUS, чтобы связать аккаунты. Связь активируется с серверной частью.</div>
-            </div>
-            <div class="modal-btns">
-                <button class="modal-btn cancel" id="cancelAdd">Отмена</button>
-                <button class="modal-btn save" id="saveChild">Добавить</button>
-            </div>
-        </div>
-    </div>
-
     <div class="toast" id="toast"></div>
 </div>
 
@@ -446,81 +484,206 @@ initAtmosphere(canvasId) {
     FocusCore.applyStoredTheme();
     FocusCore.initAtmosphere('atmosCanvas');
 
-    function toast(msg){ const t=document.getElementById('toast'); t.innerText=msg; t.classList.add('show'); clearTimeout(window._tt); window._tt=setTimeout(()=>t.classList.remove('show'),2200); }
+    function toast(msg){
+        const t=document.getElementById('toast');
+        t.innerText=msg; t.classList.add('show');
+        clearTimeout(window._tt); window._tt=setTimeout(()=>t.classList.remove('show'), 2000);
+    }
     function escapeHtml(s){ const d=document.createElement('div'); d.innerText=String(s==null?'':s); return d.innerHTML; }
 
-    const CH_KEY = 'focus_controlled_children';
-    function getChildren(){ try { return JSON.parse(localStorage.getItem(CH_KEY))||[]; } catch(e){ return []; } }
-    function saveChildren(c){ localStorage.setItem(CH_KEY, JSON.stringify(c)); }
+    const CAT_LABELS = { tarot:'Таролог', astrology:'Астролог', numerology:'Нумеролог', runes:'Рунолог', palmistry:'Хиромант', clairvoyant:'Ясновидящий', shaman:'Шаман', lead_pour:'Отлив воском' };
+    function catLabel(id){ return CAT_LABELS[id] || id; }
 
-    function renderChildren(){
-        const cont = document.getElementById('childrenList');
-        const children = getChildren();
-        if (children.length === 0) {
-            cont.innerHTML = '<div class="empty-state">👶 Нет подключённых детей.<br>Нажми «Добавить ребёнка» и передай код.</div>';
+    // ===== Навигация по вкладкам =====
+    document.querySelectorAll('.admin-nav-item').forEach(item => {
+        item.addEventListener('click', () => {
+            document.querySelectorAll('.admin-nav-item').forEach(x => x.classList.remove('on'));
+            document.querySelectorAll('.admin-tab-content').forEach(x => x.classList.remove('on'));
+            item.classList.add('on');
+            document.getElementById('tab-' + item.dataset.tab).classList.add('on');
+        });
+    });
+
+    // ===== ДАШБОРД (демо-статистика + реальные заявки) =====
+    function getApps(){ try { return JSON.parse(localStorage.getItem('focus_psychic_applications'))||[]; } catch(e){ return []; } }
+    function saveApps(a){ localStorage.setItem('focus_psychic_applications', JSON.stringify(a)); }
+    function getRequests(){ try { return JSON.parse(localStorage.getItem('focus_oracle_requests'))||[]; } catch(e){ return []; } }
+
+    // демо-показатели (при бэкенде заменятся реальными агрегатами)
+    const DEMO = { users: 12345, revenue: 456789, activeToday: 2840, subscribers: 1230 };
+
+    function renderDashboard(){
+        const apps = getApps();
+        const pending = apps.filter(a => a.status === 'pending').length;
+        const oracleCount = apps.filter(a => a.status === 'approved').length + 6; // демо +реальные
+        document.getElementById('statUsers').innerText = DEMO.users.toLocaleString('ru-RU');
+        document.getElementById('statRevenue').innerText = (DEMO.revenue/1000).toFixed(0) + 'к';
+        document.getElementById('statActive').innerText = DEMO.activeToday.toLocaleString('ru-RU');
+        document.getElementById('statOracles').innerText = oracleCount;
+
+        const reqs = getRequests();
+        const wd = reqs.filter(r=>r.status==='withdraw').length;
+        document.getElementById('dashAlert').innerHTML = `🚨 ${pending} ${pending===1?'заявка ожидает':'заявок ожидают'} одобрения · ${reqs.filter(r=>r.status==='pending').length} активных заказов`;
+
+        // сферы (демо-распределение активности)
+        const spheres = [
+            { name:'Тело', val:82 }, { name:'Менталка', val:67 }, { name:'Энергия', val:58 },
+            { name:'Отношения', val:44 }, { name:'Вера', val:51 }, { name:'Награды', val:73 }
+        ];
+        const maxV = Math.max(...spheres.map(s=>s.val));
+        document.getElementById('sphereStats').innerHTML = spheres.map(s => `
+            <div class="sphere-bar-row">
+                <div class="sphere-bar-label">${s.name}</div>
+                <div class="sphere-bar-track"><div class="sphere-bar-fill" style="width:${(s.val/maxV*100).toFixed(0)}%"></div></div>
+                <div class="sphere-bar-val">${s.val}%</div>
+            </div>`).join('');
+
+        // события (последние заявки + демо)
+        const events = [];
+        apps.slice(-3).reverse().forEach(a => events.push({ what:'Заявка на роль', who:a.name, status:a.status==='pending'?'📨':'✅' }));
+        events.push({ what:'Купил «Про»', who:'Иван П.', status:'✅' });
+        events.push({ what:'Новый заказ оракулу', who:'Мария С.', status:'📋' });
+        document.getElementById('eventsLog').innerHTML = events.slice(0,6).map(e => `
+            <div class="row-item">
+                <div class="row-info"><div class="row-name">${escapeHtml(e.what)}</div><div class="row-sub">${escapeHtml(e.who)}</div></div>
+                <div style="font-size:16px;">${e.status}</div>
+            </div>`).join('') || '<div class="empty-row">Нет событий</div>';
+    }
+
+    // ===== ЗАЯВКИ (реальное одобрение) =====
+    function renderApplications(){
+        const cont = document.getElementById('applicationsList');
+        const apps = getApps();
+        const pending = apps.filter(a => a.status === 'pending');
+        document.getElementById('reqCount').innerText = pending.length;
+        if (apps.length === 0) {
+            cont.innerHTML = '<div class="empty-row">Заявок пока нет</div>';
             return;
         }
         cont.innerHTML = '';
-        children.forEach(child => {
-            const card = document.createElement('div');
-            card.className = 'child-card';
-            const active = child.status === 'active';
-            const avInner = (child.photo && child.photo.startsWith('data:image'))
-                ? '<img src="'+child.photo+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">'
-                : (child.gender==='girl'?'👧':'👦');
-            card.innerHTML = `
-                <div class="child-top">
-                    <div class="child-avatar">${avInner}</div>
-                    <div class="child-info">
-                        <div class="child-name">${escapeHtml(child.name)}${child.age?', '+child.age:''}</div>
-                        <div class="child-status ${active?'active':'inactive'}">${active?'🟢 Активен сегодня':'⚪ Не заходил сегодня'}</div>
-                    </div>
+        // сначала ожидающие
+        apps.slice().sort((a,b)=>{
+            const order = { pending:0, approved:1, rejected:2 };
+            return (order[a.status]||3) - (order[b.status]||3);
+        }).forEach(app => {
+            const cats = (app.categories||[]).map(catLabel).join(', ');
+            const statusTag = app.status==='pending' ? '<span class="row-tag pending">⏳ Ожидает</span>'
+                : app.status==='approved' ? '<span class="row-tag approved">✅ Одобрена</span>'
+                : '<span class="row-tag rejected">❌ Отклонена</span>';
+            const actions = app.status==='pending' ? `
+                <div class="row-actions">
+                    <div class="act-btn approve" data-approve="${app.id}">✓</div>
+                    <div class="act-btn reject" data-reject="${app.id}">✕</div>
+                </div>` : '';
+            const div = document.createElement('div');
+            div.className = 'row-item';
+            div.innerHTML = `
+                <div class="row-avatar purple">${escapeHtml((app.name||'?')[0].toUpperCase())}</div>
+                <div class="row-info">
+                    <div class="row-name">${escapeHtml(app.name)} ${statusTag}</div>
+                    <div class="row-sub">${escapeHtml(cats)} · ${escapeHtml(app.contacts||'')}</div>
                 </div>
-                <div class="child-stats">
-                    <div class="child-stat"><div class="child-stat-val">🔥 ${child.streak||0}</div><div class="child-stat-label">дней подряд</div></div>
-                    <div class="child-stat"><div class="child-stat-val">📊 ${child.progress||0}%</div><div class="child-stat-label">прогресс</div></div>
-                </div>
-                <div class="child-geo ${child.geolocation?'on':'off'}">${child.geolocation?'📍 Геолокация включена':'📍 Геолокация выключена'}</div>`;
-            card.addEventListener('click', () => {
-                localStorage.setItem('focus_selected_child', JSON.stringify(child));
-                location.href = 'control_child.html?id=' + child.id;
-            });
-            cont.appendChild(card);
+                ${actions}`;
+            cont.appendChild(div);
         });
+        // обработчики одобрения/отклонения
+        cont.querySelectorAll('[data-approve]').forEach(el => el.addEventListener('click', () => {
+            const apps2 = getApps();
+            const app = apps2.find(a => String(a.id) === String(el.dataset.approve));
+            if (app) { app.status = 'approved'; app.reviewedAt = new Date().toISOString(); saveApps(apps2); toast('✓ Заявка одобрена — оракулу открыт кабинет'); renderApplications(); renderDashboard(); }
+        }));
+        cont.querySelectorAll('[data-reject]').forEach(el => el.addEventListener('click', () => {
+            const apps2 = getApps();
+            const app = apps2.find(a => String(a.id) === String(el.dataset.reject));
+            if (app) { app.status = 'rejected'; app.reviewedAt = new Date().toISOString(); saveApps(apps2); toast('Заявка отклонена'); renderApplications(); renderDashboard(); }
+        }));
     }
 
-    // модалка добавления
-    const addModal = document.getElementById('addModal');
-    function genCode(){ return Math.random().toString(36).substring(2,6).toUpperCase(); }
-    document.getElementById('addChildBtn').addEventListener('click', () => {
-        document.getElementById('childName').value = '';
-        document.getElementById('childAge').value = '';
-        document.getElementById('inviteCode').innerText = genCode();
-        addModal.classList.add('show');
-    });
-    document.getElementById('cancelAdd').addEventListener('click', () => addModal.classList.remove('show'));
-    addModal.addEventListener('click', (e)=>{ if(e.target.id==='addModal') addModal.classList.remove('show'); });
-    document.getElementById('saveChild').addEventListener('click', () => {
-        const name = document.getElementById('childName').value.trim();
-        const age = parseInt(document.getElementById('childAge').value) || null;
-        if (!name) { toast('Введи имя ребёнка'); return; }
-        const children = getChildren();
-        children.push({
-            id: Date.now(), name, age, gender:'boy', status:'inactive',
-            streak:0, progress:0, geolocation:true,
-            access:'full', spheres:{ body:true, mental:true, energy:true, relations:true, faith:true, reward:true, oracle:false },
-            notifs:{ workout:true, sleep:true, meds:false }
-        });
-        saveChildren(children);
-        addModal.classList.remove('show');
-        renderChildren();
-        toast('Ребёнок добавлен. Передай ему код для связи');
-    });
+    // ===== ОРАКУЛЫ + ЗАКАЗЫ =====
+    function renderOracles(){
+        const cont = document.getElementById('oraclesList');
+        const apps = getApps().filter(a => a.status === 'approved');
+        // демо-оракулы + реальные одобренные
+        const demoOracles = [
+            { name:'Мария Т.', cat:'tarot', balance:1200, active:true },
+            { name:'Анна А.', cat:'astrology', balance:850, active:true },
+            { name:'Виктория Н.', cat:'numerology', balance:0, active:false }
+        ];
+        const realOracles = apps.map(a => ({ name:a.name, cat:(a.categories||[])[0], balance:0, active:true }));
+        const all = realOracles.concat(demoOracles);
+        cont.innerHTML = all.map(o => `
+            <div class="row-item">
+                <div class="row-avatar purple">${escapeHtml((o.name||'?')[0].toUpperCase())}</div>
+                <div class="row-info">
+                    <div class="row-name">${escapeHtml(o.name)}</div>
+                    <div class="row-sub">${escapeHtml(catLabel(o.cat))} · баланс ${o.balance} F</div>
+                </div>
+                <span class="row-tag ${o.active?'active':'blocked'}">${o.active?'🟢 Активен':'🔴 Блок'}</span>
+            </div>`).join('') || '<div class="empty-row">Нет оракулов</div>';
+    }
 
-    renderChildren();
+    function renderOrders(){
+        const cont = document.getElementById('ordersList');
+        const reqs = getRequests();
+        if (reqs.length === 0) {
+            cont.innerHTML = '<div class="empty-row">Заказов пока нет</div>';
+            return;
+        }
+        cont.innerHTML = reqs.slice().reverse().slice(0,15).map(r => {
+            const st = r.status==='done' ? '<span class="row-tag approved">✅ Завершён</span>' : '<span class="row-tag pending">⏳ В работе</span>';
+            return `<div class="row-item">
+                <div class="row-info">
+                    <div class="row-name">${escapeHtml(r.clientName||'Клиент')} → ${escapeHtml(r.psychicName||'')}</div>
+                    <div class="row-sub">${escapeHtml(r.format||'')} · ${r.price} F</div>
+                </div>
+                ${st}</div>`;
+        }).join('');
+    }
+
+    // ===== ФИНАНСЫ =====
+    function renderFinance(){
+        document.getElementById('finRevenue').innerText = (DEMO.revenue/1000).toFixed(0) + 'к ₽';
+        // комиссия с оракулов (демо + реальные выполненные заказы)
+        const reqs = getRequests().filter(r=>r.status==='done');
+        let commission = 4250; // демо
+        reqs.forEach(r => commission += Math.round(r.price * 0.25));
+        document.getElementById('finCommission').innerText = commission.toLocaleString('ru-RU') + ' F';
+
+        // запросы на вывод (демо)
+        const withdraws = [
+            { name:'Мария Т.', amount:1200 },
+            { name:'Анна А.', amount:850 }
+        ];
+        document.getElementById('wdCount').innerText = withdraws.length;
+        document.getElementById('withdrawList').innerHTML = withdraws.map((w,i) => `
+            <div class="withdraw-card">
+                <div class="row-avatar purple">${escapeHtml(w.name[0])}</div>
+                <div class="row-info"><div class="row-name">${escapeHtml(w.name)}</div><div class="row-sub">Запрос на вывод</div></div>
+                <div class="withdraw-amount">${w.amount} F</div>
+                <div class="act-btn approve" data-wd="${i}">✓</div>
+            </div>`).join('') || '<div class="empty-row">Нет запросов</div>';
+        document.querySelectorAll('[data-wd]').forEach(el => el.addEventListener('click', () => {
+            toast('Вывод подтверждён (подключается с бэкендом)');
+        }));
+
+        // подписки (демо)
+        const subs = [ { name:'Лайт', count:520 }, { name:'Плюс', count:430 }, { name:'Про', count:280 } ];
+        const maxS = Math.max(...subs.map(s=>s.count));
+        document.getElementById('subsStats').innerHTML = subs.map(s => `
+            <div class="sphere-bar-row">
+                <div class="sphere-bar-label">${s.name}</div>
+                <div class="sphere-bar-track"><div class="sphere-bar-fill" style="width:${(s.count/maxS*100).toFixed(0)}%"></div></div>
+                <div class="sphere-bar-val">${s.count}</div>
+            </div>`).join('');
+    }
+
+    renderDashboard();
+    renderApplications();
+    renderOracles();
+    renderOrders();
+    renderFinance();
 
 </script>
-<script src="focus-chat-fab.js"></script>
 <script>
     if ("serviceWorker" in navigator) { window.addEventListener("load", ()=>{ navigator.serviceWorker.register("sw.js").catch(()=>{}); }); }
 </script>

@@ -231,6 +231,26 @@
         0%, 100% { box-shadow: 0 0 6px rgba(var(--accent-rgb),0.15); }
         50% { box-shadow: 0 0 18px rgba(var(--accent-rgb),0.4); }
     }
+    .ai-focus-card { background:linear-gradient(135deg, rgba(var(--accent-2-rgb),0.1), rgba(var(--accent-rgb),0.04)); border:1px solid rgba(var(--accent-2-rgb),0.25); border-radius:14px; padding:7px; margin-bottom:11px; position:relative; }
+    .ai-mini-label { display:flex; align-items:center; padding-left:4px; flex-shrink:0; }
+    .ai-pulse { width:7px; height:7px; border-radius:50%; background:var(--accent-2); animation:aiPulse 1.4s ease-in-out infinite; }
+    @keyframes aiPulse { 0%,100% { opacity:1; transform:scale(1); } 50% { opacity:0.4; transform:scale(0.7); } }
+    .ai-mic-btn { width:36px; height:36px; flex-shrink:0; border-radius:10px; background:rgba(var(--accent-2-rgb),0.14); border:1px solid rgba(var(--accent-2-rgb),0.3); display:flex; align-items:center; justify-content:center; color:var(--accent-2); cursor:pointer; }
+    .ai-mic-btn svg { width:15px; height:15px; }
+    .ai-mic-btn:active { transform:scale(0.92); }
+    .ai-mic-btn.recording { background:rgba(255,90,90,0.2); border-color:rgba(255,90,90,0.5); color:#ff6b6b; animation:micRec 1s ease-in-out infinite; }
+    @keyframes micRec { 0%,100% { box-shadow:0 0 0 0 rgba(255,90,90,0.4); } 50% { box-shadow:0 0 0 5px rgba(255,90,90,0); } }
+    .ai-input-row { display:flex; gap:6px; align-items:center; }
+    .ai-input { flex:1; min-width:0; background:rgba(0,0,0,0.28); border:1px solid rgba(var(--accent-rgb),0.14); border-radius:10px; padding:10px 12px; color:#fff; font-size:12.5px; font-family:inherit; outline:none; }
+    .ai-input:focus { border-color:var(--accent-2); }
+    .ai-input::placeholder { color:#7a7a8a; font-size:12px; }
+    .ai-send-btn { width:36px; height:36px; flex-shrink:0; border-radius:10px; background:linear-gradient(135deg, var(--accent), var(--accent-2)); display:flex; align-items:center; justify-content:center; color:#0a0a0f; cursor:pointer; }
+    .ai-send-btn svg { width:15px; height:15px; }
+    .ai-send-btn:active { transform:scale(0.92); }
+    .ai-result { margin-top:7px; font-size:11.5px; font-weight:600; display:none; align-items:center; gap:6px; padding:8px 10px; border-radius:9px; background:rgba(120,220,150,0.12); border:1px solid rgba(120,220,150,0.3); color:#78DC96; line-height:1.3; }
+    .ai-result.show { display:flex; }
+    .ai-result.unknown { background:rgba(255,200,90,0.1); border-color:rgba(255,200,90,0.3); color:#FFD98A; }
+
     .quote-container {
         background: linear-gradient(135deg, rgba(var(--accent-2-rgb),0.07), rgba(var(--accent-rgb),0.04));
         border: 1px solid rgba(var(--accent-2-rgb),0.18);
@@ -259,7 +279,7 @@
     .focus-grid {
         display: flex;
         flex-direction: column;
-        gap: 10px;
+        gap: 11px;
         flex: 1;
         overflow-y: auto;
         scrollbar-width: none;
@@ -269,7 +289,7 @@
     .focus-tile {
         background: linear-gradient(135deg, rgba(35,35,46,0.42), rgba(22,22,30,0.42));
         border-radius: 18px;
-        padding: 11px 14px;
+        padding: 15px 14px;
         border: 0.5px solid rgba(var(--accent-rgb),0.12);
         cursor: pointer;
         display: flex;
@@ -615,6 +635,21 @@
             <div class="quote-text" id="quoteText">Загрузка...</div>
             <div class="quote-author" id="quoteAuthor"></div>
         </div>
+
+        <div class="ai-focus-card">
+            <div class="ai-input-row">
+                <div class="ai-mini-label"><span class="ai-pulse"></span></div>
+                <input type="text" class="ai-input" id="aiInput" placeholder="ИИ Фокуса: что ты сделал? напр. зарядка, вода...">
+                <div class="ai-mic-btn" id="aiMicBtn" title="Голос">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v1a7 7 0 0 1-14 0v-1M12 18v4M8 22h8"/></svg>
+                </div>
+                <div class="ai-send-btn" id="aiSendBtn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4 20-7Z"/></svg>
+                </div>
+            </div>
+            <div class="ai-result" id="aiResult"></div>
+        </div>
+
         <div class="dot-divider"><span></span><span></span><span></span><span></span><span></span><span></span></div>
         <div class="focus-grid" id="focusGrid">
             <div class="focus-tile" data-sphere="body" onclick="location.href='fokus_body.html'">
@@ -1242,6 +1277,110 @@
         }
         atmosphereLoop();
     })();
+
+    // ===== ИИ ФОКУСА — распознавание по ключевым словам (работает без сервера) =====
+    (function(){
+        // словарь: ключевые слова -> {сфера, что записать, человекочитаемое название}
+        const RULES = [
+            // ТЕЛО
+            { kw:['зарядк','размин','отжим','присед','подтяг','планк'], sphere:'body', action:'workout', label:'Тело · Зарядка' },
+            { kw:['трениров','качал','зал','спортзал','штанг','гантел','жим'], sphere:'body', action:'training', label:'Тело · Тренировка' },
+            { kw:['поел','покушал','завтрак','обед','ужин','съел','еда','питани','калори'], sphere:'body', action:'nutrition', label:'Тело · Питание' },
+            { kw:['воды','воду','выпил','стакан','гидрат'], sphere:'body', action:'water', label:'Тело · Вода' },
+            { kw:['витамин','таблетк','добавк','бад','лекарств'], sphere:'body', action:'supplements', label:'Тело · Добавки' },
+            // МЕНТАЛКА
+            { kw:['настроени','чувству','эмоци','грустн','радостн','тревож'], sphere:'mental', action:'mood', label:'Менталка · Настроение' },
+            { kw:['мысл','записал мысл','дамп','выгруз','голову'], sphere:'mental', action:'braindump', label:'Менталка · Поток мыслей' },
+            { kw:['фокус','сосредоточ','помодор','поработал над','концентрац'], sphere:'mental', action:'focus', label:'Менталка · Фокус' },
+            // ЭНЕРГИЯ
+            { kw:['поспал','спал','сон','выспал','лёг','уснул','просну'], sphere:'energy', action:'sleep', label:'Энергия · Сон' },
+            { kw:['подыша','дыхан','дыхател'], sphere:'energy', action:'breathing', label:'Энергия · Дыхание' },
+            { kw:['медитац','помедитир','отдохн','релакс','расслаб'], sphere:'energy', action:'rest', label:'Энергия · Медитация' },
+            // ОТНОШЕНИЯ
+            { kw:['встрети','позвонил','написал друг','пообщал','свидани','познаком','общени'], sphere:'relations', action:'contact', label:'Отношения · Контакт' },
+            // ВЕРА
+            { kw:['благодар','спасибо за','признател'], sphere:'faith', action:'gratitude', label:'Вера · Благодарность' },
+            { kw:['помолил','молитв','намаз','прибежищ'], sphere:'faith', action:'prayer', label:'Вера · Молитва' },
+            { kw:['привычк','бросил','не курил','воздерж'], sphere:'faith', action:'habit', label:'Вера · Привычки' },
+            { kw:['желани','мечт','визуализ','карта желан'], sphere:'faith', action:'wishmap', label:'Вера · Карта желаний' },
+            // прогулка -> энергия/тело
+            { kw:['погулял','прогул','шагов','ходил пешком','прошёл'], sphere:'body', action:'walk', label:'Тело · Прогулка' },
+        ];
+
+        function recognize(text){
+            const t = (text||'').toLowerCase();
+            const matched = [];
+            RULES.forEach(rule => {
+                if (rule.kw.some(k => t.includes(k))) {
+                    if (!matched.find(m => m.sphere===rule.sphere && m.action===rule.action)) matched.push(rule);
+                }
+            });
+            return matched;
+        }
+
+        const input = document.getElementById('aiInput');
+        const result = document.getElementById('aiResult');
+        const sendBtn = document.getElementById('aiSendBtn');
+        const micBtn = document.getElementById('aiMicBtn');
+        if (!input) return;
+
+        function process(){
+            const text = input.value.trim();
+            if (!text) { input.focus(); return; }
+            const matched = recognize(text);
+            if (matched.length > 0) {
+                // записываем активность во все распознанные сферы
+                matched.forEach(m => {
+                    try { FocusStorage.addActivity(m.sphere, m.action); } catch(e){}
+                });
+                try { FocusStorage.addCoins(1); } catch(e){}
+                const labels = matched.map(m => m.label).join(', ');
+                result.className = 'ai-result show';
+                result.innerHTML = '<span class="check">✓</span> Записал: ' + labels + ' &nbsp;(+1 F-coin)';
+                input.value = '';
+            } else {
+                result.className = 'ai-result show unknown';
+                result.innerHTML = '🤔 Не понял, что записать. Попробуй: «сделал зарядку», «выпил воды», «помедитировал», «поспал 8 часов»';
+            }
+            // спрятать результат через время
+            clearTimeout(window._aiTimer);
+            window._aiTimer = setTimeout(() => { result.className = 'ai-result'; }, 5000);
+        }
+
+        sendBtn.addEventListener('click', process);
+        input.addEventListener('keydown', (e) => { if (e.key === 'Enter') process(); });
+
+        // голосовой ввод (Web Speech API — где поддерживается)
+        const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (SR && micBtn) {
+            let recog = null, listening = false;
+            micBtn.addEventListener('click', () => {
+                if (listening) { if (recog) recog.stop(); return; }
+                recog = new SR();
+                recog.lang = 'ru-RU';
+                recog.interimResults = false;
+                recog.maxAlternatives = 1;
+                recog.onstart = () => { listening = true; micBtn.classList.add('recording'); };
+                recog.onend = () => { listening = false; micBtn.classList.remove('recording'); };
+                recog.onerror = () => { listening = false; micBtn.classList.remove('recording'); };
+                recog.onresult = (e) => {
+                    const text = e.results[0][0].transcript;
+                    input.value = text;
+                    process();
+                };
+                recog.start();
+            });
+        } else if (micBtn) {
+            // нет поддержки голоса — микрофон подсказывает писать текстом
+            micBtn.addEventListener('click', () => {
+                result.className = 'ai-result show unknown';
+                result.innerHTML = '🎤 Голосовой ввод недоступен в этом браузере — напиши текстом';
+                input.focus();
+                clearTimeout(window._aiTimer);
+                window._aiTimer = setTimeout(() => { result.className = 'ai-result'; }, 4000);
+            });
+        }
+    })();
 </script>
 <script>
     if ('serviceWorker' in navigator) {
@@ -1250,5 +1389,6 @@
         });
     }
 </script>
+    <script src="focus-chat-fab.js"></script>
 </body>
 </html>
