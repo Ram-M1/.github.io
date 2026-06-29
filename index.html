@@ -120,18 +120,6 @@
         position: relative;
         z-index: 1;
     }
-    .status-bar {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 0 4px 12px 4px;
-        font-size: 14px;
-        font-weight: 590;
-        color: #ececef;
-        letter-spacing: 0.2px;
-    }
-    .status-icons { display: flex; gap: 4px; opacity: 0.7; }
-    .status-icons svg { width: 14px; height: 14px; }
     .logo-section {
         display: flex;
         justify-content: space-between;
@@ -231,8 +219,10 @@
         0%, 100% { box-shadow: 0 0 6px rgba(var(--accent-rgb),0.15); }
         50% { box-shadow: 0 0 18px rgba(var(--accent-rgb),0.4); }
     }
-    .ai-focus-card { background:linear-gradient(135deg, rgba(var(--accent-2-rgb),0.1), rgba(var(--accent-rgb),0.04)); border:1px solid rgba(var(--accent-2-rgb),0.25); border-radius:14px; padding:7px; margin-bottom:11px; position:relative; }
-    .ai-mini-label { display:flex; align-items:center; padding-left:4px; flex-shrink:0; }
+    .ai-focus-card { background:linear-gradient(135deg, rgba(var(--accent-2-rgb),0.1), rgba(var(--accent-rgb),0.04)); border:1px solid rgba(var(--accent-2-rgb),0.25); border-radius:13px; padding:9px 11px; margin-bottom:8px; position:relative; }
+    .ai-card-head { display:flex; align-items:center; gap:6px; margin-bottom:2px; }
+    .ai-card-title { font-size:12px; font-weight:700; color:var(--accent-2); }
+    .ai-card-hint { font-size:10px; color:#9a9aab; margin-bottom:7px; line-height:1.25; }
     .ai-pulse { width:7px; height:7px; border-radius:50%; background:var(--accent-2); animation:aiPulse 1.4s ease-in-out infinite; }
     @keyframes aiPulse { 0%,100% { opacity:1; transform:scale(1); } 50% { opacity:0.4; transform:scale(0.7); } }
     .ai-mic-btn { width:36px; height:36px; flex-shrink:0; border-radius:10px; background:rgba(var(--accent-2-rgb),0.14); border:1px solid rgba(var(--accent-2-rgb),0.3); display:flex; align-items:center; justify-content:center; color:var(--accent-2); cursor:pointer; }
@@ -255,8 +245,8 @@
         background: linear-gradient(135deg, rgba(var(--accent-2-rgb),0.07), rgba(var(--accent-rgb),0.04));
         border: 1px solid rgba(var(--accent-2-rgb),0.18);
         border-radius: 12px;
-        padding: 11px 14px;
-        margin-bottom: 16px;
+        padding: 9px 13px;
+        margin-bottom: 12px;
         position: relative;
     }
     .quote-container::before {
@@ -268,18 +258,18 @@
         border-radius: 0 0 4px 0;
     }
     .quote-text {
-        font-size: 12.5px;
+        font-size: 12px;
         font-weight: 600;
         color: #ECECF5;
-        line-height: 1.45;
-        margin-bottom: 4px;
+        line-height: 1.4;
+        margin-bottom: 3px;
         letter-spacing: 0.1px;
     }
     .quote-author { font-size: 9px; color: var(--accent-2); letter-spacing: 0.6px; text-transform: uppercase; font-weight: 600; }
     .focus-grid {
         display: flex;
         flex-direction: column;
-        gap: 11px;
+        gap: 12px;
         flex: 1;
         overflow-y: auto;
         scrollbar-width: none;
@@ -289,12 +279,12 @@
     .focus-tile {
         background: linear-gradient(135deg, rgba(35,35,46,0.42), rgba(22,22,30,0.42));
         border-radius: 18px;
-        padding: 15px 14px;
+        padding: 17px 15px;
         border: 0.5px solid rgba(var(--accent-rgb),0.12);
         cursor: pointer;
         display: flex;
         align-items: center;
-        gap: 13px;
+        gap: 14px;
         transition: 0.35s cubic-bezier(.2,.8,.2,1);
         opacity: 0;
         transform: translateY(10px);
@@ -555,13 +545,6 @@
     <canvas id="atmosCanvas" width="375" height="700" style="position:absolute;top:0;left:0;width:375px;height:700px;z-index:0;pointer-events:none;border-radius:52px;"></canvas>
     <canvas id="cosmicCanvas" width="375" height="700" style="width:375px;height:700px;"></canvas>
     <div class="screen">
-        <div class="status-bar">
-            <span class="time">9:41</span>
-            <div class="status-icons">
-                <svg viewBox="0 0 16 12" fill="none"><rect x="0" y="7" width="3" height="5" rx="0.5" fill="#ececef"/><rect x="4.5" y="4" width="3" height="8" rx="0.5" fill="#ececef"/><rect x="9" y="1" width="3" height="11" rx="0.5" fill="#ececef"/></svg>
-                <svg viewBox="0 0 20 12" fill="none"><rect x="0.5" y="0.5" width="16" height="11" rx="2.5" stroke="#ececef"/><rect x="2" y="2" width="13" height="8" rx="1.3" fill="#ececef"/><rect x="17.5" y="4" width="2" height="4" rx="1" fill="#ececef"/></svg>
-            </div>
-        </div>
         <div class="logo-section">
             <div class="logo-left" id="logoTrigger">
                 <div class="logo-badge">
@@ -573,37 +556,18 @@
                                 <stop offset="55%" style="stop-color:var(--accent)"/>
                                 <stop offset="100%" stop-color="#B8862A"/>
                             </linearGradient>
-                            <radialGradient id="logoCore" cx="50%" cy="50%" r="50%">
-                                <stop offset="0%" stop-color="#FFFFFF"/>
-                                <stop offset="40%" style="stop-color:var(--accent-light)"/>
-                                <stop offset="100%" style="stop-color:var(--accent)"/>
-                            </radialGradient>
+                            <linearGradient id="logoRing" x1="0" y1="0" x2="100" y2="100">
+                                <stop offset="0%" style="stop-color:var(--accent)"/>
+                                <stop offset="100%" style="stop-color:var(--accent-2)"/>
+                            </linearGradient>
                         </defs>
-                        <circle cx="50" cy="50" r="47" stroke="url(#logoGrad)" stroke-width="1" opacity="0.35"/>
-                        <g stroke="url(#logoGrad)" stroke-width="1.1" stroke-linecap="round" opacity="0.55">
-                            <line x1="50" y1="4" x2="50" y2="14"/>
-                            <line x1="50" y1="86" x2="50" y2="96"/>
-                            <line x1="4" y1="50" x2="14" y2="50"/>
-                            <line x1="86" y1="50" x2="96" y2="50"/>
-                            <line x1="17.5" y1="17.5" x2="24.7" y2="24.7"/>
-                            <line x1="75.3" y1="75.3" x2="82.5" y2="82.5"/>
-                            <line x1="17.5" y1="82.5" x2="24.7" y2="75.3"/>
-                            <line x1="75.3" y1="24.7" x2="82.5" y2="17.5"/>
+                        <circle cx="50" cy="50" r="40" fill="none" stroke="var(--accent-2)" stroke-width="1.5" opacity="0.4"/>
+                        <circle cx="50" cy="50" r="32" fill="none" stroke="url(#logoRing)" stroke-width="5"/>
+                        <g fill="url(#logoGrad)">
+                            <rect x="38" y="34" width="26" height="9" rx="4.5"/>
+                            <rect x="38" y="34" width="9" height="33" rx="4.5"/>
+                            <rect x="38" y="47" width="19" height="8" rx="4"/>
                         </g>
-                        <g fill="url(#logoGrad)" opacity="0.85">
-                            <path d="M76 14 L78.3 19.4 L84 19.7 L79.6 23.5 L81.1 29 L76 25.9 L70.9 29 L72.4 23.5 L68 19.7 L73.7 19.4 Z"/>
-                            <path d="M19 18 L20.4 21.3 L24 21.5 L21.3 23.8 L22.1 27.3 L19 25.4 L15.9 27.3 L16.7 23.8 L14 21.5 L17.6 21.3 Z"/>
-                        </g>
-                        <circle cx="50" cy="50" r="34" stroke="url(#logoGrad)" stroke-width="1.4" fill="none" opacity="0.8"/>
-                        <circle cx="50" cy="50" r="34" stroke="url(#logoGrad)" stroke-width="6" fill="none" opacity="0.08"/>
-                        <g stroke="url(#logoGrad)" stroke-width="1" fill="none" opacity="0.5">
-                            <path d="M50 26 A24 24 0 0 1 74 50"/>
-                            <path d="M50 74 A24 24 0 0 1 26 50"/>
-                        </g>
-                        <path d="M34 50 Q41 38 50 38 Q59 38 66 50 Q59 62 50 62 Q41 62 34 50 Z" fill="url(#logoCore)" fill-opacity="0.22" stroke="url(#logoGrad)" stroke-width="1.3"/>
-                        <circle cx="50" cy="50" r="7" fill="url(#logoCore)"/>
-                        <circle cx="50" cy="50" r="2.4" fill="#3a2a08"/>
-                        <circle cx="47.3" cy="47.3" r="1.6" fill="#FFFFFF" opacity="0.9"/>
                     </svg>
                 </div>
                 </div>
@@ -637,9 +601,13 @@
         </div>
 
         <div class="ai-focus-card">
+            <div class="ai-card-head">
+                <span class="ai-pulse"></span>
+                <span class="ai-card-title">ИИ-наставник Фокуса</span>
+            </div>
+            <div class="ai-card-hint">Отметь, что сделал сегодня — голосом или текстом</div>
             <div class="ai-input-row">
-                <div class="ai-mini-label"><span class="ai-pulse"></span></div>
-                <input type="text" class="ai-input" id="aiInput" placeholder="ИИ Фокуса: что ты сделал? напр. зарядка, вода...">
+                <input type="text" class="ai-input" id="aiInput" placeholder="Напр: зарядка, вода, медитация...">
                 <div class="ai-mic-btn" id="aiMicBtn" title="Голос">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v1a7 7 0 0 1-14 0v-1M12 18v4M8 22h8"/></svg>
                 </div>
@@ -736,6 +704,14 @@
             <div class="modal-btn" id="parentalControlBtn">
                 Родительский контроль
                 <span class="badge">VIP</span>
+            </div>
+            <div class="modal-btn" id="coachBtn">
+                Кабинет коуча
+                <span class="badge">B2B</span>
+            </div>
+            <div class="modal-btn" id="vpnBtn">
+                Focus VPN
+                <span class="badge">Скоро</span>
             </div>
             <div class="modal-close" id="closeSettingsBtn">Готово</div>
         </div>
@@ -1014,6 +990,13 @@
         } else {
             showToast('Родительский контроль доступен на тарифе «Про». Оформите подписку в Магазине.');
         }
+    });
+    document.getElementById('coachBtn').addEventListener('click', function() {
+        document.getElementById('settingsModal').classList.remove('show');
+        window.location.href = 'coach_dashboard.html';
+    });
+    document.getElementById('vpnBtn').addEventListener('click', function() {
+        showToast('Focus VPN — отдельное направление, появится позже. Приложение работает с VPN и без него.');
     });
     loadSphereSettings();
 

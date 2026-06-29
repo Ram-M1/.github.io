@@ -170,6 +170,17 @@
     .msg-doc svg { width:24px; height:24px; flex-shrink:0; }
     .msg-doc-name { font-size:12px; font-weight:600; word-break:break-all; }
     .chat-input-row { display:flex; align-items:flex-end; gap:8px; padding-top:10px; border-top:0.5px solid rgba(255,255,255,0.08); }
+    .voice-msg-btn { width:42px; height:42px; flex-shrink:0; border-radius:50%; background:linear-gradient(135deg, var(--accent), var(--accent-2)); display:flex; align-items:center; justify-content:center; color:#0a0a0f; cursor:pointer; }
+    .voice-msg-btn svg { width:19px; height:19px; }
+    .voice-msg-btn:active { transform:scale(0.92); }
+    .voice-msg-btn.recording { background:linear-gradient(135deg, #FF5A5A, #FF8A7C); animation:voiceRec 1s ease-in-out infinite; }
+    @keyframes voiceRec { 0%,100%{box-shadow:0 0 0 0 rgba(255,90,90,0.4);} 50%{box-shadow:0 0 0 7px rgba(255,90,90,0);} }
+    .msg-voice { display:flex; align-items:center; gap:9px; padding:8px 12px; min-width:140px; }
+    .msg-voice-play { width:30px; height:30px; border-radius:50%; background:rgba(255,255,255,0.18); display:flex; align-items:center; justify-content:center; flex-shrink:0; cursor:pointer; }
+    .msg-voice-play svg { width:14px; height:14px; color:#fff; }
+    .msg-voice-wave { flex:1; height:22px; display:flex; align-items:center; gap:2px; }
+    .msg-voice-wave span { flex:1; background:rgba(255,255,255,0.4); border-radius:2px; }
+    .msg-voice-time { font-size:10px; color:rgba(255,255,255,0.6); flex-shrink:0; }
     .attach-btn { width:40px; height:40px; flex-shrink:0; border-radius:50%; background:rgba(var(--accent-2-rgb),0.12); border:1px solid rgba(var(--accent-2-rgb),0.3); display:flex; align-items:center; justify-content:center; color:var(--accent-2); cursor:pointer; }
     .attach-btn svg { width:19px; height:19px; }
     .attach-btn:active { transform:scale(0.92); }
@@ -269,11 +280,13 @@
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05 12 20.5a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
             </div>
             <textarea class="chat-input" id="chatInput" placeholder="Сообщение..." rows="1"></textarea>
-            <div class="send-msg-btn" id="sendMsgBtn">
+            <div class="voice-msg-btn" id="voiceMsgBtn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v1a7 7 0 0 1-14 0v-1M12 18v4M8 22h8"/></svg>
+            </div>
+            <div class="send-msg-btn" id="sendMsgBtn" style="display:none;">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4 20-7Z"/></svg>
             </div>
         </div>
-        <div class="chat-note">Сообщения хранятся локально (демо). Реальная переписка и файлы — с серверной частью.</div>
         <input type="file" id="fileInput" accept="image/*" style="display:none;">
         <input type="file" id="docInput" style="display:none;">
     </div>
@@ -534,6 +547,13 @@ initAtmosphere(canvasId) {
             if (m.img) inner += `<img src="${m.img}" class="msg-img">`;
             if (m.doc) inner += `<div class="msg-doc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/></svg><span class="msg-doc-name">${escapeHtml(m.doc)}</span></div>`;
             if (m.coin) inner += `<div class="msg-coin"><div class="msg-coin-icon">💰</div><div><div class="msg-coin-text">${m.coin} F-coin</div><div class="msg-coin-sub">${m.from==='me'?'Ты перевёл':'Перевод тебе'}</div></div></div>`;
+            if (m.voice) {
+                const dur = m.dur || 1;
+                const mm = String(Math.floor(dur/60)).padStart(1,'0'), ss = String(dur%60).padStart(2,'0');
+                let bars = '';
+                for (let i=0;i<14;i++) bars += '<span style="height:'+(5+Math.round(Math.random()*16))+'px"></span>';
+                inner += `<div class="msg-voice"><div class="msg-voice-play"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div><div class="msg-voice-wave">${bars}</div><div class="msg-voice-time">${mm}:${ss}</div></div>`;
+            }
             if (m.text) inner += escapeHtml(m.text);
             inner += `<div class="msg-time">${m.time||''}</div>`;
             div.innerHTML = inner;
@@ -550,7 +570,7 @@ initAtmosphere(canvasId) {
         const chats = getChats();
         const ch = chats.find(c => c.id === chatId);
         if (ch) {
-            ch.last = msg.text || (msg.img ? '📷 Фото' : (msg.doc ? '📎 Документ' : (msg.coin ? '💰 Перевод '+msg.coin+' F-coin' : '')));
+            ch.last = msg.text || (msg.img ? '📷 Фото' : (msg.doc ? '📎 Документ' : (msg.coin ? '💰 Перевод '+msg.coin+' F-coin' : (msg.voice ? '🎤 Голосовое сообщение' : ''))));
             ch.time = msg.time;
             saveChats(chats);
         }
@@ -570,11 +590,43 @@ initAtmosphere(canvasId) {
     input.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendText(); }
     });
-    // авто-высота textarea
+    // переключение микрофон/отправка + авто-высота textarea
+    const voiceBtn = document.getElementById('voiceMsgBtn');
+    const sendBtn = document.getElementById('sendMsgBtn');
     input.addEventListener('input', () => {
         input.style.height = 'auto';
         input.style.height = Math.min(90, input.scrollHeight) + 'px';
+        const hasText = input.value.trim().length > 0;
+        sendBtn.style.display = hasText ? 'flex' : 'none';
+        voiceBtn.style.display = hasText ? 'none' : 'flex';
     });
+    // голосовое сообщение (демо-запись: зажал — пишет, отпустил — отправляет)
+    let recTimer = null, recSec = 0;
+    function startRec(){
+        voiceBtn.classList.add('recording');
+        recSec = 0;
+        const sub = document.querySelector('.chat-sub');
+        if (sub) { sub.dataset.prev = sub.innerText; sub.innerText = '🔴 Запись...'; }
+        recTimer = setInterval(()=>{ recSec++; }, 1000);
+    }
+    function stopRec(send){
+        voiceBtn.classList.remove('recording');
+        clearInterval(recTimer);
+        const sub = document.querySelector('.chat-sub');
+        if (sub && sub.dataset.prev) sub.innerText = sub.dataset.prev;
+        if (send && recSec >= 1) {
+            addMsg({ from:'me', voice:true, dur:recSec, time:nowTime() });
+        } else if (send) {
+            toast('Слишком коротко — удерживай для записи');
+        }
+        recSec = 0;
+    }
+    // зажатие (тач + мышь)
+    voiceBtn.addEventListener('mousedown', startRec);
+    voiceBtn.addEventListener('mouseup', ()=>stopRec(true));
+    voiceBtn.addEventListener('mouseleave', ()=>{ if(voiceBtn.classList.contains('recording')) stopRec(false); });
+    voiceBtn.addEventListener('touchstart', (e)=>{ e.preventDefault(); startRec(); }, {passive:false});
+    voiceBtn.addEventListener('touchend', (e)=>{ e.preventDefault(); stopRec(true); }, {passive:false});
 
     // меню вложений
     const attachMenu = document.getElementById('attachMenu');

@@ -193,7 +193,7 @@
     /* === ДЕТАЛИ ЦЕЛИ (шаги) === */
     .goal-detail { position:absolute; inset:0; z-index:400; background:radial-gradient(ellipse at 50% 0%, #16161f, #0a0a0f 80%); border-radius:52px; display:none; flex-direction:column; padding:0; }
     .goal-detail.show { display:flex; }
-    .gd-header { display:flex; align-items:center; gap:11px; padding:18px 18px 14px; }
+    .gd-header { display:flex; align-items:center; gap:11px; padding:18px 18px 14px; padding-top:calc(env(safe-area-inset-top, 0px) + 22px); }
     .gd-back { width:36px; height:36px; border-radius:10px; background:rgba(255,255,255,0.06); display:flex; align-items:center; justify-content:center; color:#fff; cursor:pointer; flex-shrink:0; }
     .gd-back svg { width:18px; height:18px; }
     .gd-title-wrap { flex:1; min-width:0; }
@@ -215,6 +215,16 @@
     .step-text.done { text-decoration:line-through; color:#6e6e7e; }
     .step-today { font-size:9px; font-weight:700; padding:4px 9px; border-radius:7px; cursor:pointer; flex-shrink:0; background:rgba(255,217,102,0.14); color:#FFD966; border:1px solid rgba(255,217,102,0.3); }
     .step-today.added { background:rgba(120,220,150,0.15); color:#78DC96; border-color:rgba(120,220,150,0.3); }
+    .step-cal { font-size:15px; cursor:pointer; flex-shrink:0; opacity:0.55; padding:0 2px; }
+    .step-cal.set { opacity:1; }
+    .step-remind { font-size:9.5px; color:#FFD966; margin-top:3px; }
+    input[type=date]::-webkit-calendar-picker-indicator, input[type=time]::-webkit-calendar-picker-indicator { filter:invert(1) brightness(1.5); }
+    .cal-notif-toggle { display:flex; align-items:center; gap:10px; padding:11px 13px; background:rgba(120,220,150,0.07); border:1px solid rgba(120,220,150,0.2); border-radius:11px; margin-bottom:13px; cursor:pointer; }
+    .cal-notif-box { width:22px; height:22px; border-radius:6px; border:1.5px solid rgba(120,220,150,0.4); flex-shrink:0; display:flex; align-items:center; justify-content:center; }
+    .cal-notif-box.on { background:#78DC96; border-color:#78DC96; }
+    .cal-notif-box svg { width:13px; height:13px; color:#0a0a0f; opacity:0; }
+    .cal-notif-box.on svg { opacity:1; }
+    .cal-notif-label { font-size:12.5px; color:#d8d8e0; }
     .step-del { color:#ff6b6b; opacity:0.5; cursor:pointer; flex-shrink:0; font-size:15px; }
 
     /* === РАСПОРЯДОК НЕДЕЛИ === */
@@ -336,10 +346,26 @@
         </div>
     </div>
 
+    <div class="modal" id="stepCalModal">
+        <div class="modal-box">
+            <div class="modal-title">📅 Напоминание о шаге</div>
+            <label class="m-label" style="font-size:11px;color:#AAB9FF;font-weight:700;margin-bottom:7px;display:block;">ДАТА</label>
+            <input type="date" class="m-input" id="stepCalDate">
+            <label class="m-label" style="font-size:11px;color:#AAB9FF;font-weight:700;margin-bottom:7px;display:block;">ВРЕМЯ</label>
+            <input type="time" class="m-input" id="stepCalTime">
+            <div class="cal-notif-toggle" id="calNotifToggle">
+                <div class="cal-notif-box on" id="calNotifBox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>
+                <div class="cal-notif-label">🔔 Напомнить</div>
+            </div>
+            <div class="modal-btns">
+                <button class="modal-btn cancel" id="clearStepCal">Убрать</button>
+                <button class="modal-btn save" id="saveStepCal">Сохранить</button>
+            </div>
+        </div>
+    </div>
+
     <div class="toast" id="toast"></div>
 </div>
-
-<script src="focus-storage.js"></script>
 <script src="focus-core.js"></script>
 <script>
     if (typeof FocusStorage === 'undefined') {
@@ -665,8 +691,9 @@ initAtmosphere(canvasId) {
             div.className = 'step-item';
             div.innerHTML = `
                 <div class="step-check ${step.done?'done':''}" data-toggle="${step.id}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>
-                <div class="step-text ${step.done?'done':''}">${escapeHtml(step.text)}</div>
-                <div class="step-today ${step.today?'added':''}" data-today="${step.id}">${step.today?'✓ в плане':'+ на сегодня'}</div>
+                <div class="step-text ${step.done?'done':''}">${escapeHtml(step.text)}${step.remindDate?'<div class="step-remind">📅 '+formatRemind(step)+'</div>':''}</div>
+                <div class="step-cal ${step.remindDate?'set':''}" data-cal="${step.id}">📅</div>
+                <div class="step-today ${step.today?'added':''}" data-today="${step.id}">${step.today?'✓':'+ сегодня'}</div>
                 <div class="step-del" data-delstep="${step.id}">×</div>`;
             cont.appendChild(div);
         });
@@ -695,7 +722,60 @@ initAtmosphere(canvasId) {
             saveGoals(); saveWeek(); renderSteps();
             toast(step.today ? 'Шаг добавлен в задачи на сегодня' : 'Шаг убран из сегодня');
         }));
+        // кнопка календаря — дата + напоминание
+        cont.querySelectorAll('[data-cal]').forEach(el => el.addEventListener('click', () => {
+            openStepCal(el.dataset.cal);
+        }));
     }
+
+    // === Календарь/напоминание шага ===
+    function formatRemind(step){
+        if (!step.remindDate) return '';
+        const d = new Date(step.remindDate + (step.remindTime ? 'T'+step.remindTime : 'T00:00'));
+        let s = d.toLocaleDateString('ru-RU', {day:'numeric', month:'short'});
+        if (step.remindTime) s += ' ' + step.remindTime;
+        if (step.remindNotif) s += ' 🔔';
+        return s;
+    }
+    const stepCalModal = document.getElementById('stepCalModal');
+    let calStepId = null, calNotif = true;
+    function openStepCal(stepId){
+        const g = goals.find(x => x.id === currentGoalId);
+        const step = g.steps.find(s => s.id === stepId);
+        if (!step) return;
+        calStepId = stepId;
+        document.getElementById('stepCalDate').value = step.remindDate || new Date().toISOString().slice(0,10);
+        document.getElementById('stepCalTime').value = step.remindTime || '';
+        calNotif = step.remindNotif !== false;
+        document.getElementById('calNotifBox').classList.toggle('on', calNotif);
+        stepCalModal.classList.add('show');
+    }
+    document.getElementById('calNotifToggle').addEventListener('click', () => {
+        calNotif = !calNotif;
+        document.getElementById('calNotifBox').classList.toggle('on', calNotif);
+    });
+    document.getElementById('clearStepCal').addEventListener('click', () => {
+        const g = goals.find(x => x.id === currentGoalId);
+        const step = g.steps.find(s => s.id === calStepId);
+        if (step) { delete step.remindDate; delete step.remindTime; delete step.remindNotif; saveGoals(); renderSteps(); }
+        stepCalModal.classList.remove('show');
+        toast('Напоминание убрано');
+    });
+    stepCalModal.addEventListener('click', (e)=>{ if(e.target.id==='stepCalModal') stepCalModal.classList.remove('show'); });
+    document.getElementById('saveStepCal').addEventListener('click', () => {
+        const g = goals.find(x => x.id === currentGoalId);
+        const step = g.steps.find(s => s.id === calStepId);
+        const date = document.getElementById('stepCalDate').value;
+        if (!date) { toast('Выбери дату'); return; }
+        if (step) {
+            step.remindDate = date;
+            step.remindTime = document.getElementById('stepCalTime').value;
+            step.remindNotif = calNotif;
+            saveGoals(); renderSteps();
+        }
+        stepCalModal.classList.remove('show');
+        toast(calNotif ? 'Напоминание установлено 🔔' : 'Дата установлена');
+    });
 
     document.getElementById('addStepBtn').addEventListener('click', () => {
         const text = document.getElementById('stepInput').value.trim();

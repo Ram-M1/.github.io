@@ -453,7 +453,7 @@ initAtmosphere(canvasId) {
 
     // --- Навигация ---
     // Готовые экраны, на которые можно переходить
-    const readyScreens = ['index.html','fokus_profile.html','fokus_nutrition.html','fokus_workout.html','fokus_training.html','fokus_body_stats.html','fokus_medications.html','fokus_supplements.html'];
+    const readyScreens = ['index.html','fokus_profile.html','fokus_progress.html','fokus_reward.html','shop.html','status.html','notifications.html','fokus_nutrition.html','fokus_workout.html','fokus_training.html','fokus_body_stats.html','fokus_medications.html','fokus_supplements.html'];
     document.querySelectorAll('[data-go]').forEach(el => {
         el.addEventListener('click', () => {
             const target = el.dataset.go;

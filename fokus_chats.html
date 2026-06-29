@@ -156,6 +156,19 @@
     .chat-search:focus { border-color:var(--accent-2); }
     .chat-search::placeholder { color:#6e6e7e; }
     .chat-item { display:flex; align-items:center; gap:12px; padding:11px 10px; border-radius:14px; cursor:pointer; transition:0.15s; }
+    .group-member { display:flex; align-items:center; gap:11px; padding:10px; border-radius:11px; cursor:pointer; margin-bottom:6px; background:rgba(255,255,255,0.03); }
+    .group-member.sel { background:rgba(120,220,150,0.12); }
+    .gm-avatar { width:38px; height:38px; border-radius:50%; flex-shrink:0; background:linear-gradient(135deg, var(--accent), var(--accent-2)); display:flex; align-items:center; justify-content:center; font-size:15px; font-weight:700; color:#0a0a0f; }
+    .gm-name { flex:1; font-size:13.5px; color:#fff; font-weight:600; }
+    .gm-check { width:22px; height:22px; border-radius:50%; border:1.5px solid rgba(255,255,255,0.2); flex-shrink:0; display:flex; align-items:center; justify-content:center; }
+    .gm-check.on { background:#78DC96; border-color:#78DC96; }
+    .gm-check svg { width:13px; height:13px; color:#0a0a0f; opacity:0; }
+    .gm-check.on svg { opacity:1; }
+    .group-create-row { display:flex; gap:9px; margin-top:14px; }
+    .group-btn { flex:1; padding:13px; border-radius:13px; font-size:13px; font-weight:700; cursor:pointer; text-align:center; border:none; font-family:inherit; }
+    .group-btn.cancel { background:rgba(255,255,255,0.07); color:#9a9aab; }
+    .group-btn.create { background:linear-gradient(135deg, #78DC96, var(--accent-2)); color:#0a0a0f; }
+    .group-btn:active { transform:scale(0.97); }
     .chat-item:active { background:rgba(255,255,255,0.04); }
     .chat-avatar { width:50px; height:50px; border-radius:50%; flex-shrink:0; background:linear-gradient(135deg, var(--accent), var(--accent-2)); display:flex; align-items:center; justify-content:center; font-size:19px; font-weight:700; color:#0a0a0f; position:relative; }
     .chat-avatar .online-dot { position:absolute; bottom:1px; right:1px; width:13px; height:13px; border-radius:50%; background:#78DC96; border:2.5px solid #0d0d12; }
@@ -213,7 +226,27 @@
                 Добавить друзей по контактам
             </div>
 
+            <div class="add-friend-btn" id="createGroupBtn" style="background:rgba(120,220,150,0.1);border-color:rgba(120,220,150,0.3);color:#78DC96;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-3-3.87M9 21v-2a4 4 0 0 1 3-3.87M12 3a4 4 0 1 0 0 8 4 4 0 0 0 0-8ZM23 21v-2a4 4 0 0 0-3-3.87M3 21v-2a4 4 0 0 1 3-3.87"/></svg>
+                Создать группу
+            </div>
+
             <div id="chatsList"></div>
+        </div>
+    </div>
+
+    <!-- Модалка создания группы -->
+    <div class="modal" id="groupModal">
+        <div class="contacts-sheet">
+            <div class="sheet-handle"></div>
+            <div class="sheet-title">Новая группа</div>
+            <input type="text" class="chat-search" id="groupNameInput" placeholder="Название группы..." style="margin-bottom:12px;">
+            <div class="sheet-sub">Выбери участников:</div>
+            <div id="groupMembersList"></div>
+            <div class="group-create-row">
+                <button class="group-btn cancel" id="cancelGroup">Отмена</button>
+                <button class="group-btn create" id="confirmGroup">Создать</button>
+            </div>
         </div>
     </div>
 
@@ -540,9 +573,62 @@ initAtmosphere(canvasId) {
         }));
     }
 
-    renderChats();
+    // === Создание группы ===
+    const groupModal = document.getElementById('groupModal');
+    // потенциальные участники (демо-друзья; с бэкендом — реальные контакты)
+    const friendPool = [
+        { id:'f1', name:'Алексей', av:'А' },
+        { id:'f2', name:'Мария', av:'М' },
+        { id:'f3', name:'Дмитрий', av:'Д' },
+        { id:'f4', name:'Ольга', av:'О' },
+        { id:'f5', name:'Иван', av:'И' }
+    ];
+    let selectedMembers = [];
+    function renderGroupMembers(){
+        const cont = document.getElementById('groupMembersList');
+        cont.innerHTML = '';
+        friendPool.forEach(f => {
+            const sel = selectedMembers.includes(f.id);
+            const row = document.createElement('div');
+            row.className = 'group-member' + (sel?' sel':'');
+            row.innerHTML = `
+                <div class="gm-avatar">${f.av}</div>
+                <div class="gm-name">${escapeHtml(f.name)}</div>
+                <div class="gm-check ${sel?'on':''}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>`;
+            row.addEventListener('click', () => {
+                if (sel) selectedMembers = selectedMembers.filter(x => x !== f.id);
+                else selectedMembers.push(f.id);
+                renderGroupMembers();
+            });
+            cont.appendChild(row);
+        });
+    }
+    document.getElementById('createGroupBtn').addEventListener('click', () => {
+        selectedMembers = [];
+        document.getElementById('groupNameInput').value = '';
+        renderGroupMembers();
+        groupModal.classList.add('show');
+    });
+    document.getElementById('cancelGroup').addEventListener('click', () => groupModal.classList.remove('show'));
+    groupModal.addEventListener('click', (e) => { if (e.target.id === 'groupModal') groupModal.classList.remove('show'); });
+    document.getElementById('confirmGroup').addEventListener('click', () => {
+        const name = document.getElementById('groupNameInput').value.trim();
+        if (!name) { toast('Введи название группы'); return; }
+        if (selectedMembers.length < 1) { toast('Выбери хотя бы одного участника'); return; }
+        const members = friendPool.filter(f => selectedMembers.includes(f.id)).map(f => f.name);
+        const chats = getChats();
+        chats.unshift({
+            id: 'g' + Date.now(), name: name, type:'group', avatar:'👥', online:false,
+            last: 'Группа создана', time:'сейчас', unread:0,
+            members: members, isGroup:true
+        });
+        saveChats(chats);
+        groupModal.classList.remove('show');
+        renderChats();
+        toast('Группа «' + name + '» создана');
+    });
 
-</script>
+    renderChats();</script>
 <script>
     if ("serviceWorker" in navigator) { window.addEventListener("load", ()=>{ navigator.serviceWorker.register("sw.js").catch(()=>{}); }); }
 </script>

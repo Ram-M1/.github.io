@@ -595,7 +595,7 @@ initAtmosphere(canvasId) {
     document.getElementById('photoFileInput').addEventListener('change', (e) => {
         const file = e.target.files[0];
         if (!file) return;
-        if (file.size > 1500*1024) { toast('Фото великовато (>1.5МБ) для демо'); return; }
+        // без лимита размера — фото в полном качестве (в памяти, не в localStorage)
         const reader = new FileReader();
         reader.onload = () => {
             const img = new Image();
@@ -604,8 +604,10 @@ initAtmosphere(canvasId) {
                 updateEditorUI();
                 drawCollage();
             };
+            img.onerror = () => toast('Не удалось открыть фото');
             img.src = reader.result;
         };
+        reader.onerror = () => toast('Не удалось прочитать файл');
         reader.readAsDataURL(file);
         e.target.value = '';
     });
@@ -722,11 +724,17 @@ initAtmosphere(canvasId) {
     document.getElementById('saveToAlbumBtn').addEventListener('click', () => {
         if (photos.length === 0) { toast('Добавь фото'); return; }
         renderFinal();
-        const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+        // в альбом — сжатое превью (localStorage маленький; полное качество — через "Поделиться/Скачать")
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.6);
         const album = getAlbum();
         album.push({ id:Date.now(), img:dataUrl, date:new Date().toISOString() });
-        saveAlbum(album);
-        toast('✓ Сохранено в альбом');
+        try {
+            saveAlbum(album);
+            toast('✓ Сохранено в альбом (для полного качества — «Поделиться»)');
+        } catch(err) {
+            album.pop();
+            toast('Альбом заполнен. Скачай фото через «Поделиться» или удали старые');
+        }
     });
 
     // ===== Поделиться =====

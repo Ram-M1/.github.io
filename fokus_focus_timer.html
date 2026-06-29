@@ -596,8 +596,8 @@ initAtmosphere(canvasId) {
         const elapsed = total > 0 ? (total - remaining) / total : 0;
         // кольцо утекает против часовой
         arcEl.style.strokeDashoffset = ARC_LEN * elapsed;
-        // точка-бегунок: от верха (12 часов) против часовой стрелки
-        const ang = (-90 - elapsed * 360) * Math.PI / 180;
+        // точка-бегунок идёт ПО часовой (синхронно с убыванием кольца), от верха (12 часов)
+        const ang = (-90 + elapsed * 360) * Math.PI / 180;
         dotEl.setAttribute('cx', CX + R * Math.cos(ang));
         dotEl.setAttribute('cy', CY + R * Math.sin(ang));
     }
