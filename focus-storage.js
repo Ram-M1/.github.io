@@ -164,6 +164,86 @@ const FocusStorage = {
         return { burned: cur - remaining, remaining };
     },
 
+    // ========== ИИ-ЗАПРОСЫ (лимиты по тарифу + докупка за купленные монеты) ==========
+
+    /** Месячный лимит ИИ-запросов В КАЖДОМ разделе по тарифу */
+    aiMonthlyLimit() {
+        const sub = this.getUser().subscription;
+        if (sub === 'Про') return 10;
+        if (sub === 'Плюс') return 5;
+        if (sub === 'Лайт') return 3;
+        return 3; // пробный период / без подписки — как Лайт
+    },
+
+    /** Цена ИИ-запроса сверх лимита (в купленных F-coin) по типу */
+    aiPrice(type) {
+        const prices = { text: 2, voice: 3, photo: 5, analysis: 15 };
+        return prices[type] || 2;
+    },
+
+    /** Сколько купленных монет (только ими можно платить за ИИ сверх лимита) */
+    getBoughtCoins() {
+        try { return parseInt(localStorage.getItem('focus_coins_bought')) || 0; } catch(e){ return 0; }
+    },
+    setBoughtCoins(n) {
+        localStorage.setItem('focus_coins_bought', String(Math.max(0, n)));
+    },
+
+    /** Ключ месяца для сброса лимитов (YYYY-MM) */
+    _aiMonthKey() { return new Date().toISOString().slice(0,7); },
+
+    /** Использовано ИИ-запросов в разделе за текущий месяц */
+    aiUsedThisMonth(feature) {
+        try {
+            const all = JSON.parse(localStorage.getItem('focus_ai_usage')) || {};
+            const month = this._aiMonthKey();
+            return (all[month] && all[month][feature]) || 0;
+        } catch(e){ return 0; }
+    },
+
+    /** Проверить можно ли сделать ИИ-запрос в разделе.
+     *  Возвращает { ok, reason, withinLimit, needCoins, price, boughtCoins }
+     */
+    canUseAI(feature, type = 'text') {
+        const used = this.aiUsedThisMonth(feature);
+        const limit = this.aiMonthlyLimit();
+        if (used < limit) {
+            return { ok: true, withinLimit: true, remaining: limit - used };
+        }
+        // лимит исчерпан — нужны КУПЛЕННЫЕ монеты
+        const price = this.aiPrice(type);
+        const bought = this.getBoughtCoins();
+        if (bought >= price) {
+            return { ok: true, withinLimit: false, needCoins: true, price, boughtCoins: bought };
+        }
+        return { ok: false, withinLimit: false, needCoins: true, price, boughtCoins: bought,
+                 reason: 'Лимит исчерпан. Купи F-coin в магазине для запросов сверх лимита.' };
+    },
+
+    /** Зафиксировать использование ИИ-запроса (списать лимит или купленные монеты).
+     *  Возвращает { ok, charged } — charged: сколько монет списано (0 если в лимите)
+     */
+    useAI(feature, type = 'text') {
+        const check = this.canUseAI(feature, type);
+        if (!check.ok) return { ok: false, charged: 0 };
+
+        if (check.withinLimit) {
+            // в пределах лимита — увеличиваем счётчик использования
+            const all = (() => { try { return JSON.parse(localStorage.getItem('focus_ai_usage')) || {}; } catch(e){ return {}; } })();
+            const month = this._aiMonthKey();
+            if (!all[month]) all[month] = {};
+            all[month][feature] = (all[month][feature] || 0) + 1;
+            localStorage.setItem('focus_ai_usage', JSON.stringify(all));
+            return { ok: true, charged: 0 };
+        } else {
+            // сверх лимита — списываем КУПЛЕННЫЕ монеты
+            const price = this.aiPrice(type);
+            this.setBoughtCoins(this.getBoughtCoins() - price);
+            this.spendCoins(price); // и из общего баланса тоже
+            return { ok: true, charged: price };
+        }
+    },
+
     // ========== ТЕМА ОФОРМЛЕНИЯ ==========
 
     /** Текущая тема (для applyStoredTheme и переключателя) */

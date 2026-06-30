@@ -232,6 +232,7 @@
     .modal, .slideshow, .session-area { border-radius: 0 !important; }
 }
 </style>
+<script src="focus-analytics.js"></script>
 </head>
 <body>
 <div class="phone">
@@ -315,6 +316,7 @@
         </div>
     </div>
 </div>
+<script type="module" src="firebase-auth-helper.js"></script>
 <script src="focus-storage.js"></script>
 <script src="focus-core.js"></script>
 <script>
@@ -581,13 +583,43 @@
             return;
         }
 
-        const user = FocusStorage.getUser();
-        if (email === user.email && password === user.password) {
-            FocusStorage.saveUser({ flags: { loggedIn: true } });
-            window.location.href = 'index.html';
+        const loginBtn = document.getElementById('loginBtn');
+        loginBtn.disabled = true;
+        const origText = loginBtn.innerText;
+        loginBtn.innerText = 'Входим...';
+
+        if (window.fbLogin) {
+            window.fbLogin(email, password).then(function(res) {
+                if (res.ok) {
+                    FocusStorage.saveUser({ email: email, flags: { loggedIn: true } });
+                    // подтянуть профиль из облака
+                    if (window.fbLoadUserData) {
+                        window.fbLoadUserData().then(function(data) {
+                            if (data) FocusStorage.saveUser(data);
+                            window.location.href = 'index.html';
+                        });
+                    } else {
+                        window.location.href = 'index.html';
+                    }
+                } else {
+                    loginBtn.disabled = false;
+                    loginBtn.innerText = origText;
+                    document.getElementById('passwordError').innerText = res.error;
+                    document.getElementById('passwordError').style.display = 'block';
+                }
+            });
         } else {
-            document.getElementById('passwordError').innerText = 'Неверный email или пароль';
-            document.getElementById('passwordError').style.display = 'block';
+            // запасной вариант
+            const user = FocusStorage.getUser();
+            if (email === user.email && password === user.password) {
+                FocusStorage.saveUser({ flags: { loggedIn: true } });
+                window.location.href = 'index.html';
+            } else {
+                loginBtn.disabled = false;
+                loginBtn.innerText = origText;
+                document.getElementById('passwordError').innerText = 'Неверный email или пароль';
+                document.getElementById('passwordError').style.display = 'block';
+            }
         }
     });
 

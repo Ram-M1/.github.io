@@ -112,6 +112,21 @@
     .timer-card::before { content:''; position:absolute; top:0; left:0; width:50px; height:3px; background: linear-gradient(90deg, var(--accent), var(--accent-2)); border-radius:16px 0 7px 0; }
     .timer-label { font-size: 9px; color: #8e8e9e; letter-spacing: 0.4px; margin-bottom: 2px; line-height: 1.3; }
     .timer-value { font-size: 15px; font-weight: 700; color: var(--accent); line-height: 1.35; padding-bottom: 1px; }
+    .earned-card { background: linear-gradient(135deg, rgba(120,220,150,0.12), rgba(var(--accent-2-rgb),0.06)); border: 1px solid rgba(120,220,150,0.28); border-radius: 14px; padding: 11px 14px; margin-bottom: 10px; }
+    .earned-text { font-size: 12px; color: #d8d8e0; margin-bottom: 7px; }
+    .earned-text b { color: #78DC96; font-weight: 700; font-size: 14px; }
+    .earned-track { height: 7px; background: rgba(0,0,0,0.3); border-radius: 4px; overflow: hidden; margin-bottom: 7px; }
+    .earned-fill { height: 100%; background: linear-gradient(90deg, #78DC96, var(--accent)); border-radius: 4px; transition: width 0.5s; }
+    .earned-hint { font-size: 9.5px; color: #8e8e9e; line-height: 1.4; }
+    .paths-card { background: linear-gradient(135deg, rgba(var(--accent-2-rgb),0.1), rgba(var(--accent-rgb),0.05)); border: 1px solid rgba(var(--accent-2-rgb),0.25); border-radius: 13px; padding: 10px 12px; margin-bottom: 8px; }
+    .paths-title { font-size: 11px; font-weight: 700; color: var(--accent-2); margin-bottom: 7px; text-align: center; }
+    .path-row { display: flex; align-items: flex-start; gap: 9px; }
+    .path-badge { width: 20px; height: 20px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #0a0a0f; }
+    .path-badge.a { background: #78DC96; }
+    .path-badge.b { background: var(--accent); }
+    .path-text { font-size: 10px; color: #c8c8d0; line-height: 1.4; }
+    .path-text b { color: #fff; }
+    .path-or { text-align: center; font-size: 9px; color: #6e6e7e; margin: 4px 0; font-weight: 600; }
 
     .status-grid { display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px; }
     .status-item {
@@ -233,6 +248,7 @@
     .modal, .slideshow, .session-area { border-radius: 0 !important; }
 }
 </style>
+<script src="focus-analytics.js"></script>
 </head>
 <body>
 <div class="phone">
@@ -248,6 +264,12 @@
         <div class="timer-card">
             <div class="timer-label">СЛЕДУЮЩАЯ ПРОВЕРКА</div>
             <div class="timer-value" id="timerValue">через 7 дней</div>
+        </div>
+
+        <div class="earned-card">
+            <div class="earned-text" id="earnedBadge">Заработано за неделю: <b>0</b> / 333 F-coin</div>
+            <div class="earned-track"><div class="earned-fill" id="earnedBar" style="width:0%;"></div></div>
+            <div class="earned-hint">Выполняй условия — заработай подписку без денег. Этих монет хватит ровно на месяц.</div>
         </div>
 
         <div class="status-grid">
@@ -302,8 +324,21 @@
             </div>
         </div>
 
+        <div class="paths-card">
+            <div class="paths-title">Два пути к доступу</div>
+            <div class="path-row">
+                <div class="path-badge a">A</div>
+                <div class="path-text">Выполни <b>все условия выше</b> + пригласи <b>3 друзей</b> → заработай 333 F-coin на подписку</div>
+            </div>
+            <div class="path-or">или</div>
+            <div class="path-row">
+                <div class="path-badge b">B</div>
+                <div class="path-text">Пригласи <b>1 премиум-друга</b> (он купил подписку) → получи <b>столько же F-coin</b> = такая же подписка. Без условий!</div>
+            </div>
+        </div>
+
         <div class="paid-friend-card">
-            <span class="paid-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4h10l1.5 5L12 20 5.5 9 7 4Z"/></svg>Премиум-приглашение</span>
+            <span class="paid-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4h10l1.5 5L12 20 5.5 9 7 4Z"/></svg>Премиум-приглашение (путь B)</span>
             <span class="paid-status" id="paidFriendStatus"><svg viewBox="0 0 24 24" fill="currentColor" style="color:var(--accent);"><circle cx="12" cy="12" r="9"/></svg></span>
         </div>
 
@@ -561,6 +596,31 @@
         paidFriend: false
     };
 
+    // Награды F-coin за выполнение условий за неделю (сумма = 333 на подписку)
+    // Эти монеты — "заработанные", идут ТОЛЬКО на подписку (на ИИ нельзя)
+    const REWARDS = {
+        workout: 70,      // зарядка 5 дней
+        sleep: 70,        // сон 7 дней
+        gratitude: 63,    // благодарность 7 дней
+        tasks: 30,        // висяки
+        activeFriends: 90, // 3 друга
+        weekBonus: 10     // бонус за полную неделю
+    };
+    // 70+70+63+30+90+10 = 333
+
+    function getEarnedThisWeek(){ try { return JSON.parse(localStorage.getItem('focus_week_earned')) || {}; } catch(e){ return {}; } }
+    function saveEarnedThisWeek(o){ localStorage.setItem('focus_week_earned', JSON.stringify(o)); }
+
+    // начислить награду за условие один раз за неделю
+    function awardCondition(key, amount){
+        const earned = getEarnedThisWeek();
+        if (earned[key]) return 0; // уже начислено на этой неделе
+        earned[key] = true;
+        saveEarnedThisWeek(earned);
+        FocusStorage.addCoins(amount);
+        return amount;
+    }
+
     const checkSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg>';
     const pendingSvg = '<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="9"/></svg>';
 
@@ -579,30 +639,50 @@
         document.getElementById('workoutCurrent').innerText = criteria.workout.current;
         document.getElementById('workoutText').innerText = criteria.workout.current + ' из ' + criteria.workout.need + ' дней';
         setCheck('workoutStatus', workoutOk);
+        if (workoutOk) awardCondition('workout', REWARDS.workout);
 
         const sleepOk = criteria.sleep.current >= criteria.sleep.need;
         document.getElementById('sleepFill').style.width = Math.min((criteria.sleep.current / criteria.sleep.need) * 100, 100) + '%';
         document.getElementById('sleepCurrent').innerText = criteria.sleep.current;
         document.getElementById('sleepText').innerText = criteria.sleep.current + ' из ' + criteria.sleep.need + ' дней';
         setCheck('sleepStatus', sleepOk);
+        if (sleepOk) awardCondition('sleep', REWARDS.sleep);
 
         const gratitudeOk = criteria.gratitude.current >= criteria.gratitude.need;
         document.getElementById('gratitudeFill').style.width = Math.min((criteria.gratitude.current / criteria.gratitude.need) * 100, 100) + '%';
         document.getElementById('gratitudeCurrent').innerText = criteria.gratitude.current;
         document.getElementById('gratitudeText').innerText = criteria.gratitude.current + ' из ' + criteria.gratitude.need + ' дней';
         setCheck('gratitudeStatus', gratitudeOk);
+        if (gratitudeOk) awardCondition('gratitude', REWARDS.gratitude);
 
         document.getElementById('tasksFill').style.width = criteria.tasks.done ? '100%' : '0%';
         document.getElementById('tasksText').innerHTML = criteria.tasks.done ? '1/1' : '0/1';
         setCheck('tasksStatus', criteria.tasks.done);
+        if (criteria.tasks.done) awardCondition('tasks', REWARDS.tasks);
 
         const activeOk = criteria.activeFriends.current >= criteria.activeFriends.need;
         document.getElementById('activeFriendsFill').style.width = Math.min((criteria.activeFriends.current / criteria.activeFriends.need) * 100, 100) + '%';
         document.getElementById('activeFriendsCurrent').innerText = criteria.activeFriends.current;
         document.getElementById('activeFriendsText').innerText = criteria.activeFriends.current + ' из ' + criteria.activeFriends.need;
         setCheck('activeFriendsStatus', activeOk);
+        if (activeOk) awardCondition('activeFriends', REWARDS.activeFriends);
 
         setCheck('paidFriendStatus', criteria.paidFriend);
+
+        // обновляем индикатор заработанного на этой неделе
+        updateEarnedBadge();
+    }
+
+    function updateEarnedBadge(){
+        const earned = getEarnedThisWeek();
+        let total = 0;
+        Object.keys(REWARDS).forEach(k => { if (earned[k]) total += REWARDS[k]; });
+        const badge = document.getElementById('earnedBadge');
+        if (badge) {
+            badge.innerHTML = `Заработано за неделю: <b>${total}</b> / 333 F-coin`;
+            const bar = document.getElementById('earnedBar');
+            if (bar) bar.style.width = Math.min(100, Math.round(total/333*100)) + '%';
+        }
     }
 
     function checkAllConditions() {
@@ -613,21 +693,25 @@
         const activeOk = criteria.activeFriends.current >= criteria.activeFriends.need;
         const allDone = workoutOk && sleepOk && gratitudeOk && tasksOk && activeOk;
 
-        if (allDone) {
-            messageCard.style.borderColor = '#4CAF50';
-            messageCard.style.background = 'rgba(76,175,80,0.1)';
-            messageText.style.color = '#7CFFA0';
-            messageText.innerText = 'Все условия выполнены! Бесплатный доступ на следующую неделю активирован.';
-        } else if (criteria.paidFriend) {
+        // ПУТЬ B: премиум-друг → сразу доступ + аналогичная подписка, без условий
+        if (criteria.paidFriend) {
             messageCard.style.borderColor = 'var(--accent)';
             messageCard.style.background = 'rgba(var(--accent-rgb),0.1)';
             messageText.style.color = 'var(--accent)';
-            messageText.innerText = 'У вас есть премиум-приглашение. Монеты сохраняются даже при невыполнении условий.';
-        } else {
+            messageText.innerText = 'Премиум-друг купил подписку! Тебе начислено столько же F-coin — такая же подписка без выполнения условий.';
+        }
+        // ПУТЬ A: все условия + 3 друга
+        else if (allDone) {
+            messageCard.style.borderColor = '#4CAF50';
+            messageCard.style.background = 'rgba(76,175,80,0.1)';
+            messageText.style.color = '#7CFFA0';
+            messageText.innerText = 'Все условия выполнены! Заработал 333 F-coin — доступ на следующую неделю активирован.';
+        }
+        else {
             messageCard.style.borderColor = '#ff5555';
             messageCard.style.background = 'rgba(255,85,85,0.1)';
             messageText.style.color = '#ff8888';
-            messageText.innerText = 'Условия не выполнены. Без премиум-приглашения сгорит 75% монет.';
+            messageText.innerText = 'Выполни условия (путь A) или пригласи премиум-друга (путь B), чтобы продолжить доступ.';
         }
     }
 

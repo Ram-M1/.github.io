@@ -37,6 +37,30 @@
     .title-icon svg { width:17px; height:17px; color:#78DC96; }
 
     .mode-tabs { display:flex; gap:6px; background:rgba(0,0,0,0.25); border-radius:13px; padding:4px; margin-bottom:14px; }
+    .archive-btn { width:30px; height:30px; flex-shrink:0; border-radius:9px; background:rgba(255,217,102,0.12); border:0.5px solid rgba(255,217,102,0.35); display:flex; align-items:center; justify-content:center; font-size:15px; cursor:pointer; }
+    .archive-btn:active { transform:scale(0.92); }
+    .habit-progress-track { height:6px; background:rgba(255,255,255,0.08); border-radius:4px; overflow:hidden; margin:9px 0; }
+    .habit-progress-fill { height:100%; border-radius:4px; transition:width 0.4s; }
+    .habit-progress-fill.bad { background:linear-gradient(90deg,#FF8A7C,#FFB088); }
+    .habit-progress-fill.good { background:linear-gradient(90deg,#78DC96,#5BC47E); }
+    .habit-warn { font-size:10.5px; color:#FFB088; background:rgba(255,138,124,0.1); border-radius:9px; padding:8px 10px; margin-bottom:8px; line-height:1.4; }
+    .habit-act.done { background:linear-gradient(135deg,#FFD966,#FFB84D); color:#0a0a0f; font-weight:700; }
+    /* окно следующего дня */
+    .nd-title { font-size:20px; font-weight:700; color:#fff; text-align:center; margin-bottom:6px; }
+    .nd-sub { font-size:13px; color:#9a9aab; text-align:center; line-height:1.4; margin-bottom:14px; }
+    .nd-norm-box { background:rgba(0,0,0,0.3); border-radius:14px; padding:16px; text-align:center; margin-bottom:12px; }
+    .nd-norm-label { font-size:11px; color:#9a9aab; font-weight:600; margin-bottom:6px; }
+    .nd-norm-val { font-size:40px; font-weight:700; }
+    .nd-norm-val.bad { color:#FF8A7C; }
+    .nd-norm-val.good { color:#78DC96; }
+    .nd-hint { font-size:11.5px; color:#8e8e9e; text-align:center; line-height:1.4; }
+    /* архив */
+    .archive-item { display:flex; align-items:center; gap:12px; padding:12px; background:rgba(255,255,255,0.04); border-radius:13px; margin-bottom:9px; }
+    .arch-icon { width:42px; height:42px; border-radius:12px; flex-shrink:0; background:rgba(255,217,102,0.12); display:flex; align-items:center; justify-content:center; font-size:20px; }
+    .arch-info { flex:1; min-width:0; }
+    .arch-name { font-size:14px; font-weight:700; color:#fff; }
+    .arch-meta { font-size:10.5px; color:#9a9aab; margin-top:2px; }
+    .arch-date { font-size:10px; color:#78DC96; margin-top:3px; }
     .mode-tab { flex:1; text-align:center; padding:10px 4px; border-radius:10px; font-size:12.5px; font-weight:700; color:#8e8e9e; cursor:pointer; transition:0.2s ease; }
     .mode-tab.active.good { background:linear-gradient(135deg, #78DC96, #5BC47E); color:#0a0a0f; }
     .mode-tab.active.bad { background:linear-gradient(135deg, #FF8A7C, #FF6B5C); color:#0a0a0f; }
@@ -62,6 +86,11 @@
     .hc-value small { font-size:14px; color:#9a9aab; font-weight:500; }
     .habit-dots { display:flex; flex-wrap:wrap; gap:5px; justify-content:center; margin-bottom:11px; }
     .habit-dot { width:11px; height:11px; border-radius:50%; background:rgba(255,255,255,0.1); }
+    .hdot { width:14px; height:14px; border-radius:50%; background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.12); cursor:pointer; transition:0.15s; }
+    .hdot:active { transform:scale(0.85); }
+    .hdot.filled.bad { background:#78DC96; border-color:#78DC96; }
+    .hdot.filled.good { background:#78DC96; border-color:#78DC96; }
+    .hdot.over { background:#FF3B30; border-color:#FF6B5C; box-shadow:0 0 6px rgba(255,59,48,0.5); }
     .habit-dot.filled.good { background:#78DC96; }
     .habit-dot.filled.bad { background:#FF8A7C; }
     .habit-dot.over { background:#FF6B5C; }
@@ -85,10 +114,18 @@
     .modal-box { background:linear-gradient(165deg, #1c1c26, #15151c); border-radius:22px; width:100%; max-height:560px; overflow-y:auto; scrollbar-width:none; padding:18px; border:0.5px solid rgba(var(--accent-rgb),0.2); }
     .modal-box::-webkit-scrollbar { display:none; }
     .modal-title { font-size:16px; font-weight:700; color:var(--accent); margin-bottom:14px; }
-    .modal-box input { width:100%; background:rgba(0,0,0,0.3); border:1px solid rgba(var(--accent-rgb),0.16); border-radius:11px; padding:11px 12px; color:#fff; font-size:14px; font-family:inherit; outline:none; margin-bottom:10px; }
+    .modal-box input { width:100%; background:rgba(0,0,0,0.3); border:1px solid rgba(var(--accent-rgb),0.16); border-radius:11px; padding:11px 12px; color:#fff !important; -webkit-text-fill-color:#fff; font-size:14px; font-family:inherit; outline:none; margin-bottom:10px; }
+    .modal-box input[type=number] { -moz-appearance:textfield; appearance:textfield; }
+    .modal-box input[type=number]::-webkit-outer-spin-button, .modal-box input[type=number]::-webkit-inner-spin-button { -webkit-appearance:none; margin:0; }
     .modal-box input:focus { border-color:var(--accent-2); }
     .modal-box input::placeholder { color:#6e6e7e; }
     .field-label { font-size:10px; color:#9a9aab; margin-bottom:5px; font-weight:600; }
+    .plan-hint { font-size:11px; color:#AAB9FF; background:rgba(170,185,255,0.08); border:1px solid rgba(170,185,255,0.18); border-radius:10px; padding:9px 11px; margin-bottom:10px; line-height:1.5; }
+    .habit-num-row { display:flex; gap:8px; margin-bottom:10px; }
+    .habit-num-col { flex:1; }
+    .habit-num-col .field-label { margin-bottom:4px; }
+    .habit-num-col input { margin-bottom:0 !important; text-align:center; }
+    .plan-hint b { color:#fff; font-weight:700; }
     .modal-btns { display:flex; gap:8px; margin-top:4px; }
     .modal-btn { flex:1; padding:12px; border-radius:13px; font-size:13px; font-weight:700; cursor:pointer; text-align:center; border:none; }
     .modal-btn.save { background:linear-gradient(135deg, var(--accent), var(--accent-2)); color:#0a0a0f; }
@@ -150,6 +187,7 @@
     .modal, .slideshow, .session-area { border-radius: 0 !important; }
 }
 </style>
+<script src="focus-analytics.js"></script>
 </head>
 <body>
 <div class="phone">
@@ -160,6 +198,7 @@
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
             </div>
             <div class="title">Привычки</div>
+            <div class="archive-btn" id="archiveBtn" title="Архив марафонов">🏆</div>
             <div class="title-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
         </div>
 
@@ -181,14 +220,23 @@
     <div class="modal" id="habitModal">
         <div class="modal-box">
             <div class="modal-title" id="habitModalTitle">➕ Новая привычка</div>
-            <div class="field-label">Название</div>
-            <input type="text" id="habitName" placeholder="Например: Чтение, Прогулка">
-            <div class="field-label">Цель за интервал (сколько раз)</div>
-            <input type="number" id="habitLimit" placeholder="Например: 30" value="30">
-            <div class="field-label">Интервал (дней)</div>
-            <input type="number" id="habitInterval" placeholder="Например: 30" value="30">
-            <div class="field-label" id="replaceLabel">✨ Заменить на (полезную альтернативу)</div>
-            <input type="text" id="habitReplace" placeholder="Например: Прогулка вместо перекура">
+            <input type="text" id="habitName" placeholder="Название (напр: Курение)">
+            <div class="habit-num-row">
+                <div class="habit-num-col">
+                    <div class="field-label" id="startLabel">Сейчас</div>
+                    <input type="number" id="habitStart" placeholder="20" value="20">
+                </div>
+                <div class="habit-num-col">
+                    <div class="field-label" id="goalLabel">Цель</div>
+                    <input type="number" id="habitGoal" placeholder="0" value="0">
+                </div>
+                <div class="habit-num-col">
+                    <div class="field-label">Дней</div>
+                    <input type="number" id="habitDays" placeholder="21" value="21" min="1" max="365">
+                </div>
+            </div>
+            <div class="plan-hint" id="planHint"></div>
+            <input type="text" id="habitReplace" placeholder="✨ Заменить на (напр: прогулка)">
             <div class="modal-btns">
                 <button class="modal-btn cancel" id="cancelHabit">Отмена</button>
                 <button class="modal-btn save" id="saveHabit">Сохранить</button>
@@ -203,6 +251,27 @@
             <table class="stats-table" id="statsTable"></table>
             <div class="modal-btns" style="margin-top:14px;">
                 <button class="modal-btn cancel" id="closeStats">Закрыть</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модалка "следующий день" -->
+    <div class="modal" id="nextDayModal">
+        <div class="modal-box">
+            <div id="nextDayBody"></div>
+            <div class="modal-btns" style="margin-top:16px;">
+                <button class="modal-btn save" id="closeNextDay" style="width:100%;">Понятно</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модалка архива марафонов -->
+    <div class="modal" id="archiveModal">
+        <div class="modal-box">
+            <div class="modal-title">🏆 Архив марафонов</div>
+            <div id="archiveList"></div>
+            <div class="modal-btns" style="margin-top:14px;">
+                <button class="modal-btn cancel" id="closeArchive">Закрыть</button>
             </div>
         </div>
     </div>
@@ -226,6 +295,47 @@
     if (typeof FocusCore === 'undefined') {
         window.FocusCore = {
             applyStoredTheme(){ (document.getElementById('htmlRoot')||document.documentElement).setAttribute('data-theme', FocusStorage.getTheme()); },
+            celebrate: function(config) {
+                config = config || {};
+                var phrases = ['Огонь','Красава','Так держать','Бомба','Мощь','Зверь','Вот это да','На кураже','Чемпион','Жара','Вперёд','Гордость','Сила','Респект'];
+                var emojis = ['🔥','💪','⚡','💥','🚀','🦁','🌟','😎','🏆','👑'];
+                var text = config.text || phrases[Math.floor(Math.random()*phrases.length)];
+                var emo = config.emoji || emojis[Math.floor(Math.random()*emojis.length)];
+                var big = !!config.big;
+                var rs = getComputedStyle(document.documentElement);
+                var accent = (rs.getPropertyValue('--accent')||'#FFD966').trim();
+                var accent2 = (rs.getPropertyValue('--accent-2')||'#7C8CFF').trim();
+                var palette = [accent, accent2, '#FF6B5C', '#78DC96'];
+                var ox = window.innerWidth/2, oy = window.innerHeight/2;
+                if (config.fromEl && config.fromEl.getBoundingClientRect) { var r=config.fromEl.getBoundingClientRect(); ox=r.left+r.width/2; oy=r.top+r.height/2; }
+                var ov = document.createElement('div');
+                ov.style.cssText = 'position:fixed;inset:0;z-index:99999;pointer-events:none;overflow:hidden;';
+                document.body.appendChild(ov);
+                var ring = document.createElement('div');
+                ring.style.cssText = 'position:absolute;left:'+ox+'px;top:'+oy+'px;width:30px;height:30px;border-radius:50%;border:3px solid '+accent+';transform:translate(-50%,-50%) scale(0);';
+                ov.appendChild(ring);
+                ring.animate([{transform:'translate(-50%,-50%) scale(0)',opacity:1},{transform:'translate(-50%,-50%) scale('+(big?22:16)+')',opacity:0}],{duration:780,easing:'cubic-bezier(.15,.7,.4,1)'});
+                var N = big?38:26;
+                for (var i=0;i<N;i++){ (function(i){
+                    var p=document.createElement('div'); var size=7+Math.random()*10; var col=palette[Math.floor(Math.random()*palette.length)]; var isStar=Math.random()>0.5;
+                    p.style.cssText='position:absolute;left:'+ox+'px;top:'+oy+'px;width:'+size+'px;height:'+size+'px;'+(isStar?'':'border-radius:50%;')+'background:'+col+';box-shadow:0 0 10px '+col+';';
+                    if(isStar)p.style.clipPath='polygon(50% 0%,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%)';
+                    ov.appendChild(p);
+                    var ang=(i/N)*Math.PI*2+Math.random()*0.5; var dist=(big?160:120)+Math.random()*(big?220:170);
+                    var dx=Math.cos(ang)*dist, dy=Math.sin(ang)*dist; var rot=Math.random()*540-270;
+                    p.animate([{transform:'translate(-50%,-50%) scale(0.3) rotate(0deg)',opacity:1},{transform:'translate(calc(-50% + '+(dx*0.55)+'px),calc(-50% + '+(dy*0.55)+'px)) scale(1.15) rotate('+(rot*0.5)+'deg)',opacity:1,offset:0.45},{transform:'translate(calc(-50% + '+dx+'px),calc(-50% + '+(dy+45)+'px)) scale(0.2) rotate('+rot+'deg)',opacity:0}],{duration:1150+Math.random()*250,easing:'cubic-bezier(.16,.74,.44,1)'});
+                })(i); }
+                var wrap=document.createElement('div');
+                wrap.style.cssText='position:absolute;left:'+ox+'px;top:'+oy+'px;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:4px;white-space:nowrap;';
+                var em=document.createElement('div'); em.innerText=emo; em.style.cssText='font-size:'+(big?52:42)+'px;line-height:1;';
+                var tx=document.createElement('div'); tx.innerText=text;
+                tx.style.cssText='font-family:-apple-system,system-ui,sans-serif;font-size:'+(big?38:32)+'px;font-weight:900;letter-spacing:1px;background:linear-gradient(135deg,'+accent+',#fff 55%,'+accent2+');-webkit-background-clip:text;background-clip:text;color:transparent;';
+                wrap.appendChild(em); wrap.appendChild(tx); ov.appendChild(wrap);
+                wrap.animate([{transform:'translate(-50%,-50%) scale(0.3)',opacity:0},{transform:'translate(-50%,-120%) scale(1.12)',opacity:1,offset:0.32},{transform:'translate(-50%,-160%) scale(1)',opacity:1,offset:0.72},{transform:'translate(-50%,-200%) scale(1.04)',opacity:0}],{duration:big?1700:1450,easing:'cubic-bezier(.34,1.4,.64,1)'});
+                if(navigator.vibrate){try{navigator.vibrate(big?[20,40,20]:18);}catch(e){}}
+                setTimeout(function(){ov.remove();}, big?1800:1500);
+            },
+
             coinBurst(config) {
 
       config = config || {};
@@ -502,15 +612,88 @@ initAtmosphere(canvasId) {
     }
     function escapeHtml(s){ const d=document.createElement('div'); d.innerText=String(s==null?'':s); return d.innerHTML; }
 
-    // habits = [{id, name, type:'good'|'bad', limit, interval, replace, current, history:[{date,count}], currentIntervalStart}]
+    // habits = [{id, name, type, start, goal, days, dayIndex, replace, todayCount, history:[{date,count,norm}], startedAt, done}]
+    // план: норма дня меняется плавно от start к goal за days дней
     const KEY = 'faith_habits';
+    const ARCHIVE_KEY = 'faith_habits_archive';
     let habits = [];
     try {
         habits = JSON.parse(localStorage.getItem(KEY)) || [];
-        // миграция: если нет type — считаем по наличию replace (вредная)
-        habits = habits.map(h => { if (!h.type) h.type = h.replace ? 'bad' : 'good'; return h; });
+        habits = habits.map(h => {
+            if (!h.type) h.type = h.replace ? 'bad' : 'good';
+            // миграция старых привычек на новую модель
+            if (h.start === undefined) {
+                h.start = h.limit || 20;
+                h.goal = h.type === 'bad' ? 0 : (h.limit || 30);
+                h.days = h.interval || 21;
+                h.dayIndex = 0;
+                h.todayCount = h.current || 0;
+                h.history = h.history || [];
+                h.startedAt = h.startedAt || today;
+            }
+            return h;
+        });
     } catch(e){ habits = []; }
     function save(){ localStorage.setItem(KEY, JSON.stringify(habits)); }
+    function getArchive(){ try { return JSON.parse(localStorage.getItem(ARCHIVE_KEY))||[]; } catch(e){ return []; } }
+    function saveArchive(a){ localStorage.setItem(ARCHIVE_KEY, JSON.stringify(a)); }
+
+    // норма на конкретный день плана (плавное изменение start→goal)
+    function normForDay(h, dayIdx){
+        const isGrowth = h.goal > h.start; // наращивание полезного
+        if (h.days <= 1) {
+            const v = h.goal;
+            return isGrowth ? Math.max(1, v) : v;
+        }
+        const t = Math.min(dayIdx, h.days) / h.days; // 0..1
+        let val = h.start + (h.goal - h.start) * t;
+        val = Math.round(val);
+        // наращивание полезного: минимум 1 (нельзя "делать 0"), но финал = goal как есть
+        if (isGrowth && dayIdx < h.days) val = Math.max(1, val);
+        return val;
+    }
+    // норма сегодня
+    function todayNorm(h){ return normForDay(h, h.dayIndex || 0); }
+
+    // SVG-график плана: столбики по ключевым дням с числами (понятно "сколько когда")
+    function planChart(h, withFact){
+        const days = h.days;
+        const isBad = h.type === 'bad';
+        const color = isBad ? '#FF8A7C' : '#78DC96';
+        // выбираем ключевые дни для показа (чтобы не было каши): максимум ~7 столбиков
+        let marks = [];
+        if (days <= 7) {
+            for (let d = 1; d <= days; d++) marks.push(d);
+            marks.push(days + 1); // финал
+        } else {
+            const step = Math.max(1, Math.round(days / 5));
+            for (let d = 1; d <= days; d += step) marks.push(d);
+            if (marks[marks.length-1] !== days) marks.push(days);
+            marks.push(days + 1); // финал (цель)
+        }
+        const maxV = Math.max(h.start, h.goal, 1);
+        const n = marks.length;
+        const W = 300, H = 110, padB = 18, padT = 18;
+        const barW = Math.min(34, (W / n) * 0.6);
+        const gap = W / n;
+        let bars = '';
+        marks.forEach((d, i) => {
+            const dayIdx = d - 1; // day 0-based
+            const v = normForDay(h, dayIdx);
+            const bh = (v / maxV) * (H - padB - padT);
+            const x = gap * i + gap/2 - barW/2;
+            const y = H - padB - bh;
+            const isFinal = d === days + 1;
+            const barColor = isFinal ? '#FFD966' : color;
+            bars += `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${barW.toFixed(1)}" height="${Math.max(2,bh).toFixed(1)}" rx="3" fill="${barColor}" opacity="${isFinal?1:0.85}"/>`;
+            // число над столбиком
+            bars += `<text x="${(x+barW/2).toFixed(1)}" y="${(y-5).toFixed(1)}" fill="#fff" font-size="11" font-weight="700" text-anchor="middle">${v}</text>`;
+            // подпись дня снизу
+            const label = isFinal ? '🏁' : ('Д' + d);
+            bars += `<text x="${(x+barW/2).toFixed(1)}" y="${H-5}" fill="#9a9aab" font-size="8.5" text-anchor="middle">${label}</text>`;
+        });
+        return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block;">${bars}</svg>`;
+    }
 
     let mode = 'good';
     const today = new Date().toISOString().slice(0,10);
@@ -521,7 +704,6 @@ initAtmosphere(canvasId) {
             document.querySelectorAll('.mode-tab').forEach(t => t.classList.remove('active'));
             tab.classList.add('active');
             document.getElementById('addLabel').innerText = mode==='good' ? 'Добавить полезную' : 'Добавить вредную';
-            document.getElementById('replaceLabel').style.display = mode==='bad' ? 'block' : 'none';
             document.getElementById('habitReplace').style.display = mode==='bad' ? 'block' : 'none';
             renderHabits();
         });
@@ -552,37 +734,51 @@ initAtmosphere(canvasId) {
         }
         container.innerHTML = '';
         list.forEach(h => {
-            const cur = h.current || 0;
             const isBad = h.type === 'bad';
-            let dots = '';
-            if (h.limit <= 30) {
-                for (let i=0;i<Math.max(h.limit,cur);i++) {
-                    const over = i >= h.limit;
-                    const filled = i < cur;
-                    dots += `<div class="habit-dot ${filled?'filled '+h.type:''} ${over&&filled?'over':''}"></div>`;
-                }
-            }
+            const dayIdx = h.dayIndex || 0;
+            const norm = todayNorm(h);              // норма на сегодня
+            const tomorrowNorm = normForDay(h, dayIdx + 1);
+            const cur = h.todayCount || 0;
+            const dayNum = dayIdx + 1;              // показываем «День 1», не 0
+            const finished = dayIdx >= h.days;      // марафон завершён
+            const overLimit = isBad && cur > norm;
             const div = document.createElement('div');
             div.className = 'habit-item ' + h.type;
             div.innerHTML = `
                 <div class="habit-top">
                     <div>
                         <div class="habit-name">${escapeHtml(h.name)}</div>
-                        <div class="habit-meta">интервал ${h.interval} дн · ${isBad?'лимит макс':'цель'} ${h.limit}</div>
+                        <div class="habit-meta">День ${Math.min(dayNum,h.days)} из ${h.days} · ${isBad?'норма сегодня':'цель сегодня'}: <b style="color:${isBad?'#FF8A7C':'#78DC96'}">${norm}</b></div>
                     </div>
                     <div class="habit-del" data-del="${h.id}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg></div>
                 </div>
                 <div class="habit-counter">
                     <button class="hc-btn minus" data-dec="${h.id}">−</button>
-                    <div class="hc-value">${cur}<small>/${h.limit}</small></div>
+                    <div class="hc-value" style="${overLimit?'color:#FF8A7C':''}">${cur}<small>/${norm}</small></div>
                     <button class="hc-btn plus ${h.type}" data-inc="${h.id}">+</button>
                 </div>
-                ${dots ? `<div class="habit-dots">${dots}</div>` : ''}
+                ${(() => {
+                    // кружочки: норма дня = серые кружки, заполняем по факту; превышение = красные сверх
+                    const total = Math.max(norm, cur);
+                    if (total === 0 || total > 60) return ''; // не рисуем если 0 или слишком много
+                    let dots = '';
+                    for (let i = 0; i < total; i++) {
+                        const filled = i < cur;
+                        const over = i >= norm; // сверх нормы
+                        let cls = 'hdot';
+                        if (filled && over) cls += ' over';
+                        else if (filled) cls += ' filled ' + h.type;
+                        dots += `<div class="${cls}" data-dot="${h.id}" data-idx="${i}"></div>`;
+                    }
+                    return `<div class="habit-dots">${dots}</div>`;
+                })()}
+                <div class="habit-progress-track"><div class="habit-progress-fill ${h.type}" style="width:${Math.min(100, Math.round(dayIdx/h.days*100))}%"></div></div>
+                ${overLimit ? `<div class="habit-warn">Сегодня больше нормы (${cur} из ${norm}). Ничего страшного — отметь честно, завтра новый день.</div>` : ''}
                 ${isBad && h.replace ? `<div class="habit-info-row"><div class="habit-chip"><b>✨ ЗАМЕНА</b>${escapeHtml(h.replace)}</div></div>` : ''}
                 <div class="habit-ai"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 1 3 3c1.7 0 3 1.3 3 3 0 .5-.1 1-.3 1.4A3 3 0 0 1 18 15a3 3 0 0 1-3 3 3 3 0 0 1-6 0 3 3 0 0 1-3-3 3 3 0 0 1 .3-4.6A3 3 0 0 1 6 8c0-1.7 1.3-3 3-3a3 3 0 0 1 3-3Z"/></svg><span>${aiTip(h)}</span></div>
                 <div class="habit-actions">
                     <div class="habit-act stats" data-stats="${h.id}">📊 Статистика</div>
-                    <div class="habit-act fix" data-fix="${h.id}">✅ Зафиксировать день</div>
+                    ${finished ? `<div class="habit-act done" data-finish="${h.id}">🏆 Завершить марафон</div>` : `<div class="habit-act fix" data-fix="${h.id}">✅ Завершить день</div>`}
                 </div>`;
             container.appendChild(div);
         });
@@ -593,33 +789,116 @@ initAtmosphere(canvasId) {
             habits = habits.filter(h => String(h.id) !== String(el.dataset.del));
             save(); renderHabits();
         }));
-        container.querySelectorAll('[data-fix]').forEach(el => el.addEventListener('click', () => fixDay(el.dataset.fix)));
+        container.querySelectorAll('[data-fix]').forEach(el => el.addEventListener('click', (e) => fixDay(el.dataset.fix, e.currentTarget)));
+        container.querySelectorAll('[data-dot]').forEach(el => el.addEventListener('click', () => {
+            const h = habits.find(x => String(x.id) === String(el.dataset.dot));
+            if (!h) return;
+            const idx = parseInt(el.dataset.idx);
+            // тык по кружку: если он уже заполнен — снять до него, иначе заполнить включительно
+            const cur = h.todayCount || 0;
+            h.todayCount = (idx + 1 === cur) ? idx : idx + 1;
+            save(); renderHabits();
+        }));
+        container.querySelectorAll('[data-finish]').forEach(el => el.addEventListener('click', () => finishMarathon(el.dataset.finish)));
         container.querySelectorAll('[data-stats]').forEach(el => el.addEventListener('click', () => showStats(el.dataset.stats)));
     }
 
     function changeCount(id, delta){
         const h = habits.find(x => String(x.id) === String(id));
         if (!h) return;
-        h.current = Math.max(0, (h.current||0) + delta);
+        h.todayCount = Math.max(0, (h.todayCount||0) + delta);
         save(); renderHabits();
     }
 
-    function fixDay(id){
+    function fixDay(id, btnEl){
         const h = habits.find(x => String(x.id) === String(id));
         if (!h) return;
         if (!h.history) h.history = [];
-        const ex = h.history.find(e => e.date === today);
-        if (ex) ex.count = h.current||0;
-        else h.history.push({ date: today, count: h.current||0 });
+        const dayIdx = h.dayIndex || 0;
+        const norm = todayNorm(h);
+        const cur = h.todayCount || 0;
+        // записываем результат дня в историю
+        const ex = h.history.find(e => e.day === dayIdx);
+        if (ex) { ex.count = cur; ex.norm = norm; }
+        else h.history.push({ day: dayIdx, date: today, count: cur, norm: norm });
+        // двигаем план на следующий день
+        h.dayIndex = dayIdx + 1;
+        h.todayCount = 0;
+        h.lastFixDate = today;
         save();
-        // награда раз в день за фиксацию любой привычки
+
+        // подбадривающая анимация от кнопки
+        if (FocusCore.celebrate) FocusCore.celebrate({ fromEl: btnEl });
+
+        // награда раз в день (монеты копятся в фоне, без всплытия — эмоция уже дана анимацией)
         let rd = []; try { rd = JSON.parse(localStorage.getItem('focus_habit_reward')) || []; } catch(e){}
         if (!rd.includes(today)) {
             rd.push(today); localStorage.setItem('focus_habit_reward', JSON.stringify(rd));
             FocusStorage.addCoins(1); FocusStorage.addActivity('faith', 'habit');
-            if (FocusCore.coinBurst) FocusCore.coinBurst({ amount:1, reason:'Привычка отмечена', sourceEl: document.querySelector('.title-icon') });
-            toast('День зафиксирован! +1 F-coin');
-        } else toast('День зафиксирован ✅');
+        }
+
+        // окно с нормой на следующий день
+        const newDayIdx = h.dayIndex;
+        if (newDayIdx >= h.days) {
+            // марафон пройден
+            showNextDay(h, true);
+        } else {
+            showNextDay(h, false);
+        }
+        renderHabits();
+    }
+
+    // окно "норма на следующий день"
+    function showNextDay(h, finished){
+        const isBad = h.type === 'bad';
+        const nextNorm = normForDay(h, h.dayIndex);
+        const dayNum = h.dayIndex + 1;
+        const modal = document.getElementById('nextDayModal');
+        const body = document.getElementById('nextDayBody');
+        if (finished) {
+            body.innerHTML = `
+                <div style="font-size:46px;text-align:center;margin-bottom:10px;">🏆</div>
+                <div class="nd-title">Марафон пройден!</div>
+                <div class="nd-sub">«${escapeHtml(h.name)}» — ${h.days} дней позади.<br>${isBad?'Ты снизил до цели. Огромный шаг!':'Привычка закреплена. Так держать!'}</div>
+                <div class="nd-norm-label">Заверши марафон, чтобы сохранить его в архив достижений.</div>`;
+        } else {
+            body.innerHTML = `
+                <div style="display:flex;justify-content:center;margin-bottom:10px;">${isBad
+                    ? '<svg viewBox="0 0 24 24" width="42" height="42" fill="none" stroke="#FF8A7C" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12A10 10 0 1 1 5.93 4.2"/><path d="M22 4 12 14l-3-3"/></svg>'
+                    : '<svg viewBox="0 0 24 24" width="42" height="42" fill="none" stroke="#78DC96" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h7l-1 8 10-12h-7l1-8Z"/></svg>'}</div>
+                <div class="nd-title">День ${dayNum} из ${h.days}</div>
+                <div class="nd-sub">${escapeHtml(h.name)}</div>
+                <div class="nd-norm-box">
+                    <div class="nd-norm-label">${isBad?'Норма на завтра':'Цель на завтра'}</div>
+                    <div class="nd-norm-val ${isBad?'bad':'good'}">${nextNorm}</div>
+                </div>
+                <div class="nd-hint">${isBad?'Каждый день чуть меньше — мягко и без ломки.':'Постепенно наращиваем. Шаг за шагом.'}</div>`;
+        }
+        modal.classList.add('show');
+    }
+    document.getElementById('closeNextDay') && document.getElementById('closeNextDay').addEventListener('click', () => {
+        document.getElementById('nextDayModal').classList.remove('show');
+    });
+
+    // завершить марафон → в архив
+    function finishMarathon(id){
+        const h = habits.find(x => String(x.id) === String(id));
+        if (!h) return;
+        const archive = getArchive();
+        const total = (h.history||[]).reduce((s,e)=>s+e.count,0);
+        archive.push({
+            id: h.id, name: h.name, type: h.type,
+            start: h.start, goal: h.goal, days: h.days,
+            startedAt: h.startedAt, finishedAt: today,
+            history: h.history || [], total: total
+        });
+        saveArchive(archive);
+        habits = habits.filter(x => String(x.id) !== String(id));
+        save();
+        document.getElementById('nextDayModal').classList.remove('show');
+        renderHabits();
+        if (FocusCore.celebrate) FocusCore.celebrate({ big: true, text: 'Марафон пройден', emoji: '🏆' });
+        toast('Марафон в архиве достижений!');
     }
 
     function showStats(id){
@@ -628,48 +907,107 @@ initAtmosphere(canvasId) {
         document.getElementById('statsTitle').innerText = '📊 ' + h.name;
         const hist = (h.history||[]).slice().reverse();
         let rows = '';
-        if (hist.length === 0) rows = '<tr><td colspan="2" style="text-align:center;color:#9a9aab;padding:14px;">Нет зафиксированных дней</td></tr>';
-        else hist.forEach(e => { rows += `<tr><td>${e.date}</td><td>${e.count} ${h.type==='bad'?'раз':'✓'}</td></tr>`; });
+        if (hist.length === 0) rows = '<tr><td colspan="3" style="text-align:center;color:#9a9aab;padding:14px;">Нет завершённых дней</td></tr>';
+        else { rows = '<tr style="color:#9a9aab;font-size:11px;"><td>День</td><td>Норма</td><td>Факт</td></tr>'; hist.forEach(e => { const over = h.type==='bad' && e.count > (e.norm||0); rows += `<tr><td>${(e.day||0)+1}</td><td>${e.norm!=null?e.norm:'—'}</td><td style="${over?'color:#FF8A7C':''}">${e.count}</td></tr>`; }); }
         // итоги
         const total = (h.history||[]).reduce((s,e)=>s+e.count,0);
         const avg = hist.length ? (total/hist.length).toFixed(1) : 0;
         rows += `<tr style="border-top:1px solid rgba(255,255,255,0.15);"><td><b>Всего</b></td><td><b>${total}</b></td></tr>`;
         rows += `<tr><td><b>Среднее/день</b></td><td><b>${avg}</b></td></tr>`;
         document.getElementById('statsTable').innerHTML = rows;
+        // график: план + факт
+        let chartBox = document.getElementById('statsChart');
+        if (!chartBox) {
+            chartBox = document.createElement('div');
+            chartBox.id = 'statsChart';
+            chartBox.style.cssText = 'margin-bottom:14px;background:rgba(0,0,0,0.2);border-radius:12px;padding:10px;';
+            document.getElementById('statsTable').parentNode.insertBefore(chartBox, document.getElementById('statsTable'));
+        }
+        chartBox.innerHTML = '<div style="font-size:10px;color:#9a9aab;margin-bottom:6px;">План (линия) и факт (жёлтые точки)</div>' + planChart(h, true);
         document.getElementById('statsModal').classList.add('show');
     }
     document.getElementById('closeStats').addEventListener('click', () => document.getElementById('statsModal').classList.remove('show'));
 
+    // ===== Архив марафонов =====
+    document.getElementById('archiveBtn').addEventListener('click', () => {
+        const archive = getArchive();
+        const cont = document.getElementById('archiveList');
+        if (archive.length === 0) {
+            cont.innerHTML = '<div class="empty-mini">Архив пуст.<br>Заверши марафон — он появится здесь.</div>';
+        } else {
+            cont.innerHTML = '';
+            archive.slice().reverse().forEach(a => {
+                const isBad = a.type === 'bad';
+                const days = (a.history||[]).length;
+                const div = document.createElement('div');
+                div.className = 'archive-item';
+                div.innerHTML = `
+                    <div class="arch-icon">${isBad?'🚭':'💪'}</div>
+                    <div class="arch-info">
+                        <div class="arch-name">${escapeHtml(a.name)}</div>
+                        <div class="arch-meta">${isBad?'Снижение':'Наращивание'} ${a.start}→${a.goal} · ${a.days} дней · отмечено ${days}</div>
+                        <div class="arch-date">Завершён ${a.finishedAt}</div>
+                    </div>`;
+                cont.appendChild(div);
+            });
+        }
+        document.getElementById('archiveModal').classList.add('show');
+    });
+    document.getElementById('closeArchive').addEventListener('click', () => document.getElementById('archiveModal').classList.remove('show'));
+
     // ===== Добавление =====
+    function updatePlanHint(){
+        const start = parseInt(document.getElementById('habitStart').value) || 0;
+        const goal = parseInt(document.getElementById('habitGoal').value) || 0;
+        const days = Math.max(1, Math.min(365, parseInt(document.getElementById('habitDays').value) || 21));
+        const hint = document.getElementById('planHint');
+        if (!start && !goal) { hint.innerText = ''; return; }
+        const isReduce = goal < start;
+        // примеры по дням
+        const tmp = { start, goal, days, type: (goal < start ? 'bad' : 'good'), id:'modal' };
+        hint.innerHTML = `<div style="margin-bottom:6px;font-size:10.5px;">${isReduce?'↓ Снижение':'↑ Наращивание'} ${start}→${goal} за ${days} дн. На графике — сколько в день:</div>` + planChart(tmp, false);
+    }
+    ['habitStart','habitGoal','habitDays'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('input', updatePlanHint);
+    });
+
     document.getElementById('addHabitBtn').addEventListener('click', () => {
         document.getElementById('habitModalTitle').innerText = mode==='good' ? '➕ Полезная привычка' : '🚭 Вредная привычка';
         document.getElementById('habitName').value = '';
-        document.getElementById('habitName').placeholder = mode==='good' ? 'Например: Чтение, Прогулка' : 'Например: Курение, Алкоголь';
-        document.getElementById('habitLimit').value = mode==='good' ? 30 : 10;
-        document.getElementById('habitInterval').value = 30;
+        document.getElementById('habitName').placeholder = mode==='good' ? 'Например: Чтение, Спорт' : 'Например: Курение, Алкоголь';
+        // дефолты: вредная — снижение 20→0, полезная — наращивание 0→30
+        document.getElementById('habitStart').value = mode==='good' ? 0 : 20;
+        document.getElementById('habitGoal').value = mode==='good' ? 30 : 0;
+        document.getElementById('habitDays').value = 21;
+        document.getElementById('startLabel').innerText = 'Сейчас';
+        document.getElementById('goalLabel').innerText = 'Цель';
         document.getElementById('habitReplace').value = '';
-        document.getElementById('replaceLabel').style.display = mode==='bad' ? 'block' : 'none';
         document.getElementById('habitReplace').style.display = mode==='bad' ? 'block' : 'none';
+        updatePlanHint();
         document.getElementById('habitModal').classList.add('show');
     });
     document.getElementById('cancelHabit').addEventListener('click', () => document.getElementById('habitModal').classList.remove('show'));
     document.getElementById('saveHabit').addEventListener('click', () => {
         const name = document.getElementById('habitName').value.trim();
         if (!name) { toast('Введите название'); return; }
+        const start = parseInt(document.getElementById('habitStart').value) || 0;
+        const goal = parseInt(document.getElementById('habitGoal').value) || 0;
+        const days = Math.max(1, Math.min(365, parseInt(document.getElementById('habitDays').value) || 21));
         habits.push({
             id: Date.now(), name, type: mode,
-            limit: parseInt(document.getElementById('habitLimit').value) || 1,
-            interval: parseInt(document.getElementById('habitInterval').value) || 30,
+            start, goal, days,
+            dayIndex: 0, todayCount: 0,
             replace: mode==='bad' ? document.getElementById('habitReplace').value.trim() : '',
-            current: 0, history: [], currentIntervalStart: new Date().toISOString()
+            history: [], startedAt: today
         });
         save();
         document.getElementById('habitModal').classList.remove('show');
         renderHabits();
-        toast('Привычка добавлена');
+        toast(mode==='bad' ? 'Марафон отказа начат' : 'Марафон привычки начат');
     });
 
-    ['habitModal','statsModal'].forEach(id => {
+    ['habitModal','statsModal','nextDayModal','archiveModal'].forEach(id => {
         document.getElementById(id).addEventListener('click', (e) => { if (e.target.id === id) e.currentTarget.classList.remove('show'); });
     });
 

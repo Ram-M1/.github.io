@@ -153,15 +153,25 @@
     .scroll-area { flex:1; overflow-y:auto; scrollbar-width:none; padding-bottom:70px; }
     .scroll-area::-webkit-scrollbar { display:none; }
     .admin-alert { background:rgba(255,140,90,0.12); border:1px solid rgba(255,140,90,0.3); border-radius:13px; padding:11px 13px; margin-bottom:14px; font-size:11.5px; color:#FFB088; line-height:1.5; font-weight:600; }
-    .stat-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:16px; }
-    .stat-card { background:linear-gradient(135deg, rgba(35,35,46,0.6), rgba(22,22,30,0.6)); border:0.5px solid rgba(var(--accent-rgb),0.14); border-radius:15px; padding:14px; }
-    .stat-value { font-size:22px; font-weight:700; color:#fff; }
+    .stat-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:10px; }
+    .stat-card { background:linear-gradient(135deg, rgba(35,35,46,0.6), rgba(22,22,30,0.6)); border:0.5px solid rgba(var(--accent-rgb),0.14); border-radius:13px; padding:10px; }
+    .access-split { display:flex; gap:8px; margin-bottom:7px; }
+    .access-card { flex:1; border-radius:12px; padding:10px; text-align:center; }
+    .access-card.paid { background:linear-gradient(135deg, rgba(255,217,102,0.14), rgba(255,217,102,0.05)); border:1px solid rgba(255,217,102,0.3); }
+    .access-card.earned { background:linear-gradient(135deg, rgba(120,220,150,0.14), rgba(120,220,150,0.05)); border:1px solid rgba(120,220,150,0.3); }
+    .access-num { font-size:23px; font-weight:700; margin-bottom:2px; }
+    .access-card.paid .access-num { color:#FFD966; }
+    .access-card.earned .access-num { color:#78DC96; }
+    .access-lbl { font-size:10px; color:#d8d8e0; font-weight:600; margin-bottom:1px; }
+    .access-sub { font-size:8.5px; color:#8e8e9e; }
+    .access-hint { font-size:9px; color:#8e8e9e; line-height:1.4; }
+    .stat-value { font-size:19px; font-weight:700; color:#fff; }
     .stat-value.gold { color:#FFD966; }
     .stat-value.green { color:#78DC96; }
     .stat-value.purple { color:#C8AAFF; }
     .stat-label { font-size:10.5px; color:#9a9aab; margin-top:3px; font-weight:600; }
-    .panel { background:linear-gradient(135deg, rgba(35,35,46,0.5), rgba(22,22,30,0.5)); border:0.5px solid rgba(var(--accent-rgb),0.12); border-radius:15px; padding:14px; margin-bottom:13px; }
-    .panel-title { font-size:13px; font-weight:700; color:var(--accent); margin-bottom:12px; display:flex; align-items:center; justify-content:space-between; }
+    .panel { background:linear-gradient(135deg, rgba(35,35,46,0.5), rgba(22,22,30,0.5)); border:0.5px solid rgba(var(--accent-rgb),0.12); border-radius:13px; padding:11px; margin-bottom:9px; }
+    .panel-title { font-size:12px; font-weight:700; color:var(--accent); margin-bottom:9px; display:flex; align-items:center; justify-content:space-between; }
     .panel-title .count-badge { font-size:10px; background:rgba(255,140,90,0.2); color:#FFB088; padding:2px 9px; border-radius:8px; }
     .admin-search { width:100%; background:rgba(0,0,0,0.3); border:1px solid rgba(var(--accent-rgb),0.16); border-radius:11px; padding:10px 13px; color:#fff; font-size:12.5px; font-family:inherit; outline:none; margin-bottom:11px; }
     .admin-search:focus { border-color:var(--accent); }
@@ -208,6 +218,7 @@
     .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
 
 </style>
+<script src="focus-analytics.js"></script>
 <body>
 <div class="phone">
     <canvas id="atmosCanvas" width="375" height="700" style="width:375px;height:700px;"></canvas>
@@ -267,11 +278,27 @@
                     <div class="stat-card"><div class="stat-value purple" id="finCommission">—</div><div class="stat-label">🏦 Комиссия с оракулов</div></div>
                 </div>
                 <div class="panel">
+                    <div class="panel-title">👥 Как получили доступ</div>
+                    <div class="access-split">
+                        <div class="access-card paid">
+                            <div class="access-num" id="accPaid">—</div>
+                            <div class="access-lbl">💳 Купили за ₽</div>
+                            <div class="access-sub" id="accPaidSub">прямой доход</div>
+                        </div>
+                        <div class="access-card earned">
+                            <div class="access-num" id="accEarned">—</div>
+                            <div class="access-lbl">⭐ Заработали старанием</div>
+                            <div class="access-sub" id="accEarnedSub">ядро, вовлечённые</div>
+                        </div>
+                    </div>
+                    <div class="access-hint">«Старательные» — лояльное ядро, активны и приводят друзей. «Денежные» — прямая касса. Здоровый баланс = устойчивый рост.</div>
+                </div>
+                <div class="panel">
                     <div class="panel-title">💸 Запросы на вывод <span class="count-badge" id="wdCount">0</span></div>
                     <div id="withdrawList"></div>
                 </div>
                 <div class="panel">
-                    <div class="panel-title">📊 Подписки</div>
+                    <div class="panel-title">📊 Подписки по тарифам</div>
                     <div id="subsStats"></div>
                 </div>
             </div>
@@ -675,6 +702,15 @@ initAtmosphere(canvasId) {
                 <div class="sphere-bar-track"><div class="sphere-bar-fill" style="width:${(s.count/maxS*100).toFixed(0)}%"></div></div>
                 <div class="sphere-bar-val">${s.count}</div>
             </div>`).join('');
+
+        // разделение: купили за ₽ vs заработали старанием (демо — с бэкендом реальные)
+        const totalSubs = subs.reduce((a,s)=>a+s.count,0); // 1230
+        const paidCount = 740;   // купили рублями
+        const earnedCount = totalSubs - paidCount; // заработали старанием = 490
+        document.getElementById('accPaid').innerText = paidCount.toLocaleString('ru-RU');
+        document.getElementById('accEarned').innerText = earnedCount.toLocaleString('ru-RU');
+        document.getElementById('accPaidSub').innerText = '≈ ' + (paidCount*450).toLocaleString('ru-RU') + ' ₽/мес';
+        document.getElementById('accEarnedSub').innerText = Math.round(earnedCount/totalSubs*100) + '% базы, вовлечённые';
     }
 
     renderDashboard();

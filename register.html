@@ -242,6 +242,7 @@
     .modal, .slideshow, .session-area { border-radius: 0 !important; }
 }
 </style>
+<script src="focus-analytics.js"></script>
 </head>
 <body>
 <div class="phone">
@@ -322,6 +323,7 @@
         </div>
     </div>
 </div>
+<script type="module" src="firebase-auth-helper.js"></script>
 <script src="focus-storage.js"></script>
 <script src="focus-core.js"></script>
 <script>
@@ -449,8 +451,34 @@
         }
 
         if (!hasError) {
-            FocusStorage.saveUser({ email, password });
-            window.location.href = 'confirm.html';
+            const btn = document.getElementById('registerBtn');
+            btn.disabled = true;
+            const originalText = btn.innerText;
+            btn.innerText = 'Регистрируем...';
+
+            // реальная регистрация через Firebase
+            if (window.fbRegister) {
+                window.fbRegister(email, password).then(function(res) {
+                    if (res.ok) {
+                        // сохраняем локально для текущей сессии + в облако
+                        FocusStorage.saveUser({ email });
+                        if (window.fbSaveUserData) {
+                            window.fbSaveUserData({ email: email, createdAt: Date.now() });
+                        }
+                        window.location.href = 'profile-form.html';
+                    } else {
+                        btn.disabled = false;
+                        btn.innerText = originalText;
+                        document.getElementById('emailError').innerText = res.error;
+                        document.getElementById('emailError').style.display = 'block';
+                        document.getElementById('email').classList.add('error');
+                    }
+                });
+            } else {
+                // запасной вариант если Firebase не загрузился
+                FocusStorage.saveUser({ email, password });
+                window.location.href = 'profile-form.html';
+            }
         }
     });
 </script>

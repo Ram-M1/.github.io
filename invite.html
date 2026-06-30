@@ -105,6 +105,11 @@
         -webkit-background-clip: text; background-clip: text; color: transparent;
     }
 
+    .invite-type-tabs { display:flex; gap:7px; margin-bottom:9px; background:rgba(0,0,0,0.25); border-radius:13px; padding:4px; }
+    .invite-type-tab { flex:1; text-align:center; padding:9px; border-radius:10px; font-size:12px; font-weight:700; color:#8e8e9e; cursor:pointer; transition:0.2s; }
+    .invite-type-tab.on { background:linear-gradient(135deg, var(--accent), var(--accent-2)); color:#0a0a0f; }
+    .invite-type-info { font-size:10.5px; color:#9a9aab; line-height:1.45; margin-bottom:12px; padding:0 4px; }
+    .invite-type-info b { color:var(--accent); }
     .reward-banner {
         background: linear-gradient(135deg, rgba(var(--accent-rgb),0.12), rgba(var(--accent-2-rgb),0.08));
         border: 1px solid rgba(var(--accent-rgb),0.25);
@@ -242,6 +247,7 @@
     .modal, .slideshow, .session-area { border-radius: 0 !important; }
 }
 </style>
+<script src="focus-analytics.js"></script>
 </head>
 <body>
 <div class="phone">
@@ -259,9 +265,17 @@
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9.5"/><circle cx="12" cy="12" r="7"/><path d="M9.8 8.7h4.1M9.8 8.7v6.6M9.8 11.8h3.3" stroke-width="1.4"/></svg>
             </div>
             <div class="reward-text">
-                <div class="reward-title">Зарабатывай F-coins за друзей</div>
-                <div class="reward-desc">Друг подтвердил email и заполнил анкету — ты получаешь бонус</div>
+                <div class="reward-title" id="rewardTitle">Зарабатывай F-coin за друзей</div>
+                <div class="reward-desc" id="rewardDesc">Друг подтвердил email и заполнил анкету — ты получаешь бонус</div>
             </div>
+        </div>
+
+        <div class="invite-type-tabs">
+            <div class="invite-type-tab on" data-itype="friend">👥 Обычный друг</div>
+            <div class="invite-type-tab" data-itype="premium">⭐ Премиум</div>
+        </div>
+        <div class="invite-type-info" id="inviteTypeInfo">
+            Пригласи друга — он регистрируется, подтверждает email и заполняет анкету. Нужно <b>3 активных друга</b> для пути A (вместе с условиями).
         </div>
 
         <div class="stats-row">
@@ -575,6 +589,38 @@
     document.getElementById('activeCount').innerText = activeCount;
     document.getElementById('earnedCount').innerText = FocusCore.formatCoins(activeCount * 50);
 
+    // переключатель типа приглашения (обычный друг / премиум)
+    let inviteType = 'friend';
+    const typeInfo = {
+        friend: {
+            title: 'Зарабатывай F-coin за друзей',
+            desc: 'Друг подтвердил email и заполнил анкету — ты получаешь бонус',
+            info: 'Пригласи друга — он регистрируется, подтверждает email и заполняет анкету. Нужно <b>3 активных друга</b> для пути A (вместе с условиями).',
+            share: 'Присоединяйся к FOCUS — 6 сфер твоей жизни в одном приложении!'
+        },
+        premium: {
+            title: 'Пригласи премиум-друга',
+            desc: 'Друг купит подписку — ты получишь столько же F-coin = такая же подписка бесплатно',
+            info: 'Если приглашённый <b>купит подписку</b> (333/555/777₽) — тебе начислят <b>столько же F-coin</b>. Это путь B: получаешь такую же подписку без выполнения условий!',
+            share: 'Заходи в FOCUS по моей ссылке — приложение для развития себя. Оформи подписку и получи бонусы!'
+        }
+    };
+    function applyInviteType(){
+        const t = typeInfo[inviteType];
+        document.getElementById('rewardTitle').innerText = t.title;
+        document.getElementById('rewardDesc').innerText = t.desc;
+        document.getElementById('inviteTypeInfo').innerHTML = t.info;
+    }
+    document.querySelectorAll('.invite-type-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+            document.querySelectorAll('.invite-type-tab').forEach(x => x.classList.remove('on'));
+            tab.classList.add('on');
+            inviteType = tab.dataset.itype;
+            applyInviteType();
+        });
+    });
+    applyInviteType();
+
     document.getElementById('copyBtn').addEventListener('click', () => {
         if (navigator.clipboard) {
             navigator.clipboard.writeText(inviteLink).then(() => toast('Ссылка скопирована! 📋')).catch(() => toast('Не удалось скопировать'));
@@ -584,8 +630,9 @@
     });
 
     document.getElementById('shareBtn').addEventListener('click', () => {
+        const shareText = typeInfo[inviteType].share;
         if (navigator.share) {
-            navigator.share({ title: 'FOCUS', text: 'Присоединяйся к FOCUS — 6 сфер твоей жизни в одном приложении!', url: inviteLink }).catch(() => {});
+            navigator.share({ title: 'FOCUS', text: shareText, url: inviteLink }).catch(() => {});
         } else {
             toast('Скопируй ссылку и поделись с друзьями');
         }

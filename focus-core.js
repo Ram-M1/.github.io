@@ -204,6 +204,99 @@ const FocusCore = {
         }, 1500);
     },
 
+    /**
+     * Подбадривающая полноэкранная анимация за выполнение значимого действия.
+     * Разлетается ОТ нажатой кнопки по всему экрану. Задорно, эффектно, ~1.4с.
+     * Использование:
+     *   FocusCore.celebrate({ fromEl: кнопка });   // салют от кнопки
+     *   FocusCore.celebrate({ big: true });          // усиленный (за марафон/большое достижение)
+     *   FocusCore.celebrate({ text: 'Своя фраза' }); // своя надпись
+     */
+    celebrate(config) {
+        config = config || {};
+        const phrases = ['Огонь','Красава','Так держать','Бомба','Мощь','Зверь','Вот это да','На кураже','Чемпион','Жара','Вперёд','Гордость','Сила','Ты машина','Респект','Красиво','Не остановить'];
+        const emojis = ['🔥','💪','⚡','💥','🚀','🦁','🌟','😎','🏆','👑'];
+        const text = config.text || phrases[Math.floor(Math.random() * phrases.length)];
+        const emo = config.emoji || emojis[Math.floor(Math.random() * emojis.length)];
+        const big = !!config.big;
+
+        const accent = (getComputedStyle(document.documentElement).getPropertyValue('--accent').trim()) || '#FFD966';
+        const accent2 = (getComputedStyle(document.documentElement).getPropertyValue('--accent-2').trim()) || '#7C8CFF';
+        const palette = [accent, accent2, '#FF6B5C', '#78DC96'];
+
+        // точка старта — центр нажатой кнопки, иначе центр экрана
+        let ox = window.innerWidth / 2, oy = window.innerHeight / 2;
+        if (config.fromEl && config.fromEl.getBoundingClientRect) {
+            const r = config.fromEl.getBoundingClientRect();
+            ox = r.left + r.width / 2;
+            oy = r.top + r.height / 2;
+        }
+
+        // полноэкранный оверлей ПОВЕРХ ВСЕГО
+        const ov = document.createElement('div');
+        ov.style.cssText = 'position:fixed;inset:0;z-index:99999;pointer-events:none;overflow:hidden;';
+        document.body.appendChild(ov);
+
+        // кольцо-удар
+        const ring = document.createElement('div');
+        ring.style.cssText = `position:absolute;left:${ox}px;top:${oy}px;width:30px;height:30px;border-radius:50%;border:3px solid ${accent};transform:translate(-50%,-50%) scale(0);`;
+        ov.appendChild(ring);
+        ring.animate([
+            { transform:'translate(-50%,-50%) scale(0)', opacity:1 },
+            { transform:`translate(-50%,-50%) scale(${big?22:16})`, opacity:0 }
+        ], { duration: 780, easing:'cubic-bezier(.15,.7,.4,1)' });
+
+        // мягкая вспышка-волна
+        const wave = document.createElement('div');
+        wave.style.cssText = `position:absolute;left:${ox}px;top:${oy}px;width:50px;height:50px;border-radius:50%;background:radial-gradient(circle, ${accent}55, ${accent2}22 55%, transparent 70%);transform:translate(-50%,-50%) scale(0);`;
+        ov.appendChild(wave);
+        wave.animate([
+            { transform:'translate(-50%,-50%) scale(0)', opacity:1 },
+            { transform:`translate(-50%,-50%) scale(${big?30:22})`, opacity:0 }
+        ], { duration: 880, easing:'cubic-bezier(.22,.61,.36,1)' });
+
+        // частицы разлетаются от кнопки во все стороны
+        const N = big ? 38 : 26;
+        for (let i = 0; i < N; i++) {
+            const p = document.createElement('div');
+            const size = 7 + Math.random() * 10;
+            const col = palette[Math.floor(Math.random() * palette.length)];
+            const isStar = Math.random() > 0.5;
+            p.style.cssText = `position:absolute;left:${ox}px;top:${oy}px;width:${size}px;height:${size}px;${isStar?'':'border-radius:50%;'}background:${col};box-shadow:0 0 10px ${col};`;
+            if (isStar) p.style.clipPath = 'polygon(50% 0%,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%)';
+            ov.appendChild(p);
+            const ang = (i / N) * Math.PI * 2 + Math.random() * 0.5;
+            const dist = (big ? 160 : 120) + Math.random() * (big ? 220 : 170);
+            const dx = Math.cos(ang) * dist, dy = Math.sin(ang) * dist;
+            const rot = Math.random() * 540 - 270;
+            p.animate([
+                { transform:'translate(-50%,-50%) scale(0.3) rotate(0deg)', opacity:1 },
+                { transform:`translate(calc(-50% + ${dx*0.55}px), calc(-50% + ${dy*0.55}px)) scale(1.15) rotate(${rot*0.5}deg)`, opacity:1, offset:0.45 },
+                { transform:`translate(calc(-50% + ${dx}px), calc(-50% + ${dy+45}px)) scale(0.2) rotate(${rot}deg)`, opacity:0 }
+            ], { duration: 1150 + Math.random() * 250, easing:'cubic-bezier(.16,.74,.44,1)' });
+        }
+
+        // эмодзи + фраза взлетают от кнопки вверх
+        const wrap = document.createElement('div');
+        wrap.style.cssText = `position:absolute;left:${ox}px;top:${oy}px;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:4px;white-space:nowrap;`;
+        const em = document.createElement('div');
+        em.innerText = emo; em.style.cssText = `font-size:${big?52:42}px;line-height:1;`;
+        const tx = document.createElement('div');
+        tx.innerText = text;
+        tx.style.cssText = `font-family:-apple-system,system-ui,sans-serif;font-size:${big?38:32}px;font-weight:900;letter-spacing:1px;background:linear-gradient(135deg, ${accent}, #fff 55%, ${accent2});-webkit-background-clip:text;background-clip:text;color:transparent;`;
+        wrap.appendChild(em); wrap.appendChild(tx);
+        ov.appendChild(wrap);
+        wrap.animate([
+            { transform:'translate(-50%,-50%) scale(0.3)', opacity:0 },
+            { transform:'translate(-50%,-120%) scale(1.12)', opacity:1, offset:0.32 },
+            { transform:'translate(-50%,-160%) scale(1)', opacity:1, offset:0.72 },
+            { transform:'translate(-50%,-200%) scale(1.04)', opacity:0 }
+        ], { duration: big ? 1700 : 1450, easing:'cubic-bezier(.34,1.4,.64,1)' });
+
+        if (navigator.vibrate) { try { navigator.vibrate(big ? [20,40,20] : 18); } catch(e){} }
+        setTimeout(() => ov.remove(), big ? 1800 : 1500);
+    },
+
 
     applyStoredTheme() {
         const theme = FocusStorage.getTheme();
