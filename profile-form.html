@@ -397,6 +397,7 @@
 </div>
 <script src="focus-storage.js"></script>
 <script src="focus-core.js"></script>
+<script type="module" src="firebase-auth-helper.js"></script>
 <script>
     // Запасной вариант, если общие файлы не подгрузились (см. примечание в landing.html)
     if (typeof FocusStorage === 'undefined') {
@@ -785,6 +786,23 @@
         }
 
         FocusStorage.saveUser({ flags: { profileCompleted: true } });
+
+        // Сохраняем профиль в облако Firestore (если Firebase готов и юзер вошёл)
+        if (window.fbSaveUserData && window.fbCurrentUser && window.fbCurrentUser()) {
+            const fullUser = FocusStorage.getUser();
+            window.fbSaveUserData({
+                name: fullUser.name || '',
+                age: fullUser.age || '',
+                city: fullUser.city || '',
+                phone: fullUser.phone || '',
+                coins: fullUser.coins || 0,
+                profileCompleted: true,
+                updatedAt: new Date().toISOString()
+            }).then(r => {
+                if (r && r.ok) console.log('✓ Профиль сохранён в облако');
+            }).catch(() => {});
+        }
+
         setTimeout(() => { window.location.href = 'index.html'; }, 1600);
     });
 
