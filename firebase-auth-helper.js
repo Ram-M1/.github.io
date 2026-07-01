@@ -17,7 +17,8 @@ import {
   signOut, onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {
-  getFirestore, doc, setDoc, getDoc, updateDoc, collection, query, where, getDocs, arrayUnion
+  getFirestore, doc, setDoc, getDoc, updateDoc, collection, query, where, getDocs, arrayUnion,
+  addDoc, onSnapshot, orderBy, serverTimestamp, limit
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -157,12 +158,20 @@ window.fbLinkByCode = async function(code) {
     if (!codeSnap.exists()) return { ok: false, error: 'Код не найден' };
     const parentUid = codeSnap.data().parentUid;
     if (parentUid === user.uid) return { ok: false, error: 'Нельзя привязать себя' };
-    // ребёнок → запоминает родителя
+    // ребёнок → запоминает родителя (в облаке И локально)
     await setDoc(doc(db, 'users', user.uid), { parentUid: parentUid }, { merge: true });
+    if (window.FocusStorage) window.FocusStorage.saveUser({ parentUid: parentUid });
     // родитель → добавляет ребёнка в список
     await setDoc(doc(db, 'users', parentUid), { children: arrayUnion(user.uid) }, { merge: true });
     // помечаем код использованным
     await setDoc(doc(db, 'pairing_codes', code), { used: true, childUid: user.uid }, { merge: true });
+    // сразу шлём геопозицию (первый раз, чтобы родитель увидел ребёнка на карте)
+    if (navigator.geolocation && window.fbSaveLocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => { window.fbSaveLocation(pos.coords.latitude, pos.coords.longitude); },
+        () => {}, { enableHighAccuracy: false, timeout: 8000 }
+      );
+    }
     return { ok: true, parentUid };
   } catch (e) {
     return { ok: false, error: e.message };
@@ -188,7 +197,7 @@ window.fbGetChildren = async function() {
   }
 };
 
-// Родитель: отправить задание ребёнку
+// Родитель: отправить задание ребёнку (с наградой и типом проверки)
 window.fbSendChildTask = async function(childUid, task) {
   const user = _currentUser || auth.currentUser;
   if (!user) return { ok: false, error: 'Не авторизован' };
@@ -197,9 +206,17 @@ window.fbSendChildTask = async function(childUid, task) {
     await setDoc(doc(db, 'users', childUid, 'tasks', taskId), {
       text: task.text || '',
       sphere: task.sphere || '',
-      reward: task.reward || 0,
+      reward: task.reward || 0,           // F-coin за выполнение
+      verify: task.verify || 'auto',      // 'auto' | 'confirm' | 'photo'
+      streakDays: task.streakDays || 0,   // 0 = разовое; N = нужно N дней подряд
+      streakBonus: task.streakBonus || 0, // бонус за стрик
+      repeat: task.repeat || 'once',      // 'once' | 'daily'
       from: user.uid,
-      done: false,
+      fromName: task.fromName || 'Родитель',
+      status: 'active',                   // active | pending | done
+      progress: 0,                        // для стриков — дней подряд
+      photo: null,
+      lastDone: null,
       createdAt: new Date().toISOString()
     });
     return { ok: true, taskId };
@@ -208,15 +225,369 @@ window.fbSendChildTask = async function(childUid, task) {
   }
 };
 
-// Ребёнок: получить свои задания
+// Ребёнок: получить свои задания (только активные/в ожидании)
 window.fbGetChildTasks = async function() {
   const user = _currentUser || auth.currentUser;
   if (!user) return [];
   try {
     const snap = await getDocs(collection(db, 'users', user.uid, 'tasks'));
     const tasks = [];
-    snap.forEach(d => tasks.push({ id: d.id, ...d.data() }));
+    snap.forEach(d => { const t = { id: d.id, ...d.data() }; if (t.status !== 'deleted') tasks.push(t); });
     return tasks;
+  } catch (e) {
+    return [];
+  }
+};
+
+// Ребёнок: отметить выполнение. Возвращает { ok, awarded, pending, streakComplete }
+window.fbMarkTaskDone = async function(taskId, photoData) {
+  const user = _currentUser || auth.currentUser;
+  if (!user) return { ok: false, error: 'Не авторизован' };
+  try {
+    const taskRef = doc(db, 'users', user.uid, 'tasks', taskId);
+    const snap = await getDoc(taskRef);
+    if (!snap.exists()) return { ok: false, error: 'Задание не найдено' };
+    const task = snap.data();
+    const today = new Date().toISOString().slice(0,10);
+    if (task.lastDone === today) return { ok: false, error: 'Уже отмечено сегодня' };
+
+    // прогресс стрика
+    let progress = task.progress || 0;
+    const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0,10);
+    if (task.lastDone === yesterday || !task.lastDone) progress += 1;
+    else progress = 1; // стрик сорван — заново
+    const streakTarget = task.streakDays || 0;
+    const streakComplete = streakTarget > 0 && progress >= streakTarget;
+
+    if (task.verify === 'auto') {
+      let award = task.reward || 0;
+      if (streakComplete) award += (task.streakBonus || 0);
+      await setDoc(taskRef, {
+        status: (task.repeat === 'daily' && !streakComplete) ? 'active' : 'done',
+        progress, lastDone: today
+      }, { merge: true });
+      await _transferCoins(task.from, user.uid, award);
+      return { ok: true, awarded: award, streakComplete };
+    } else {
+      await setDoc(taskRef, {
+        status: 'pending', progress, lastDone: today,
+        photo: photoData || null,
+        pendingAward: (task.reward || 0) + (streakComplete ? (task.streakBonus || 0) : 0)
+      }, { merge: true });
+      return { ok: true, awarded: 0, pending: true };
+    }
+  } catch (e) {
+    return { ok: false, error: e.message };
+  }
+};
+
+// Родитель: получить задания конкретного ребёнка
+window.fbGetTasksForChild = async function(childUid) {
+  const user = _currentUser || auth.currentUser;
+  if (!user) return [];
+  try {
+    const snap = await getDocs(collection(db, 'users', childUid, 'tasks'));
+    const tasks = [];
+    snap.forEach(d => { const t = { id: d.id, ...d.data() }; if (t.status !== 'deleted') tasks.push(t); });
+    return tasks;
+  } catch (e) {
+    return [];
+  }
+};
+
+// Родитель: подтвердить/отклонить выполнение → начислить награду
+window.fbConfirmTask = async function(childUid, taskId, approved) {
+  const user = _currentUser || auth.currentUser;
+  if (!user) return { ok: false, error: 'Не авторизован' };
+  try {
+    const taskRef = doc(db, 'users', childUid, 'tasks', taskId);
+    const snap = await getDoc(taskRef);
+    if (!snap.exists()) return { ok: false, error: 'Задание не найдено' };
+    const task = snap.data();
+    if (approved) {
+      const award = task.pendingAward || task.reward || 0;
+      await setDoc(taskRef, {
+        status: (task.repeat === 'daily') ? 'active' : 'done', pendingAward: 0
+      }, { merge: true });
+      await _transferCoins(user.uid, childUid, award);
+      return { ok: true, awarded: award };
+    } else {
+      await setDoc(taskRef, { status: 'active', pendingAward: 0, photo: null }, { merge: true });
+      return { ok: true, awarded: 0, rejected: true };
+    }
+  } catch (e) {
+    return { ok: false, error: e.message };
+  }
+};
+
+// Родитель: удалить задание
+window.fbDeleteChildTask = async function(childUid, taskId) {
+  const user = _currentUser || auth.currentUser;
+  if (!user) return { ok: false };
+  try {
+    await setDoc(doc(db, 'users', childUid, 'tasks', taskId), { status: 'deleted' }, { merge: true });
+    return { ok: true };
+  } catch (e) { return { ok: false }; }
+};
+
+// Внутреннее: переток F-coin родитель → ребёнок
+async function _transferCoins(fromUid, toUid, amount) {
+  if (!amount || amount <= 0) return;
+  try {
+    const fromSnap = await getDoc(doc(db, 'users', fromUid));
+    if (fromSnap.exists()) {
+      const fromCoins = fromSnap.data().coins || 0;
+      await setDoc(doc(db, 'users', fromUid), { coins: Math.max(0, fromCoins - amount) }, { merge: true });
+    }
+    const toSnap = await getDoc(doc(db, 'users', toUid));
+    if (toSnap.exists()) {
+      const toCoins = toSnap.data().coins || 0;
+      await setDoc(doc(db, 'users', toUid), { coins: toCoins + amount }, { merge: true });
+    }
+  } catch (e) {}
+}
+
+// Ребёнок: сохранить свою геопозицию в облако (вызывается при заходе в приложение)
+window.fbSaveLocation = async function(lat, lng) {
+  const user = _currentUser || auth.currentUser;
+  if (!user) return { ok: false };
+  try {
+    await setDoc(doc(db, 'users', user.uid), {
+      location: { lat, lng, at: new Date().toISOString() }
+    }, { merge: true });
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: e.message };
+  }
+};
+
+// Родитель: получить последнюю геопозицию конкретного ребёнка
+window.fbGetChildLocation = async function(childUid) {
+  const user = _currentUser || auth.currentUser;
+  if (!user) return null;
+  try {
+    const snap = await getDoc(doc(db, 'users', childUid));
+    if (snap.exists() && snap.data().location) return snap.data().location;
+    return null;
+  } catch (e) {
+    return null;
+  }
+};
+
+// ========== ЧАТ (реальный обмен сообщениями через Firestore) ==========
+
+// Найти пользователя по номеру телефона (для начала чата)
+// Нормализация телефона к единому виду (последние 10 цифр — российский номер)
+function _normPhone(phone) {
+  let digits = (phone || '').replace(/\D/g, ''); // только цифры
+  // убираем ведущую 7 или 8 для РФ-номеров (11 цифр → 10)
+  if (digits.length === 11 && (digits[0] === '7' || digits[0] === '8')) {
+    digits = digits.slice(1);
+  }
+  return digits; // 10 цифр (например 9179630777)
+}
+
+window.fbFindUserByPhone = async function(phone) {
+  const user = _currentUser || auth.currentUser;
+  if (!user) return { ok: false, error: 'Не авторизован' };
+  const norm = _normPhone(phone);
+  if (norm.length < 10) return { ok: false, error: 'Введи полный номер (10 цифр)' };
+  try {
+    // берём всех юзеров и сравниваем по нормализованному телефону
+    // (телефоны в базе могут быть в разном формате: 8917..., +7917..., 917...)
+    const snap = await getDocs(collection(db, 'users'));
+    let found = null;
+    snap.forEach(d => {
+      if (d.id === user.uid) return;
+      const p = _normPhone(d.data().phone);
+      if (p && p === norm) found = { uid: d.id, ...d.data() };
+    });
+    if (!found) return { ok: false, error: 'Пользователь с таким номером не найден в FOCUS' };
+    return { ok: true, user: { uid: found.uid, name: found.name || 'Пользователь', phone: found.phone } };
+  } catch (e) {
+    return { ok: false, error: e.message };
+  }
+};
+
+// ID общего чата двух пользователей (детерминированный — одинаковый с обеих сторон)
+function _chatId(uid1, uid2) {
+  return [uid1, uid2].sort().join('__');
+}
+
+// Открыть/создать чат с пользователем. Возвращает { ok, chatId }
+window.fbOpenChat = async function(otherUid, otherName) {
+  const user = _currentUser || auth.currentUser;
+  if (!user) return { ok: false, error: 'Не авторизован' };
+  try {
+    const chatId = _chatId(user.uid, otherUid);
+    const myName = (window.FocusStorage && window.FocusStorage.getUser().name) || 'Я';
+    // записываем метаданные чата в документы обоих участников
+    await setDoc(doc(db, 'chats', chatId), {
+      participants: [user.uid, otherUid],
+      updatedAt: new Date().toISOString()
+    }, { merge: true });
+    // список чатов у меня
+    await setDoc(doc(db, 'users', user.uid, 'chatList', chatId), {
+      chatId, withUid: otherUid, withName: otherName || 'Пользователь', updatedAt: new Date().toISOString()
+    }, { merge: true });
+    // список чатов у собеседника
+    await setDoc(doc(db, 'users', otherUid, 'chatList', chatId), {
+      chatId, withUid: user.uid, withName: myName, updatedAt: new Date().toISOString()
+    }, { merge: true });
+    return { ok: true, chatId };
+  } catch (e) {
+    return { ok: false, error: e.message };
+  }
+};
+
+// Отправить сообщение (текст и/или вложение: фото/файл/перевод F-coin)
+// opts: { text, kind: 'text'|'photo'|'file'|'coins', data, fileName, amount }
+window.fbSendMessage = async function(chatId, opts) {
+  const user = _currentUser || auth.currentUser;
+  if (!user) return { ok: false };
+  // обратная совместимость: если передали строку — это текст
+  if (typeof opts === 'string') opts = { text: opts, kind: 'text' };
+  const kind = opts.kind || 'text';
+  if (kind === 'text' && (!opts.text || !opts.text.trim())) return { ok: false };
+  try {
+    const msg = {
+      from: user.uid,
+      kind,
+      text: (opts.text || '').trim(),
+      at: new Date().toISOString(),
+      ts: serverTimestamp()
+    };
+    if (kind === 'photo') msg.data = opts.data;              // base64 сжатого фото
+    if (kind === 'file') { msg.data = opts.data; msg.fileName = opts.fileName || 'файл'; msg.fileSize = opts.fileSize || ''; }
+    if (kind === 'coins') msg.amount = opts.amount || 0;     // перевод F-coin
+    await addDoc(collection(db, 'chats', chatId, 'messages'), msg);
+    // текст превью для списка чатов
+    let preview = opts.text || '';
+    if (kind === 'photo') preview = '📷 Фото';
+    if (kind === 'file') preview = '📎 ' + (opts.fileName || 'Файл');
+    if (kind === 'coins') preview = '💰 Перевод ' + (opts.amount||0) + ' F-coin';
+    const chatSnap = await getDoc(doc(db, 'chats', chatId));
+    if (chatSnap.exists()) {
+      const parts = chatSnap.data().participants || [];
+      for (const uid of parts) {
+        await setDoc(doc(db, 'users', uid, 'chatList', chatId), {
+          lastText: preview.slice(0, 60), updatedAt: new Date().toISOString()
+        }, { merge: true });
+      }
+    }
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: e.message };
+  }
+};
+
+// Перевод F-coin другому пользователю (в чате)
+window.fbTransferCoinsInChat = async function(chatId, toUid, amount) {
+  const user = _currentUser || auth.currentUser;
+  if (!user) return { ok: false, error: 'Не авторизован' };
+  amount = parseInt(amount) || 0;
+  if (amount <= 0) return { ok: false, error: 'Неверная сумма' };
+  try {
+    // проверяем баланс отправителя
+    const meSnap = await getDoc(doc(db, 'users', user.uid));
+    const myCoins = (meSnap.exists() && meSnap.data().coins) || 0;
+    if (myCoins < amount) return { ok: false, error: 'Недостаточно F-coin (есть ' + myCoins + ')' };
+    // переток
+    await _transferCoins(user.uid, toUid, amount);
+    // сообщение-квитанция в чат
+    await window.fbSendMessage(chatId, { kind: 'coins', amount, text: '' });
+    return { ok: true, newBalance: myCoins - amount };
+  } catch (e) {
+    return { ok: false, error: e.message };
+  }
+};
+
+// Добавить пользователя в контакты
+window.fbAddContact = async function(contactUid, name, phone) {
+  const user = _currentUser || auth.currentUser;
+  if (!user) return { ok: false };
+  try {
+    await setDoc(doc(db, 'users', user.uid, 'contacts', contactUid), {
+      uid: contactUid, name: name || 'Контакт', phone: phone || '', addedAt: new Date().toISOString()
+    }, { merge: true });
+    return { ok: true };
+  } catch (e) { return { ok: false, error: e.message }; }
+};
+
+// Получить список контактов
+window.fbGetContacts = async function() {
+  const user = _currentUser || auth.currentUser;
+  if (!user) return [];
+  try {
+    const snap = await getDocs(collection(db, 'users', user.uid, 'contacts'));
+    const list = [];
+    snap.forEach(d => list.push({ id: d.id, ...d.data() }));
+    return list;
+  } catch (e) { return []; }
+};
+
+// Глобальный поиск по чатам, сообщениям и файлам (как в WhatsApp)
+window.fbSearchChats = async function(queryText) {
+  const user = _currentUser || auth.currentUser;
+  if (!user) return { chats: [], messages: [] };
+  const qq = (queryText || '').trim().toLowerCase();
+  if (!qq) return { chats: [], messages: [] };
+  try {
+    const listSnap = await getDocs(collection(db, 'users', user.uid, 'chatList'));
+    const chatList = [];
+    listSnap.forEach(d => chatList.push({ id: d.id, ...d.data() }));
+    // чаты по имени собеседника
+    const matchedChats = chatList.filter(c => (c.withName || '').toLowerCase().includes(qq));
+    // сообщения и файлы во всех чатах
+    const matchedMessages = [];
+    for (const c of chatList) {
+      try {
+        const msgSnap = await getDocs(collection(db, 'chats', c.chatId, 'messages'));
+        msgSnap.forEach(m => {
+          const data = m.data();
+          const text = (data.text || '').toLowerCase();
+          const fileName = (data.fileName || '').toLowerCase();
+          if (text.includes(qq) || fileName.includes(qq)) {
+            matchedMessages.push({
+              chatId: c.chatId, withName: c.withName || 'Пользователь',
+              text: data.text || '', kind: data.kind || 'text',
+              fileName: data.fileName || '', at: data.at || '', from: data.from
+            });
+          }
+        });
+      } catch(e){}
+    }
+    matchedMessages.sort((a,b) => (b.at||'').localeCompare(a.at||''));
+    return { chats: matchedChats, messages: matchedMessages };
+  } catch (e) {
+    return { chats: [], messages: [] };
+  }
+};
+
+// Подписаться на сообщения чата (реалтайм). Возвращает функцию отписки.
+window.fbListenMessages = function(chatId, callback) {
+  try {
+    const q = query(collection(db, 'chats', chatId, 'messages'), orderBy('ts', 'asc'), limit(200));
+    return onSnapshot(q, (snap) => {
+      const msgs = [];
+      snap.forEach(d => msgs.push({ id: d.id, ...d.data() }));
+      callback(msgs);
+    }, () => {});
+  } catch (e) {
+    return function(){};
+  }
+};
+
+// Получить список чатов пользователя
+window.fbGetChatList = async function() {
+  const user = _currentUser || auth.currentUser;
+  if (!user) return [];
+  try {
+    const snap = await getDocs(collection(db, 'users', user.uid, 'chatList'));
+    const list = [];
+    snap.forEach(d => list.push({ id: d.id, ...d.data() }));
+    list.sort((a,b) => (b.updatedAt||'').localeCompare(a.updatedAt||''));
+    return list;
   } catch (e) {
     return [];
   }

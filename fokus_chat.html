@@ -158,6 +158,18 @@
     .chat-hdr-name { font-size:15px; font-weight:700; color:#fff; }
     .chat-hdr-status { font-size:10.5px; color:#78DC96; }
     .chat-hdr-status.offline { color:#8e8e9e; }
+    .hdr-action-btn { width:36px; height:36px; border-radius:50%; background:rgba(var(--accent-rgb),0.1); border:1px solid rgba(var(--accent-rgb),0.25); display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0; color:var(--accent); }
+    .hdr-action-btn svg { width:17px; height:17px; }
+    .hdr-action-btn.coins { background:rgba(255,217,102,0.14); border-color:rgba(255,217,102,0.35); color:#FFD966; }
+    .hdr-action-btn:active { transform:scale(0.9); }
+    .coins-balance-row { font-size:12px; color:#9a9aab; margin-bottom:12px; text-align:center; }
+    .coins-balance-row b { color:#FFD966; font-size:15px; }
+    .msg-coins { background:linear-gradient(135deg, rgba(255,217,102,0.18), rgba(255,180,80,0.1)); border:1px solid rgba(255,217,102,0.4); border-radius:14px; padding:11px 15px; text-align:center; color:#FFD966; font-weight:700; font-size:14px; }
+    .msg-photo img { max-width:200px; border-radius:12px; display:block; }
+    .msg-file { display:flex; align-items:center; gap:9px; background:rgba(255,255,255,0.06); border-radius:11px; padding:10px 13px; }
+    .msg-file-ic { width:32px; height:32px; border-radius:8px; background:rgba(var(--accent-rgb),0.2); display:flex; align-items:center; justify-content:center; font-size:16px; flex-shrink:0; }
+    .msg-file-name { font-size:12px; color:#fff; word-break:break-word; }
+    .msg-file-size { font-size:10px; color:#9a9aab; }
     .messages-area { flex:1; overflow-y:auto; scrollbar-width:none; padding:12px 2px; display:flex; flex-direction:column; gap:8px; }
     .messages-area::-webkit-scrollbar { display:none; }
     .msg { max-width:78%; padding:9px 13px; border-radius:16px; font-size:13px; line-height:1.4; word-wrap:break-word; position:relative; }
@@ -188,6 +200,13 @@
     .chat-input:focus { border-color:var(--accent-2); }
     .chat-input::placeholder { color:#6e6e7e; }
     .send-msg-btn { width:42px; height:42px; flex-shrink:0; border-radius:50%; background:linear-gradient(135deg, var(--accent), var(--accent-2)); display:flex; align-items:center; justify-content:center; color:#0a0a0f; cursor:pointer; }
+    .ai-suggest-btn { width:38px; height:38px; flex-shrink:0; border-radius:50%; background:rgba(var(--accent-2-rgb),0.14); border:1px solid rgba(var(--accent-2-rgb),0.3); display:flex; align-items:center; justify-content:center; color:var(--accent-2); cursor:pointer; }
+    .ai-suggest-btn svg { width:19px; height:19px; }
+    .ai-suggest-btn:active { transform:scale(0.92); }
+    .ai-suggests { display:flex; flex-direction:column; gap:6px; padding:8px 4px 4px; }
+    .ai-suggest-item { background:linear-gradient(135deg, rgba(var(--accent-2-rgb),0.12), rgba(var(--accent-rgb),0.06)); border:1px solid rgba(var(--accent-2-rgb),0.25); border-radius:12px; padding:9px 13px; font-size:12.5px; color:#d8d8e0; cursor:pointer; line-height:1.35; }
+    .ai-suggest-item:active { transform:scale(0.98); background:rgba(var(--accent-2-rgb),0.2); }
+    .ai-suggest-hint { font-size:9.5px; color:#8e8e9e; text-align:center; padding:2px; }
     .send-msg-btn svg { width:18px; height:18px; }
     .send-msg-btn:active { transform:scale(0.92); }
     .attach-menu { position:absolute; bottom:62px; left:8px; background:linear-gradient(165deg,#23232e,#1a1a22); border:0.5px solid rgba(var(--accent-rgb),0.2); border-radius:14px; padding:6px; display:none; flex-direction:column; gap:2px; z-index:50; box-shadow:0 8px 24px rgba(0,0,0,0.5); }
@@ -236,6 +255,9 @@
                 <div class="chat-hdr-name" id="hdrName">Чат</div>
                 <div class="chat-hdr-status" id="hdrStatus">онлайн</div>
             </div>
+            <div class="hdr-action-btn" id="addContactBtn" title="В контакты" style="display:none;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8M19 8v6M22 11h-6"/></svg>
+            </div>
         </div>
 
         <div class="messages-area" id="messagesArea"></div>
@@ -276,7 +298,12 @@
             </div>
         </div>
 
+        <div class="ai-suggests" id="aiSuggests" style="display:none;"></div>
+
         <div class="chat-input-row">
+            <div class="ai-suggest-btn" id="aiSuggestBtn" title="ИИ-подсказки ответа">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.2 1 2h6c0-.8.4-1.5 1-2A7 7 0 0 0 12 2Z"/></svg>
+            </div>
             <div class="attach-btn" id="attachBtn">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05 12 20.5a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
             </div>
@@ -491,6 +518,10 @@ initAtmosphere(canvasId) {
 
     const params = new URLSearchParams(location.search);
     const chatId = params.get('id') || 'c1';
+    // Реальный чат через Firebase (если пришли с chatId в URL)
+    const realChatId = params.get('chatId');
+    const realChatName = params.get('name') || 'Пользователь';
+    const isRealChat = !!realChatId;
 
     const CHATS_KEY = 'focus_chats';
     function getChats(){ try { return JSON.parse(localStorage.getItem(CHATS_KEY))||[]; } catch(e){ return []; } }
@@ -584,10 +615,20 @@ initAtmosphere(canvasId) {
     function sendText(){
         const text = input.value.trim();
         if (!text) return;
+        if (isRealChat && window.fbSendMessage) {
+            // реальный чат — шлём в облако (отобразится через реалтайм-подписку)
+            window.fbSendMessage(realChatId, text);
+            input.value = '';
+            input.style.height = 'auto';
+            sendBtnEl.style.display = 'none'; voiceBtnEl.style.display = 'flex';
+            return;
+        }
         addMsg({ from:'me', text, time:nowTime() });
         input.value = '';
         input.style.height = 'auto';
     }
+    const sendBtnEl = document.getElementById('sendMsgBtn');
+    const voiceBtnEl = document.getElementById('voiceMsgBtn');
     document.getElementById('sendMsgBtn').addEventListener('click', sendText);
     input.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendText(); }
@@ -663,38 +704,207 @@ initAtmosphere(canvasId) {
     }));
     document.getElementById('cancelCoin').addEventListener('click', () => coinModal.classList.remove('show'));
     coinModal.addEventListener('click', (e) => { if (e.target.id === 'coinModal') coinModal.classList.remove('show'); });
-    document.getElementById('sendCoin').addEventListener('click', () => {
+    document.getElementById('sendCoin').addEventListener('click', async () => {
         const amt = parseInt(document.getElementById('coinAmount').value) || 0;
         if (amt <= 0) { toast('Введи сумму'); return; }
         if (amt > COIN_LIMIT) { toast('Лимит перевода — ' + COIN_LIMIT + ' F-coin за раз'); return; }
         const balance = FocusStorage.getUser().coins || 0;
         if (amt > balance) { toast('Недостаточно монет на балансе'); return; }
-        FocusStorage.spendCoins(amt);
-        coinModal.classList.remove('show');
-        addMsg({ from:'me', coin:amt, time:nowTime() });
-        toast('✓ Переведено ' + amt + ' F-coin');
+        if (isRealChat && window._realChatTransfer) {
+            // реальный перевод через Firebase (переток + сообщение)
+            const btn = document.getElementById('sendCoin');
+            btn.disabled = true; btn.innerText = 'Перевод...';
+            const ok = await window._realChatTransfer(amt);
+            btn.disabled = false; btn.innerText = 'Перевести';
+            if (ok) coinModal.classList.remove('show');
+        } else {
+            FocusStorage.spendCoins(amt);
+            coinModal.classList.remove('show');
+            addMsg({ from:'me', coin:amt, time:nowTime() });
+            toast('✓ Переведено ' + amt + ' F-coin');
+        }
     });
 
     // фото → base64 (демо; при бэкенде грузится в Storage)
     document.getElementById('fileInput').addEventListener('change', (e) => {
         const file = e.target.files[0];
         if (!file) return;
-        if (file.size > 800*1024) { toast('Фото великовато для демо (>800КБ). На бэкенде лимит будет больше'); return; }
         const reader = new FileReader();
-        reader.onload = () => { addMsg({ from:'me', img: reader.result, time:nowTime() }); };
+        reader.onload = () => {
+            // сжимаем фото через canvas
+            const img = new Image();
+            img.onload = async () => {
+                const max = 800, sc = Math.min(1, max/Math.max(img.width, img.height));
+                const cv = document.createElement('canvas');
+                cv.width = img.width*sc; cv.height = img.height*sc;
+                cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height);
+                const compressed = cv.toDataURL('image/jpeg', 0.7);
+                if (isRealChat && window.fbSendMessage) {
+                    await window.fbSendMessage(realChatId, { kind:'photo', data: compressed, text:'' });
+                } else {
+                    addMsg({ from:'me', img: compressed, time:nowTime() });
+                }
+            };
+            img.src = reader.result;
+        };
         reader.readAsDataURL(file);
         e.target.value = '';
+        document.getElementById('attachMenu').classList.remove('show');
     });
-    // документ → только имя (демо; при бэкенде — загрузка файла)
+    // документ/файл → base64 (лимит 900КБ для Firestore; крупнее — нужен Storage)
     document.getElementById('docInput').addEventListener('change', (e) => {
         const file = e.target.files[0];
         if (!file) return;
-        addMsg({ from:'me', doc: file.name, time:nowTime() });
-        toast('Документ прикреплён (на бэкенде загрузится в облако)');
+        if (file.size > 900*1024) {
+            toast('Файл больше 900КБ. Крупные файлы — через облачное хранилище (скоро)');
+            e.target.value = ''; return;
+        }
+        const reader = new FileReader();
+        reader.onload = async () => {
+            const sizeKb = Math.round(file.size/1024) + ' КБ';
+            if (isRealChat && window.fbSendMessage) {
+                await window.fbSendMessage(realChatId, { kind:'file', data: reader.result, fileName: file.name, fileSize: sizeKb, text:'' });
+            } else {
+                addMsg({ from:'me', doc: file.name, time:nowTime() });
+            }
+        };
+        reader.readAsDataURL(file);
         e.target.value = '';
+        document.getElementById('attachMenu').classList.remove('show');
     });
 
-    renderMsgs();
+    // ===== Реальный чат: заголовок + реалтайм-подписка =====
+    if (isRealChat) {
+        // шапка на реального собеседника
+        document.getElementById('hdrName').innerText = realChatName;
+        document.getElementById('hdrAvatar').innerText = (realChatName[0]||'?').toUpperCase();
+        const st = document.getElementById('hdrStatus');
+        if (st) { st.innerText = 'FOCUS чат'; st.className = 'chat-hdr-status'; }
+
+        // получаем uid собеседника из chatId (формат uid1__uid2)
+        let otherUid = null;
+        const myUidNow = () => (window.fbCurrentUser && window.fbCurrentUser()) ? window.fbCurrentUser().uid : null;
+
+        // показываем кнопку "в контакты"
+        const addContactBtn = document.getElementById('addContactBtn');
+        addContactBtn.style.display = 'flex';
+
+        function resolveOther(){
+            const my = myUidNow();
+            if (!my) return null;
+            const parts = realChatId.split('__');
+            otherUid = parts.find(p => p !== my) || parts[0];
+            return otherUid;
+        }
+
+        // рендер одного сообщения (все типы)
+        function renderMsg(m, mine){
+            const wrap = document.createElement('div');
+            wrap.className = 'msg-row ' + (mine ? 'me' : 'them');
+            const t = m.at ? new Date(m.at).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'}) : '';
+            let inner = '';
+            if (m.kind === 'photo' && m.data) {
+                inner = `<div class="msg-bubble ${mine?'me':'them'} msg-photo"><img src="${m.data}" onclick="window.open('${m.data}','_blank')">${m.text?'<div style=\"margin-top:5px;\">'+escapeHtml(m.text)+'</div>':''}<span class="msg-time">${t}</span></div>`;
+            } else if (m.kind === 'file' && m.data) {
+                inner = `<div class="msg-bubble ${mine?'me':'them'}"><a href="${m.data}" download="${escapeHtml(m.fileName||'файл')}" class="msg-file"><div class="msg-file-ic">📎</div><div><div class="msg-file-name">${escapeHtml(m.fileName||'Файл')}</div><div class="msg-file-size">${escapeHtml(m.fileSize||'')}</div></div></a><span class="msg-time">${t}</span></div>`;
+            } else if (m.kind === 'coins') {
+                inner = `<div class="msg-coins">💰 ${mine?'Ты перевёл':'Тебе перевели'} ${m.amount} F-coin<span class="msg-time" style="display:block;color:#a88;">${t}</span></div>`;
+            } else {
+                inner = `<div class="msg-bubble ${mine?'me':'them'}">${escapeHtml(m.text)}<span class="msg-time">${t}</span></div>`;
+            }
+            wrap.innerHTML = inner;
+            return wrap;
+        }
+
+        function startRealChat(){
+            if (!window.fbListenMessages || !myUidNow()) { setTimeout(startRealChat, 400); return; }
+            resolveOther();
+            const myUid = myUidNow();
+            const area = document.getElementById('messagesArea');
+            area.innerHTML = '';
+            window.fbListenMessages(realChatId, (msgs) => {
+                area.innerHTML = '';
+                if (!msgs.length) {
+                    area.innerHTML = '<div style="text-align:center;color:#8e8e9e;font-size:12px;padding:30px 20px;">Начни переписку — напиши первое сообщение 👋</div>';
+                    return;
+                }
+                msgs.forEach(m => area.appendChild(renderMsg(m, m.from === myUid)));
+                area.scrollTop = area.scrollHeight;
+            });
+        }
+        if (window.FB_AUTH_READY) startRealChat();
+        else window.addEventListener('fb-auth-ready', startRealChat);
+
+        // === Добавить в контакты ===
+        addContactBtn.addEventListener('click', async () => {
+            resolveOther();
+            if (!otherUid || !window.fbAddContact) { toast('Не готово, подожди'); return; }
+            const res = await window.fbAddContact(otherUid, realChatName, '');
+            toast(res.ok ? '✓ Добавлен в контакты' : 'Не удалось');
+        });
+
+        // === Перевод F-coin через существующее меню (optCoin → coinModal) ===
+        // переопределяем подтверждение перевода на реальный переток
+        window._realChatTransfer = async function(amount){
+            resolveOther();
+            if (!otherUid || !window.fbTransferCoinsInChat) { toast('Не готово'); return false; }
+            const res = await window.fbTransferCoinsInChat(realChatId, otherUid, amount);
+            if (res.ok) {
+                FocusStorage.saveUser({ coins: res.newBalance });
+                toast('✓ Переведено ' + amount + ' F-coin');
+                return true;
+            } else {
+                toast(res.error || 'Ошибка перевода');
+                return false;
+            }
+        };
+    } else {
+        renderMsgs();
+    }
+
+    // ===== ИИ-подсказки ответов (заработают с реальным ИИ) =====
+    (function(){
+        const btn = document.getElementById('aiSuggestBtn');
+        const panel = document.getElementById('aiSuggests');
+        if (!btn || !panel) return;
+        btn.addEventListener('click', async () => {
+            if (panel.style.display === 'block') { panel.style.display = 'none'; return; }
+            panel.style.display = 'block';
+            panel.innerHTML = '<div class="ai-suggest-hint">ИИ подбирает варианты...</div>';
+
+            // TODO: когда подключим реальный ИИ (DeepSeek) — сюда придут 3 варианта
+            // на основе последних сообщений чата. Пока — заглушка с примерами.
+            let suggestions;
+            if (window.fbAiSuggestReplies) {
+                // реальный ИИ (появится после подключения)
+                suggestions = await window.fbAiSuggestReplies(realChatId);
+            } else {
+                // временные примеры (демо до подключения ИИ)
+                suggestions = [
+                    'Звучит отлично! Расскажи подробнее 👍',
+                    'Согласен, давай так и сделаем.',
+                    'Мне нужно немного подумать, отвечу позже.'
+                ];
+            }
+            panel.innerHTML = '';
+            suggestions.forEach(s => {
+                const item = document.createElement('div');
+                item.className = 'ai-suggest-item';
+                item.innerText = s;
+                item.addEventListener('click', () => {
+                    input.value = s;
+                    input.dispatchEvent(new Event('input'));
+                    panel.style.display = 'none';
+                    input.focus();
+                });
+                panel.appendChild(item);
+            });
+            const hint = document.createElement('div');
+            hint.className = 'ai-suggest-hint';
+            hint.innerText = window.fbAiSuggestReplies ? 'Нажми вариант или напиши свой' : 'Примеры (ИИ активируется скоро) — можешь писать свой ответ';
+            panel.appendChild(hint);
+        });
+    })();
 
 </script>
 <script>

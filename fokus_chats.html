@@ -153,6 +153,13 @@
     .scroll-area { flex:1; overflow-y:auto; scrollbar-width:none; }
     .scroll-area::-webkit-scrollbar { display:none; }
     .chat-search { width:100%; background:rgba(0,0,0,0.3); border:1px solid rgba(var(--accent-rgb),0.16); border-radius:13px; padding:11px 14px; color:#fff; font-size:13px; font-family:inherit; outline:none; margin-bottom:13px; }
+    .search-section-label { font-size:10px; color:#8e8e9e; font-weight:700; text-transform:uppercase; letter-spacing:0.4px; margin:10px 4px 7px; }
+    .search-msg-item { background:rgba(255,255,255,0.03); border:0.5px solid rgba(var(--accent-rgb),0.1); border-radius:12px; padding:10px 13px; margin-bottom:6px; cursor:pointer; transition:0.15s; }
+    .search-msg-item:active { background:rgba(255,255,255,0.06); }
+    .search-msg-top { display:flex; justify-content:space-between; margin-bottom:3px; }
+    .search-msg-name { font-size:12.5px; font-weight:700; color:var(--accent-2); }
+    .search-msg-date { font-size:10px; color:#8e8e9e; }
+    .search-msg-text { font-size:12px; color:#c8c8d0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
     .chat-search:focus { border-color:var(--accent-2); }
     .chat-search::placeholder { color:#6e6e7e; }
     .chat-item { display:flex; align-items:center; gap:12px; padding:11px 10px; border-radius:14px; cursor:pointer; transition:0.15s; }
@@ -220,7 +227,13 @@
         </div>
 
         <div class="scroll-area">
-            <input type="text" class="chat-search" id="chatSearch" placeholder="Поиск по чатам...">
+            <input type="text" class="chat-search" id="chatSearch" placeholder="Поиск: имена, сообщения, файлы...">
+            <div id="globalSearchResults"></div>
+
+            <div class="add-friend-btn" id="writeByPhoneBtn" style="background:linear-gradient(135deg,rgba(var(--accent-rgb),0.15),rgba(var(--accent-2-rgb),0.1));border-color:rgba(var(--accent-rgb),0.35);color:var(--accent);">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92Z"/></svg>
+                Найти по номеру телефона
+            </div>
 
             <div class="add-friend-btn" id="addFriendBtn">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/></svg>
@@ -233,6 +246,21 @@
             </div>
 
             <div id="chatsList"></div>
+        </div>
+    </div>
+
+    <!-- Модалка поиска по телефону -->
+    <div class="modal" id="phoneModal">
+        <div class="contacts-sheet">
+            <div class="sheet-handle"></div>
+            <div class="sheet-title">Найти по номеру</div>
+            <div class="sheet-sub">Введи номер телефона человека — если он есть в FOCUS, откроется чат.</div>
+            <input type="tel" class="chat-search" id="phoneSearchInput" placeholder="+7 900 000 00 00" style="margin-bottom:12px;">
+            <div class="group-create-row">
+                <button class="group-btn cancel" id="cancelPhone">Отмена</button>
+                <button class="group-btn create" id="findPhone">Найти</button>
+            </div>
+            <div id="phoneSearchResult" style="margin-top:12px;"></div>
         </div>
     </div>
 
@@ -518,8 +546,129 @@ initAtmosphere(canvasId) {
     }
 
     document.getElementById('chatSearch').addEventListener('input', (e) => {
-        searchQuery = e.target.value; renderChats();
+        searchQuery = e.target.value;
+        renderChats();
+        // глобальный поиск по сообщениям/файлам (с задержкой чтобы не спамить)
+        clearTimeout(window._searchTimer);
+        const q = searchQuery.trim();
+        if (q.length >= 2) {
+            window._searchTimer = setTimeout(() => runGlobalSearch(q), 400);
+        } else {
+            const gr = document.getElementById('globalSearchResults');
+            if (gr) gr.innerHTML = '';
+        }
     });
+
+    // Глобальный поиск по сообщениям и файлам (как в WhatsApp)
+    async function runGlobalSearch(q){
+        if (!window.fbSearchChats) return;
+        const box = document.getElementById('globalSearchResults');
+        if (!box) return;
+        box.innerHTML = '<div class="search-section-label">Поиск сообщений...</div>';
+        const res = await window.fbSearchChats(q);
+        let html = '';
+        if (res.messages && res.messages.length) {
+            html += '<div class="search-section-label">Сообщения и файлы (' + res.messages.length + ')</div>';
+            res.messages.slice(0, 30).forEach(m => {
+                const when = m.at ? new Date(m.at).toLocaleDateString('ru-RU') : '';
+                let preview;
+                if (m.kind === 'file') preview = '📎 ' + escapeHtml(m.fileName);
+                else if (m.kind === 'photo') preview = '📷 Фото';
+                else preview = escapeHtml(m.text);
+                // подсветка совпадения
+                html += `
+                    <div class="search-msg-item" data-chat="${m.chatId}" data-name="${escapeHtml(m.withName)}">
+                        <div class="search-msg-top">
+                            <span class="search-msg-name">${escapeHtml(m.withName)}</span>
+                            <span class="search-msg-date">${when}</span>
+                        </div>
+                        <div class="search-msg-text">${preview}</div>
+                    </div>`;
+            });
+        } else {
+            html = '<div class="search-section-label">Ничего не найдено по «' + escapeHtml(q) + '»</div>';
+        }
+        box.innerHTML = html;
+        box.querySelectorAll('.search-msg-item').forEach(el => {
+            el.addEventListener('click', () => {
+                location.href = 'fokus_chat.html?chatId=' + el.dataset.chat + '&name=' + encodeURIComponent(el.dataset.name);
+            });
+        });
+    }
+
+    // ===== Поиск по телефону + реальный чат =====
+    const phoneModal = document.getElementById('phoneModal');
+    document.getElementById('writeByPhoneBtn').addEventListener('click', () => {
+        document.getElementById('phoneSearchInput').value = '';
+        document.getElementById('phoneSearchResult').innerHTML = '';
+        phoneModal.classList.add('show');
+    });
+    document.getElementById('cancelPhone').addEventListener('click', () => phoneModal.classList.remove('show'));
+    phoneModal.addEventListener('click', (e) => { if (e.target.id === 'phoneModal') phoneModal.classList.remove('show'); });
+
+    document.getElementById('findPhone').addEventListener('click', async () => {
+        const phone = document.getElementById('phoneSearchInput').value.trim();
+        const resBox = document.getElementById('phoneSearchResult');
+        if (!phone) { resBox.innerHTML = '<div class="empty-chats">Введи номер</div>'; return; }
+        if (!window.fbFindUserByPhone) { resBox.innerHTML = '<div class="empty-chats">Firebase не готов, обнови страницу</div>'; return; }
+        resBox.innerHTML = '<div class="empty-chats">Ищем...</div>';
+        const res = await window.fbFindUserByPhone(phone);
+        if (res.ok) {
+            const u = res.user;
+            resBox.innerHTML = `
+                <div class="contact-item">
+                    <div class="chat-avatar" style="width:44px;height:44px;font-size:17px;">${escapeHtml((u.name[0]||'?').toUpperCase())}</div>
+                    <div class="contact-info">
+                        <div class="contact-name">${escapeHtml(u.name)}</div>
+                        <div class="contact-phone">${escapeHtml(u.phone||'')}</div>
+                    </div>
+                    <div class="contact-action has-app" id="startChatBtn">Написать</div>
+                </div>`;
+            document.getElementById('startChatBtn').addEventListener('click', async () => {
+                const open = await window.fbOpenChat(u.uid, u.name);
+                if (open.ok) {
+                    phoneModal.classList.remove('show');
+                    location.href = 'fokus_chat.html?chatId=' + open.chatId + '&name=' + encodeURIComponent(u.name);
+                } else {
+                    resBox.innerHTML += '<div class="empty-chats">' + (open.error||'Ошибка') + '</div>';
+                }
+            });
+        } else {
+            resBox.innerHTML = '<div class="empty-chats">' + (res.error||'Не найден') + '</div>';
+        }
+    });
+
+    // загрузка реальных чатов из облака (добавляются к демо сверху)
+    async function loadRealChats(){
+        if (!window.fbGetChatList) return;
+        const list = await window.fbGetChatList();
+        if (!list || !list.length) return;
+        const cont = document.getElementById('chatsList');
+        // убираем "пусто"
+        const empty = cont.querySelector('.empty-chats');
+        if (empty) cont.innerHTML = '';
+        list.forEach(c => {
+            const item = document.createElement('div');
+            item.className = 'chat-item';
+            const initial = (c.withName && c.withName[0] || '?').toUpperCase();
+            item.innerHTML = `
+                <div class="chat-avatar">${escapeHtml(initial)}</div>
+                <div class="chat-body">
+                    <div class="chat-row1">
+                        <div class="chat-name">${escapeHtml(c.withName||'Пользователь')} <span class="chat-badge-tag" style="background:rgba(120,220,150,0.18);color:#78DC96;">чат</span></div>
+                    </div>
+                    <div class="chat-row2">
+                        <div class="chat-last">${escapeHtml(c.lastText||'Начни переписку')}</div>
+                    </div>
+                </div>`;
+            item.addEventListener('click', () => {
+                location.href = 'fokus_chat.html?chatId=' + c.chatId + '&name=' + encodeURIComponent(c.withName||'');
+            });
+            cont.insertBefore(item, cont.firstChild);
+        });
+    }
+    if (window.FB_AUTH_READY) setTimeout(loadRealChats, 700);
+    else window.addEventListener('fb-auth-ready', () => setTimeout(loadRealChats, 700));
 
     // ===== Контакты (демо как WhatsApp) =====
     const contactsModal = document.getElementById('contactsModal');

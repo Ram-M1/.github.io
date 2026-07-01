@@ -223,6 +223,17 @@
     .ai-card-head { display:flex; align-items:center; gap:6px; margin-bottom:2px; }
     .ai-card-title { font-size:12px; font-weight:700; color:var(--accent-2); }
     .ai-card-hint { font-size:10px; color:#9a9aab; margin-bottom:7px; line-height:1.25; }
+    .parent-tasks { background:linear-gradient(135deg, rgba(255,217,102,0.1), rgba(124,140,255,0.06)); border:1px solid rgba(255,217,102,0.25); border-radius:16px; padding:13px; margin-bottom:14px; }
+    .parent-tasks-head { font-size:12px; font-weight:700; color:var(--accent); margin-bottom:9px; }
+    .ptask { display:flex; align-items:center; gap:10px; background:rgba(0,0,0,0.22); border-radius:12px; padding:10px 12px; margin-bottom:7px; }
+    .ptask:last-child { margin-bottom:0; }
+    .ptask-pending { opacity:0.7; }
+    .ptask-info { flex:1; min-width:0; }
+    .ptask-text { font-size:13px; font-weight:600; color:#fff; }
+    .ptask-reward { font-size:10.5px; color:#FFD966; margin-top:2px; }
+    .ptask-do { background:linear-gradient(135deg, var(--accent), var(--accent-2)); color:#0a0a0f; border:none; border-radius:10px; padding:8px 14px; font-size:12px; font-weight:700; cursor:pointer; white-space:nowrap; }
+    .ptask-do:active { transform:scale(0.95); }
+    .ptask-wait { font-size:11px; color:#FFD966; white-space:nowrap; }
     .ai-pulse { width:7px; height:7px; border-radius:50%; background:var(--accent-2); animation:aiPulse 1.4s ease-in-out infinite; }
     @keyframes aiPulse { 0%,100% { opacity:1; transform:scale(1); } 50% { opacity:0.4; transform:scale(0.7); } }
     .ai-mic-btn { width:36px; height:36px; flex-shrink:0; border-radius:10px; background:rgba(var(--accent-2-rgb),0.14); border:1px solid rgba(var(--accent-2-rgb),0.3); display:flex; align-items:center; justify-content:center; color:var(--accent-2); cursor:pointer; }
@@ -617,6 +628,14 @@
                 </div>
             </div>
             <div class="ai-result" id="aiResult"></div>
+        </div>
+
+        <!-- Задания от родителя (показываются только если есть) -->
+        <div class="parent-tasks" id="parentTasks" style="display:none;">
+            <div class="parent-tasks-head">
+                <span>🎁 Задания с наградой</span>
+            </div>
+            <div id="parentTasksList"></div>
         </div>
 
         <div class="dot-divider"><span></span><span></span><span></span><span></span><span></span><span></span></div>
@@ -1365,6 +1384,119 @@
                 window._aiTimer = setTimeout(() => { result.className = 'ai-result'; }, 4000);
             });
         }
+    })();
+
+    // ===== Геопозиция ребёнка (если привязан к родителю) =====
+    // Обновляется когда ребёнок открывает FOCUS. Фоновый трекинг в PWA невозможен.
+    (function(){
+        async function sendLocationIfChild(){
+            if (!navigator.geolocation || !window.fbSaveLocation) return;
+            // проверяем привязку: сначала локально, если нет — из облака
+            let u = FocusStorage.getUser();
+            let parentUid = u && u.parentUid;
+            if (!parentUid && window.fbLoadUserData) {
+                const cloud = await window.fbLoadUserData();
+                if (cloud && cloud.parentUid) {
+                    parentUid = cloud.parentUid;
+                    FocusStorage.saveUser({ parentUid });
+                }
+            }
+            if (!parentUid) return;
+            const last = parseInt(sessionStorage.getItem('focus_geo_sent') || '0');
+            if (Date.now() - last < 15*60*1000) return;
+            navigator.geolocation.getCurrentPosition(
+                (pos) => {
+                    window.fbSaveLocation(pos.coords.latitude, pos.coords.longitude);
+                    sessionStorage.setItem('focus_geo_sent', String(Date.now()));
+                },
+                () => {},
+                { enableHighAccuracy: false, timeout: 10000, maximumAge: 300000 }
+            );
+        }
+        if (window.FB_AUTH_READY) setTimeout(sendLocationIfChild, 2500);
+        else window.addEventListener('fb-auth-ready', () => setTimeout(sendLocationIfChild, 2500));
+    })();
+
+    // ===== Задания от родителя (сторона ребёнка) =====
+    (function(){
+        async function loadParentTasks(){
+            if (!window.fbGetChildTasks) return;
+            const u = FocusStorage.getUser();
+            if (!u || !u.parentUid) return; // только если привязан к родителю
+            const tasks = await window.fbGetChildTasks();
+            const active = tasks.filter(t => t.status === 'active' || t.status === 'pending');
+            const wrap = document.getElementById('parentTasks');
+            const list = document.getElementById('parentTasksList');
+            if (!active.length) { wrap.style.display = 'none'; return; }
+            wrap.style.display = 'block';
+            list.innerHTML = '';
+            active.forEach(t => {
+                const card = document.createElement('div');
+                card.className = 'ptask' + (t.status==='pending'?' ptask-pending':'');
+                const streak = t.streakDays ? ` · 🔥 ${t.progress||0}/${t.streakDays}` : '';
+                card.innerHTML = `
+                    <div class="ptask-info">
+                        <div class="ptask-text">${escapeHtml(t.text)}</div>
+                        <div class="ptask-reward">💰 ${t.reward} F-coin${streak}</div>
+                    </div>
+                    ${t.status==='pending'
+                        ? '<div class="ptask-wait">⏳ на проверке</div>'
+                        : `<button class="ptask-do" data-do="${t.id}" data-verify="${t.verify}">Выполнил</button>`}`;
+                list.appendChild(card);
+            });
+            list.querySelectorAll('[data-do]').forEach(b => b.addEventListener('click', async () => {
+                const taskId = b.dataset.do;
+                const verify = b.dataset.verify;
+                let photoData = null;
+                if (verify === 'photo') {
+                    photoData = await pickPhoto();
+                    if (!photoData) { return; } // отменил выбор фото
+                }
+                b.disabled = true; b.innerText = '...';
+                const res = await window.fbMarkTaskDone(taskId, photoData);
+                if (res.ok) {
+                    if (res.awarded > 0) {
+                        // начисляем ребёнку локально + анимация
+                        const nc = (FocusStorage.getUser().coins||0) + res.awarded;
+                        FocusStorage.saveUser({ coins: nc });
+                        if (FocusCore.celebrate) FocusCore.celebrate({ big: res.streakComplete, text: res.streakComplete?'Стрик! Бонус':'Награда твоя', emoji: '💰', fromEl: b });
+                        if (typeof toast==='function') toast('+' + res.awarded + ' F-coin!');
+                    } else if (res.pending) {
+                        if (typeof toast==='function') toast('Отправлено родителю на проверку');
+                    }
+                    loadParentTasks();
+                } else {
+                    b.disabled = false; b.innerText = 'Выполнил';
+                    if (typeof toast==='function') toast(res.error || 'Ошибка');
+                }
+            }));
+        }
+        // выбор фото → base64 (сжатое)
+        function pickPhoto(){
+            return new Promise(resolve => {
+                const inp = document.createElement('input');
+                inp.type = 'file'; inp.accept = 'image/*';
+                inp.onchange = () => {
+                    const f = inp.files[0]; if (!f) { resolve(null); return; }
+                    const r = new FileReader();
+                    r.onload = () => {
+                        const img = new Image();
+                        img.onload = () => {
+                            const cv = document.createElement('canvas');
+                            const max = 600, sc = Math.min(1, max/Math.max(img.width,img.height));
+                            cv.width = img.width*sc; cv.height = img.height*sc;
+                            cv.getContext('2d').drawImage(img,0,0,cv.width,cv.height);
+                            resolve(cv.toDataURL('image/jpeg', 0.7));
+                        };
+                        img.src = r.result;
+                    };
+                    r.readAsDataURL(f);
+                };
+                inp.click();
+            });
+        }
+        if (window.FB_AUTH_READY) setTimeout(loadParentTasks, 1500);
+        else window.addEventListener('fb-auth-ready', () => setTimeout(loadParentTasks, 1500));
     })();
 </script>
 <script>

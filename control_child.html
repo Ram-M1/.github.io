@@ -177,6 +177,18 @@
     .empty-state { text-align:center; color:#6e6e7e; font-size:12px; padding:30px 16px; line-height:1.7; }
     /* экран ребёнка */
     .section-title { font-size:11px; font-weight:700; color:var(--accent); letter-spacing:0.4px; margin:16px 0 10px; }
+    .task-card { display:flex; gap:10px; align-items:flex-start; background:linear-gradient(135deg, rgba(35,35,46,0.55), rgba(22,22,30,0.55)); border:0.5px solid rgba(var(--accent-rgb),0.13); border-radius:13px; padding:12px; margin-bottom:8px; }
+    .task-card.pending { border-color:rgba(255,200,80,0.4); background:rgba(255,200,80,0.06); }
+    .task-main { flex:1; min-width:0; }
+    .task-text { font-size:13px; font-weight:600; color:#fff; margin-bottom:3px; }
+    .task-meta { font-size:10px; color:#9a9aab; }
+    .task-streak { font-size:10px; color:#FF8A5C; margin-top:3px; }
+    .task-pending-badge { font-size:10px; color:#FFD966; margin-top:4px; font-weight:600; }
+    .task-actions { display:flex; flex-direction:column; gap:6px; align-items:flex-end; }
+    .task-confirm-btn { background:linear-gradient(135deg, var(--accent), var(--accent-2)); color:#0a0a0f; border:none; border-radius:9px; padding:6px 11px; font-size:11px; font-weight:700; cursor:pointer; }
+    .task-del-btn { background:rgba(255,80,80,0.14); color:#ff7676; border:none; border-radius:8px; width:26px; height:26px; font-size:13px; cursor:pointer; }
+    .task-streak-box { background:rgba(0,0,0,0.2); border-radius:11px; padding:11px; margin-bottom:12px; }
+    select.m-input { appearance:none; -webkit-appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239a9aab' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 12px center; }
     .child-hero { background:linear-gradient(135deg, rgba(150,170,255,0.12), rgba(var(--accent-rgb),0.04)); border:1px solid rgba(150,170,255,0.25); border-radius:16px; padding:16px; margin-bottom:6px; text-align:center; }
     .child-hero-avatar { width:64px; height:64px; border-radius:50%; margin:0 auto 9px; background:linear-gradient(135deg, #AAB9FF, var(--accent-2)); display:flex; align-items:center; justify-content:center; font-size:30px; position:relative; cursor:pointer; overflow:visible; }
     .child-hero-avatar img { width:100%; height:100%; object-fit:cover; border-radius:50%; }
@@ -258,6 +270,11 @@
             </div>
             <input type="file" id="childAvatarInput" accept="image/*" style="display:none;">
 
+            <div class="section-title">🎁 ЗАДАНИЯ И НАГРАДЫ</div>
+            <div class="pc-hint">Ставь задания ребёнку и назначай награду в F-coin. За выполнение монеты перейдут с твоего баланса ребёнку.</div>
+            <div class="btn-primary" id="addTaskBtn">➕ Создать задание с наградой</div>
+            <div id="tasksList"></div>
+
             <div class="section-title">📍 ГЕОЛОКАЦИЯ</div>
             <div class="btn-primary" id="openMapBtn">🗺️ Показать на карте</div>
             <div class="toggle-row">
@@ -276,6 +293,61 @@
             <div class="danger-btn" id="removeChildBtn">Отвязать ребёнка</div>
         </div>
     </div>
+    <!-- Модалка создания задания -->
+    <div class="modal" id="taskModal">
+        <div class="modal-box">
+            <div class="modal-title">🎁 Задание с наградой</div>
+            <div class="m-label">ЧТО СДЕЛАТЬ</div>
+            <input type="text" class="m-input" id="taskText" placeholder="Напр: Сделать зарядку">
+            <div class="m-label">СФЕРА (необязательно)</div>
+            <select class="m-input" id="taskSphere">
+                <option value="">— любая —</option>
+                <option value="body">💪 Тело</option>
+                <option value="mental">🧠 Менталка</option>
+                <option value="energy">⚡ Энергия</option>
+                <option value="relations">❤️ Отношения</option>
+                <option value="faith">🙏 Вера</option>
+            </select>
+            <div class="m-label">НАГРАДА (F-coin с твоего баланса)</div>
+            <input type="number" class="m-input" id="taskReward" placeholder="50" inputmode="numeric">
+            <div class="m-label">КАК ПРОВЕРЯТЬ</div>
+            <select class="m-input" id="taskVerify">
+                <option value="auto">Доверие (отметил — зачлось)</option>
+                <option value="confirm">Я подтверждаю вручную</option>
+                <option value="photo">Ребёнок присылает фото</option>
+            </select>
+            <div class="m-label">ПОВТОР</div>
+            <select class="m-input" id="taskRepeat">
+                <option value="once">Разовое</option>
+                <option value="daily">Каждый день</option>
+            </select>
+            <div class="task-streak-box">
+                <div class="m-label" style="margin-bottom:6px;">🔥 БОНУС ЗА СТРИК (необязательно)</div>
+                <div style="display:flex;gap:8px;">
+                    <input type="number" class="m-input" id="taskStreakDays" placeholder="дней подряд" inputmode="numeric" style="margin-bottom:0;">
+                    <input type="number" class="m-input" id="taskStreakBonus" placeholder="бонус F-coin" inputmode="numeric" style="margin-bottom:0;">
+                </div>
+                <div class="pc-hint" style="margin-top:6px;">Напр: 5 дней подряд → +100 F-coin сверху</div>
+            </div>
+            <div class="modal-btns">
+                <button class="modal-btn cancel" id="cancelTask">Отмена</button>
+                <button class="modal-btn save" id="saveTask">Создать</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модалка подтверждения выполнения (для confirm/photo) -->
+    <div class="modal" id="confirmTaskModal">
+        <div class="modal-box">
+            <div class="modal-title">Подтвердить выполнение?</div>
+            <div id="confirmTaskBody"></div>
+            <div class="modal-btns">
+                <button class="modal-btn cancel" id="rejectTask">На доработку</button>
+                <button class="modal-btn save" id="approveTask">Начислить награду</button>
+            </div>
+        </div>
+    </div>
+
     <div class="toast" id="toast"></div>
 </div>
 
@@ -594,7 +666,10 @@ initAtmosphere(canvasId) {
 
     // отвязать
     document.getElementById('openMapBtn').addEventListener('click', () => {
-        location.href = 'location_map.html?id=' + child.id;
+        // сохраняем актуального ребёнка (с uid и флагом real) перед открытием карты
+        const childData = { ...child, id: child.id, uid: child.uid || child.id, real: child.real || false, name: child.name };
+        localStorage.setItem('focus_selected_child', JSON.stringify(childData));
+        location.href = 'location_map.html?id=' + (child.uid || child.id);
     });
     document.getElementById('removeChildBtn').addEventListener('click', () => {
         children = children.filter(c => String(c.id) !== String(child.id));
@@ -602,6 +677,134 @@ initAtmosphere(canvasId) {
         toast('Ребёнок отвязан');
         setTimeout(()=>{ location.href = 'parental_control.html'; }, 900);
     });
+
+    // ===== ЗАДАНИЯ И НАГРАДЫ =====
+    const childUid = child.uid || child.id;
+    const taskModal = document.getElementById('taskModal');
+    const confirmModal = document.getElementById('confirmTaskModal');
+
+    document.getElementById('addTaskBtn').addEventListener('click', () => {
+        document.getElementById('taskText').value = '';
+        document.getElementById('taskReward').value = '';
+        document.getElementById('taskSphere').value = '';
+        document.getElementById('taskVerify').value = 'auto';
+        document.getElementById('taskRepeat').value = 'once';
+        document.getElementById('taskStreakDays').value = '';
+        document.getElementById('taskStreakBonus').value = '';
+        taskModal.classList.add('show');
+    });
+    document.getElementById('cancelTask').addEventListener('click', () => taskModal.classList.remove('show'));
+    taskModal.addEventListener('click', (e) => { if (e.target.id === 'taskModal') taskModal.classList.remove('show'); });
+
+    document.getElementById('saveTask').addEventListener('click', async () => {
+        const text = document.getElementById('taskText').value.trim();
+        const reward = parseInt(document.getElementById('taskReward').value) || 0;
+        if (!text) { toast('Введи текст задания'); return; }
+        if (reward <= 0) { toast('Укажи награду в F-coin'); return; }
+        if (!child.real || !childUid) { toast('Задания доступны для привязанных детей'); return; }
+        if (!window.fbSendChildTask) { toast('Firebase не готов, обнови страницу'); return; }
+
+        // проверка баланса родителя
+        const myCoins = FocusStorage.getUser().coins || 0;
+        if (myCoins < reward) { toast('Недостаточно F-coin на балансе ('+myCoins+')'); return; }
+
+        const task = {
+            text,
+            sphere: document.getElementById('taskSphere').value,
+            reward,
+            verify: document.getElementById('taskVerify').value,
+            repeat: document.getElementById('taskRepeat').value,
+            streakDays: parseInt(document.getElementById('taskStreakDays').value) || 0,
+            streakBonus: parseInt(document.getElementById('taskStreakBonus').value) || 0,
+            fromName: FocusStorage.getUser().name || 'Родитель'
+        };
+        const btn = document.getElementById('saveTask');
+        btn.disabled = true; btn.innerText = 'Создаём...';
+        const res = await window.fbSendChildTask(childUid, task);
+        btn.disabled = false; btn.innerText = 'Создать';
+        if (res.ok) {
+            taskModal.classList.remove('show');
+            toast('Задание отправлено ребёнку');
+            loadTasks();
+        } else {
+            toast(res.error || 'Не удалось создать');
+        }
+    });
+
+    // загрузка и отображение заданий
+    async function loadTasks(){
+        const cont = document.getElementById('tasksList');
+        if (!child.real || !childUid || !window.fbGetTasksForChild) {
+            cont.innerHTML = '<div class="pc-hint" style="text-align:center;padding:10px;">Задания доступны для привязанных детей (облако).</div>';
+            return;
+        }
+        const tasks = await window.fbGetTasksForChild(childUid);
+        const active = tasks.filter(t => t.status !== 'done');
+        if (active.length === 0) {
+            cont.innerHTML = '<div class="pc-hint" style="text-align:center;padding:10px;">Пока нет активных заданий.</div>';
+            return;
+        }
+        cont.innerHTML = '';
+        active.forEach(t => {
+            const card = document.createElement('div');
+            card.className = 'task-card' + (t.status === 'pending' ? ' pending' : '');
+            const verifyLabel = { auto:'Доверие', confirm:'С подтверждением', photo:'С фото' }[t.verify] || '';
+            const streakInfo = t.streakDays ? `🔥 ${t.progress||0}/${t.streakDays} дней (+${t.streakBonus})` : '';
+            card.innerHTML = `
+                <div class="task-main">
+                    <div class="task-text">${escapeHtml(t.text)}</div>
+                    <div class="task-meta">💰 ${t.reward} F-coin · ${verifyLabel}${t.repeat==='daily'?' · ежедневно':''}</div>
+                    ${streakInfo ? `<div class="task-streak">${streakInfo}</div>` : ''}
+                    ${t.status==='pending' ? '<div class="task-pending-badge">⏳ Ждёт подтверждения</div>' : ''}
+                </div>
+                <div class="task-actions">
+                    ${t.status==='pending' ? `<button class="task-confirm-btn" data-confirm="${t.id}">Проверить</button>` : ''}
+                    <button class="task-del-btn" data-del="${t.id}">✕</button>
+                </div>`;
+            cont.appendChild(card);
+        });
+        // обработчики
+        cont.querySelectorAll('[data-del]').forEach(b => b.addEventListener('click', async () => {
+            await window.fbDeleteChildTask(childUid, b.dataset.del);
+            toast('Задание удалено'); loadTasks();
+        }));
+        cont.querySelectorAll('[data-confirm]').forEach(b => b.addEventListener('click', () => {
+            const t = tasks.find(x => x.id === b.dataset.confirm);
+            openConfirm(t);
+        }));
+    }
+
+    // модалка подтверждения
+    let confirmingTask = null;
+    function openConfirm(t){
+        confirmingTask = t;
+        const body = document.getElementById('confirmTaskBody');
+        body.innerHTML = `
+            <div class="pc-hint" style="margin-bottom:10px;">«${escapeHtml(t.text)}»<br>Награда: ${t.pendingAward||t.reward} F-coin</div>
+            ${t.photo ? `<img src="${t.photo}" style="width:100%;border-radius:12px;margin-bottom:10px;">` : '<div class="pc-hint">Фото не прикреплено.</div>'}`;
+        confirmModal.classList.add('show');
+    }
+    document.getElementById('approveTask').addEventListener('click', async () => {
+        if (!confirmingTask) return;
+        const myCoins = FocusStorage.getUser().coins || 0;
+        const award = confirmingTask.pendingAward || confirmingTask.reward || 0;
+        if (myCoins < award) { toast('Недостаточно F-coin ('+myCoins+')'); return; }
+        const res = await window.fbConfirmTask(childUid, confirmingTask.id, true);
+        confirmModal.classList.remove('show');
+        if (res.ok) { toast('Награда начислена ребёнку'); FocusStorage.saveUser({ coins: myCoins - award }); loadTasks(); }
+        else toast(res.error || 'Ошибка');
+    });
+    document.getElementById('rejectTask').addEventListener('click', async () => {
+        if (!confirmingTask) return;
+        await window.fbConfirmTask(childUid, confirmingTask.id, false);
+        confirmModal.classList.remove('show');
+        toast('Отправлено на доработку'); loadTasks();
+    });
+    confirmModal.addEventListener('click', (e) => { if (e.target.id === 'confirmTaskModal') confirmModal.classList.remove('show'); });
+
+    // старт
+    if (window.FB_AUTH_READY) setTimeout(loadTasks, 600);
+    else window.addEventListener('fb-auth-ready', () => setTimeout(loadTasks, 600));
 
 </script>
 <script src="focus-chat-fab.js"></script>

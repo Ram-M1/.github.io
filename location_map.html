@@ -468,30 +468,36 @@ initAtmosphere(canvasId) {
 
     // Загрузка РЕАЛЬНОЙ позиции ребёнка из облака
     async function loadRealPosition(){
-        if (!child.real || !child.uid || !window.fbGetChildLocation) return;
+        const noteEl = document.getElementById('lastSeenNote');
+        if (!child.real || !child.uid) {
+            if (noteEl) noteEl.innerText = 'Это демо-ребёнок. Реальная геолокация работает для привязанных детей (по коду).';
+            return;
+        }
+        if (!window.fbGetChildLocation) {
+            if (noteEl) noteEl.innerText = 'Firebase загружается, нажми «Обновить» через пару секунд.';
+            return;
+        }
         try {
             const loc = await window.fbGetChildLocation(child.uid);
             if (loc && loc.lat && loc.lng) {
                 childPos = { lat: loc.lat, lng: loc.lng };
                 posFromCloud = true;
-                // обновляем карту и маркер
                 if (map && childMarker) {
                     map.setView([childPos.lat, childPos.lng], 15);
                     childMarker.setLatLng([childPos.lat, childPos.lng]);
                     const when = loc.at ? new Date(loc.at).toLocaleString('ru-RU') : '';
                     childMarker.bindPopup('<b>'+escapeHtml(childName)+'</b><br>был здесь: '+when).openPopup();
                 }
-                // обновляем подпись "последнее обновление"
-                const noteEl = document.getElementById('lastSeenNote');
                 if (noteEl && loc.at) {
                     noteEl.innerText = 'Последнее местоположение: ' + new Date(loc.at).toLocaleString('ru-RU');
                 }
                 renderZones();
             } else {
-                const noteEl = document.getElementById('lastSeenNote');
-                if (noteEl) noteEl.innerText = 'Ребёнок ещё не заходил в приложение или не дал доступ к геолокации.';
+                if (noteEl) noteEl.innerText = 'Ребёнок ещё не заходил в FOCUS после привязки, или не дал доступ к геолокации. Попроси его открыть приложение.';
             }
-        } catch(e){}
+        } catch(e){
+            if (noteEl) noteEl.innerText = 'Не удалось загрузить местоположение: ' + (e.message||'ошибка');
+        }
     }
 
     // геозоны (демо + сохранённые)
@@ -629,8 +635,12 @@ initAtmosphere(canvasId) {
         toast('Геозона добавлена');
     });
 
-    document.getElementById('refreshBtn').addEventListener('click', () => {
-        renderInfo(); toast('Местоположение обновлено');
+    document.getElementById('refreshBtn').addEventListener('click', async () => {
+        const btn = document.getElementById('refreshBtn');
+        btn.innerText = '🔄 Обновляем...';
+        await loadRealPosition();
+        btn.innerText = '🔄 Обновить местоположение';
+        if (!child.real) toast('Демо-режим (привяжи реального ребёнка)');
     });
 
     // запуск (карту инициализируем после загрузки Leaflet)
