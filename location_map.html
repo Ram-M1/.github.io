@@ -238,7 +238,7 @@
             </div>
 
             <div class="refresh-btn" id="refreshBtn">🔄 Обновить местоположение</div>
-            <div class="map-note">Отслеживание в реальном времени и уведомления о входе/выходе из зон работают с серверной частью. Сейчас — демонстрация.</div>
+            <div class="map-note" id="lastSeenNote">Местоположение обновляется когда ребёнок открывает FOCUS. Постоянное отслеживание в фоне будет в мобильном приложении.</div>
         </div>
     </div>
 
@@ -462,8 +462,37 @@ initAtmosphere(canvasId) {
     const childName = child.name || 'Ребёнок';
     document.getElementById('childMap'); // placeholder
 
-    // демо-координаты ребёнка
-    const childPos = { lat: 55.7558, lng: 37.6173 };
+    // позиция ребёнка (демо по умолчанию, заменяется реальной из облака)
+    let childPos = { lat: 55.7558, lng: 37.6173 };
+    let posFromCloud = false;
+
+    // Загрузка РЕАЛЬНОЙ позиции ребёнка из облака
+    async function loadRealPosition(){
+        if (!child.real || !child.uid || !window.fbGetChildLocation) return;
+        try {
+            const loc = await window.fbGetChildLocation(child.uid);
+            if (loc && loc.lat && loc.lng) {
+                childPos = { lat: loc.lat, lng: loc.lng };
+                posFromCloud = true;
+                // обновляем карту и маркер
+                if (map && childMarker) {
+                    map.setView([childPos.lat, childPos.lng], 15);
+                    childMarker.setLatLng([childPos.lat, childPos.lng]);
+                    const when = loc.at ? new Date(loc.at).toLocaleString('ru-RU') : '';
+                    childMarker.bindPopup('<b>'+escapeHtml(childName)+'</b><br>был здесь: '+when).openPopup();
+                }
+                // обновляем подпись "последнее обновление"
+                const noteEl = document.getElementById('lastSeenNote');
+                if (noteEl && loc.at) {
+                    noteEl.innerText = 'Последнее местоположение: ' + new Date(loc.at).toLocaleString('ru-RU');
+                }
+                renderZones();
+            } else {
+                const noteEl = document.getElementById('lastSeenNote');
+                if (noteEl) noteEl.innerText = 'Ребёнок ещё не заходил в приложение или не дал доступ к геолокации.';
+            }
+        } catch(e){}
+    }
 
     // геозоны (демо + сохранённые)
     const ZONES_KEY = 'focus_geozones_' + (child.id || '0');
@@ -608,6 +637,10 @@ initAtmosphere(canvasId) {
     renderInfo(); renderZones(); renderEvents();
     if (typeof L !== 'undefined') initMap();
     else window.addEventListener('load', () => setTimeout(initMap, 300));
+
+    // подгружаем реальную позицию ребёнка из облака
+    if (window.FB_AUTH_READY) setTimeout(loadRealPosition, 800);
+    else window.addEventListener('fb-auth-ready', () => setTimeout(loadRealPosition, 800));
 
 </script>
 <script src="focus-chat-fab.js"></script>
