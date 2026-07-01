@@ -857,9 +857,9 @@ initAtmosphere(canvasId) {
     document.getElementById('addMusicBtn').addEventListener('click', () => document.getElementById('musicInput').click());
     document.getElementById('musicInput').addEventListener('change', (e) => {
         const file = e.target.files[0]; if (!file) return;
-        // localStorage вмещает мало — лимит ~3МБ (base64 раздувает +33%)
-        if (file.size > 3*1024*1024) {
-            toast('Файл большой (макс ~3 МБ). Выбери короткий трек или сожми');
+        // localStorage вмещает мало; полноценное хранение музыки — через облако (Firebase Storage), на следующем этапе
+        if (file.size > 4*1024*1024) {
+            toast('Пока лимит ~4 МБ (храним локально). Облачная музыка будет позже. Выбери короткий трек');
             return;
         }
         const reader = new FileReader();
