@@ -17,7 +17,7 @@ import {
   signOut, onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {
-  getFirestore, doc, setDoc, getDoc
+  getFirestore, doc, setDoc, getDoc, updateDoc, collection, query, where, getDocs, arrayUnion
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -123,6 +123,103 @@ window.fbLoadUserData = async function() {
 // следить за состоянием входа
 window.fbOnAuthChange = function(callback) {
   onAuthStateChanged(auth, callback);
+};
+
+// ========== ПРИВЯЗКА РОДИТЕЛЬ ↔ РЕБЁНОК (по коду) ==========
+
+// Родитель: создать код привязки. Код сохраняется в pairing_codes/{code} → uid родителя
+window.fbCreatePairCode = async function() {
+  const user = _currentUser || auth.currentUser;
+  if (!user) return { ok: false, error: 'Не авторизован' };
+  // короткий читаемый код
+  const code = 'F' + Math.random().toString(36).slice(2, 7).toUpperCase();
+  try {
+    await setDoc(doc(db, 'pairing_codes', code), {
+      parentUid: user.uid,
+      createdAt: new Date().toISOString(),
+      used: false
+    });
+    return { ok: true, code };
+  } catch (e) {
+    return { ok: false, error: e.message };
+  }
+};
+
+// Ребёнок: ввести код → связать аккаунты.
+// В документе ребёнка пишем parentUid, в документе родителя добавляем childUid в массив children
+window.fbLinkByCode = async function(code) {
+  const user = _currentUser || auth.currentUser;
+  if (!user) return { ok: false, error: 'Не авторизован' };
+  code = (code || '').trim().toUpperCase();
+  if (!code) return { ok: false, error: 'Введите код' };
+  try {
+    const codeSnap = await getDoc(doc(db, 'pairing_codes', code));
+    if (!codeSnap.exists()) return { ok: false, error: 'Код не найден' };
+    const parentUid = codeSnap.data().parentUid;
+    if (parentUid === user.uid) return { ok: false, error: 'Нельзя привязать себя' };
+    // ребёнок → запоминает родителя
+    await setDoc(doc(db, 'users', user.uid), { parentUid: parentUid }, { merge: true });
+    // родитель → добавляет ребёнка в список
+    await setDoc(doc(db, 'users', parentUid), { children: arrayUnion(user.uid) }, { merge: true });
+    // помечаем код использованным
+    await setDoc(doc(db, 'pairing_codes', code), { used: true, childUid: user.uid }, { merge: true });
+    return { ok: true, parentUid };
+  } catch (e) {
+    return { ok: false, error: e.message };
+  }
+};
+
+// Родитель: получить данные всех своих детей (для отслеживания активности)
+window.fbGetChildren = async function() {
+  const user = _currentUser || auth.currentUser;
+  if (!user) return [];
+  try {
+    const meSnap = await getDoc(doc(db, 'users', user.uid));
+    if (!meSnap.exists()) return [];
+    const childUids = meSnap.data().children || [];
+    const children = [];
+    for (const uid of childUids) {
+      const cSnap = await getDoc(doc(db, 'users', uid));
+      if (cSnap.exists()) children.push({ uid, ...cSnap.data() });
+    }
+    return children;
+  } catch (e) {
+    return [];
+  }
+};
+
+// Родитель: отправить задание ребёнку
+window.fbSendChildTask = async function(childUid, task) {
+  const user = _currentUser || auth.currentUser;
+  if (!user) return { ok: false, error: 'Не авторизован' };
+  try {
+    const taskId = 'task_' + Date.now();
+    await setDoc(doc(db, 'users', childUid, 'tasks', taskId), {
+      text: task.text || '',
+      sphere: task.sphere || '',
+      reward: task.reward || 0,
+      from: user.uid,
+      done: false,
+      createdAt: new Date().toISOString()
+    });
+    return { ok: true, taskId };
+  } catch (e) {
+    return { ok: false, error: e.message };
+  }
+};
+
+// Ребёнок: получить свои задания
+window.fbGetChildTasks = async function() {
+  const user = _currentUser || auth.currentUser;
+  if (!user) return [];
+  try {
+    const snap = await getDocs(collection(db, 'users', user.uid, 'tasks'));
+    const tasks = [];
+    snap.forEach(d => tasks.push({ id: d.id, ...d.data() }));
+    return tasks;
+  } catch (e) {
+    return [];
+  }
 };
 
 // сигнал готовности
