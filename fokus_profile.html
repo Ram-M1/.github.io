@@ -727,15 +727,29 @@ initAtmosphere(canvasId) {
         document.getElementById('hlLink').addEventListener('click', async () => {
             const code = document.getElementById('hiddenParentCode').value.trim().toUpperCase();
             if (!code) { toast('Введите код'); return; }
-            if (window.fbLinkByCode) {
-                const btn = document.getElementById('hlLink');
-                btn.disabled = true; btn.innerText = 'Привязка...';
+            const btn = document.getElementById('hlLink');
+            // проверка что Firebase готов
+            if (!window.fbLinkByCode) {
+                toast('Firebase не загрузился. Обнови страницу и войди снова');
+                return;
+            }
+            if (!window.fbCurrentUser || !window.fbCurrentUser()) {
+                toast('Сессия не готова — подожди 3 сек и нажми снова');
+                return;
+            }
+            btn.disabled = true; btn.innerText = 'Привязка...';
+            try {
                 const res = await window.fbLinkByCode(code);
                 btn.disabled = false; btn.innerText = 'Привязать';
-                if (res.ok) { modal.classList.remove('show'); toast('Устройство привязано'); }
-                else { toast(res.error || 'Не удалось привязать'); }
-            } else {
-                toast('Нужно войти в аккаунт для привязки');
+                if (res.ok) {
+                    modal.classList.remove('show');
+                    toast('✓ Устройство привязано к родителю');
+                } else {
+                    toast(res.error || 'Не удалось привязать');
+                }
+            } catch(e) {
+                btn.disabled = false; btn.innerText = 'Привязать';
+                toast('Ошибка: ' + (e.message || 'неизвестная'));
             }
         });
         modal.addEventListener('click', (e) => { if (e.target.id === 'hiddenLinkModal') modal.classList.remove('show'); });
