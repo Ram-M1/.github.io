@@ -619,7 +619,7 @@
             </div>
             <div class="ai-card-hint">Отметь, что сделал сегодня — голосом или текстом</div>
             <div class="ai-input-row">
-                <input type="text" class="ai-input" id="aiInput" placeholder="Напр: зарядка, вода, медитация...">
+                <input type="text" class="ai-input" id="aiInput" placeholder="Отметь дело или спроси совет у наставника...">
                 <div class="ai-mic-btn" id="aiMicBtn" title="Голос">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v1a7 7 0 0 1-14 0v-1M12 18v4M8 22h8"/></svg>
                 </div>
@@ -1328,12 +1328,12 @@
         const micBtn = document.getElementById('aiMicBtn');
         if (!input) return;
 
-        function process(){
+        async function process(){
             const text = input.value.trim();
             if (!text) { input.focus(); return; }
             const matched = recognize(text);
             if (matched.length > 0) {
-                // записываем активность во все распознанные сферы
+                // распознали команду — записываем активность (быстро, без ИИ)
                 matched.forEach(m => {
                     try { FocusStorage.addActivity(m.sphere, m.action); } catch(e){}
                 });
@@ -1343,12 +1343,39 @@
                 result.innerHTML = '<span class="check">✓</span> Записал: ' + labels + ' &nbsp;(+1 F-coin)';
                 input.value = '';
             } else {
-                result.className = 'ai-result show unknown';
-                result.innerHTML = '🤔 Не понял, что записать. Попробуй: «сделал зарядку», «выпил воды», «помедитировал», «поспал 8 часов»';
+                // не команда — спрашиваем реальный ИИ (совет наставника)
+                if (window.fbAskAI) {
+                    result.className = 'ai-result show';
+                    result.innerHTML = '<span class="ai-thinking">🧠 Наставник думает...</span>';
+                    // проверка лимита ИИ (если есть система лимитов)
+                    let canAsk = true;
+                    try { if (FocusStorage.canUseAI) canAsk = FocusStorage.canUseAI('mentor', 'text').ok; } catch(e){}
+                    if (!canAsk) {
+                        result.innerHTML = '🔒 Лимит ИИ-запросов исчерпан. Пополни F-coin в магазине или оформи подписку.';
+                        return;
+                    }
+                    const prompt = [
+                        { role: 'system', content: 'Ты — доброжелательный наставник по саморазвитию в приложении FOCUS. Отвечай кратко (2-4 предложения), по делу, мотивирующе, на русском. Помогай с привычками, целями, дисциплиной, здоровьем, мышлением. Без воды.' },
+                        { role: 'user', content: text }
+                    ];
+                    const res = await window.fbAskAI(prompt, 400);
+                    if (res.ok) {
+                        try { if (FocusStorage.useAI) FocusStorage.useAI('mentor', 'text'); } catch(e){}
+                        result.className = 'ai-result show';
+                        result.innerHTML = '🧠 ' + res.reply.replace(/</g,'&lt;');
+                        input.value = '';
+                    } else {
+                        result.className = 'ai-result show unknown';
+                        result.innerHTML = '⚠️ ИИ недоступен: ' + (res.error||'ошибка') + '. Попробуй позже.';
+                    }
+                    return; // не прячем совет автоматически
+                } else {
+                    result.className = 'ai-result show unknown';
+                    result.innerHTML = '🤔 Не понял. Попробуй: «сделал зарядку», «выпил воды», или задай вопрос наставнику.';
+                }
             }
-            // спрятать результат через время
             clearTimeout(window._aiTimer);
-            window._aiTimer = setTimeout(() => { result.className = 'ai-result'; }, 5000);
+            window._aiTimer = setTimeout(() => { result.className = 'ai-result'; }, 6000);
         }
 
         sendBtn.addEventListener('click', process);
@@ -1359,20 +1386,23 @@
         if (SR && micBtn) {
             let recog = null, listening = false;
             micBtn.addEventListener('click', () => {
-                if (listening) { if (recog) recog.stop(); return; }
+                if (listening) { if (recog) { try { recog.stop(); } catch(e){} } listening = false; micBtn.classList.remove('recording'); return; }
                 recog = new SR();
                 recog.lang = 'ru-RU';
                 recog.interimResults = false;
+                recog.continuous = false;   // одна фраза → авто-стоп
                 recog.maxAlternatives = 1;
                 recog.onstart = () => { listening = true; micBtn.classList.add('recording'); };
                 recog.onend = () => { listening = false; micBtn.classList.remove('recording'); };
                 recog.onerror = () => { listening = false; micBtn.classList.remove('recording'); };
                 recog.onresult = (e) => {
-                    const text = e.results[0][0].transcript;
-                    input.value = text;
-                    process();
+                    const text = (e.results[0][0].transcript || '').trim();
+                    listening = false;
+                    micBtn.classList.remove('recording');
+                    try { recog.stop(); } catch(er){}
+                    if (text) { input.value = text; process(); }  // только если реально что-то сказали
                 };
-                recog.start();
+                try { recog.start(); } catch(e){}
             });
         } else if (micBtn) {
             // нет поддержки голоса — микрофон подсказывает писать текстом
@@ -1391,7 +1421,6 @@
     (function(){
         async function sendLocationIfChild(){
             if (!navigator.geolocation || !window.fbSaveLocation) return;
-            // проверяем привязку: сначала локально, если нет — из облака
             let u = FocusStorage.getUser();
             let parentUid = u && u.parentUid;
             if (!parentUid && window.fbLoadUserData) {
@@ -1401,20 +1430,21 @@
                     FocusStorage.saveUser({ parentUid });
                 }
             }
-            if (!parentUid) return;
+            if (!parentUid) return; // не привязан — не шлём
+            // кулдаун 10 мин (но при первом заходе в сессии — шлём сразу)
             const last = parseInt(sessionStorage.getItem('focus_geo_sent') || '0');
-            if (Date.now() - last < 15*60*1000) return;
+            if (last && Date.now() - last < 10*60*1000) return;
             navigator.geolocation.getCurrentPosition(
-                (pos) => {
-                    window.fbSaveLocation(pos.coords.latitude, pos.coords.longitude);
-                    sessionStorage.setItem('focus_geo_sent', String(Date.now()));
+                async (pos) => {
+                    const r = await window.fbSaveLocation(pos.coords.latitude, pos.coords.longitude);
+                    if (r && r.ok) sessionStorage.setItem('focus_geo_sent', String(Date.now()));
                 },
-                () => {},
-                { enableHighAccuracy: false, timeout: 10000, maximumAge: 300000 }
+                (err) => { /* отказ/ошибка доступа — молча, ребёнок не должен замечать */ },
+                { enableHighAccuracy: true, timeout: 12000, maximumAge: 60000 }
             );
         }
-        if (window.FB_AUTH_READY) setTimeout(sendLocationIfChild, 2500);
-        else window.addEventListener('fb-auth-ready', () => setTimeout(sendLocationIfChild, 2500));
+        if (window.FB_AUTH_READY) setTimeout(sendLocationIfChild, 2000);
+        else window.addEventListener('fb-auth-ready', () => setTimeout(sendLocationIfChild, 2000));
     })();
 
     // ===== Задания от родителя (сторона ребёнка) =====

@@ -1396,12 +1396,60 @@ initAtmosphere(canvasId) {
     });
 
     // AI-консультант (заработает с бэкендом)
-    document.getElementById('aiConsultBtn').addEventListener('click', () => {
+    document.getElementById('aiConsultBtn').addEventListener('click', async () => {
         if (docs.length === 0 && labs.length === 0) {
             toast('Сначала загрузи анализы или добавь показатели');
             return;
         }
-        toast('AI-разбор анализов подключается с серверной частью');
+        if (!window.fbAskAI) { toast('ИИ недоступен, обнови страницу'); return; }
+
+        let resBox = document.getElementById('aiLabResult');
+        if (!resBox) {
+            resBox = document.createElement('div');
+            resBox.id = 'aiLabResult';
+            resBox.style.cssText = 'margin-top:12px;padding:14px;background:rgba(124,140,255,0.08);border:1px solid rgba(124,140,255,0.25);border-radius:14px;font-size:13px;color:#e8e8ee;line-height:1.6;';
+            document.getElementById('aiConsultBtn').after(resBox);
+        }
+
+        // есть ли фото-анализы для vision-разбора?
+        const photoDoc = docs.find(d => d.type === 'image' && d.data);
+
+        if (photoDoc && window.fbAskAIVision) {
+            // РАЗБОР ФОТО через vision
+            resBox.innerHTML = '🧠 ИИ распознаёт фото анализов...';
+            const prompt = [
+                { role:'system', content:'Ты — медицинский ИИ-консультант в приложении FOCUS. На фото — результаты лабораторных анализов или медицинские документы. Распознай показатели, разбери простым языком на русском: что в норме, что отклонено, на что обратить внимание. НЕ ставь диагнозы. В конце напомни про консультацию врача. Если на фото не анализы — честно скажи что видишь.' },
+                { role:'user', content: 'Разбери мои анализы с этого фото' }
+            ];
+            const res = await window.fbAskAIVision(prompt, photoDoc.data, 700);
+            if (res.ok) {
+                resBox.innerHTML = '🧠 ' + res.reply.replace(/</g,'&lt;').replace(/\n/g,'<br>') + '<br><br><span style="font-size:11px;color:#9a9aab;">⚠️ Не заменяет врача. При проблемах обратись к специалисту.</span>';
+            } else {
+                // vision не сработал — покажем причину + предложим текстовый ввод
+                let msg = '⚠️ Не удалось разобрать фото: ' + (res.error||'ошибка');
+                if (res.hint) msg += '<br><span style="font-size:11px;color:#9a9aab;">' + res.hint + '. Пока введи показатели вручную (кнопка добавить значение) — разберу текстом.</span>';
+                resBox.innerHTML = msg;
+            }
+            return;
+        }
+
+        // ТЕКСТОВЫЕ показатели
+        if (labs.length === 0) {
+            resBox.innerHTML = '<span style="color:#9a9aab;">Загрузи фото анализов или добавь показатели значениями — тогда разберу.</span>';
+            return;
+        }
+        resBox.innerHTML = '🧠 ИИ разбирает показатели...';
+        const labsStr = labs.map(l => `${l.name}: ${l.value}${l.unit||''}${l.norm?' (норма '+l.norm+')':''}`).join('; ');
+        const prompt = [
+            { role:'system', content:'Ты — медицинский ИИ-консультант в приложении FOCUS. Разбери показатели анализов простым языком на русском: что в норме, что отклонено, на что обратить внимание. НЕ ставь диагнозы. В конце напомни про консультацию врача. 4-6 предложений.' },
+            { role:'user', content:'Мои показатели: ' + labsStr }
+        ];
+        const res = await window.fbAskAI(prompt, 500);
+        if (res.ok) {
+            resBox.innerHTML = '🧠 ' + res.reply.replace(/</g,'&lt;').replace(/\n/g,'<br>') + '<br><br><span style="font-size:11px;color:#9a9aab;">⚠️ Не заменяет врача.</span>';
+        } else {
+            resBox.innerHTML = '⚠️ ИИ недоступен: ' + (res.error||'ошибка');
+        }
     });
 
     // ===== Инициализация =====

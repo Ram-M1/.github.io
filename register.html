@@ -459,12 +459,13 @@
             // реальная регистрация через Firebase
             if (window.fbRegister) {
                 window.fbRegister(email, password).then(function(res) {
-                    if (res.ok) {
-                        // сохраняем локально для текущей сессии + в облако
+                    if (res.ok && res.needVerify) {
+                        // сохраняем email локально, показываем экран подтверждения
                         FocusStorage.saveUser({ email });
-                        if (window.fbSaveUserData) {
-                            window.fbSaveUserData({ email: email, createdAt: Date.now() });
-                        }
+                        showVerifyScreen(email);
+                    } else if (res.ok) {
+                        FocusStorage.saveUser({ email });
+                        if (window.fbSaveUserData) window.fbSaveUserData({ email: email, createdAt: Date.now() });
                         window.location.href = 'profile-form.html';
                     } else {
                         btn.disabled = false;
@@ -475,12 +476,29 @@
                     }
                 });
             } else {
-                // запасной вариант если Firebase не загрузился
                 FocusStorage.saveUser({ email, password });
                 window.location.href = 'profile-form.html';
             }
         }
     });
+
+    // экран "подтвердите почту"
+    function showVerifyScreen(email){
+        const card = document.querySelector('.screen') || document.body;
+        card.innerHTML = `
+            <div style="display:flex;flex-direction:column;justify-content:center;height:100%;text-align:center;padding:30px 26px;">
+                <div style="font-size:56px;margin-bottom:18px;">📬</div>
+                <div style="font-size:20px;font-weight:700;color:var(--accent);margin-bottom:14px;">Подтвердите почту</div>
+                <div style="font-size:13.5px;color:#c8c8d0;line-height:1.6;margin-bottom:10px;">
+                    Мы отправили письмо на<br><b style="color:#fff;">${email}</b>
+                </div>
+                <div style="font-size:12px;color:#9a9aab;line-height:1.6;margin-bottom:26px;">
+                    Открой письмо и нажми ссылку подтверждения, потом войди.<br>
+                    <span style="color:#8e8e9e;">Не пришло? Проверь папку «Спам».</span>
+                </div>
+                <div onclick="location.href='login.html'" style="background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#0a0a0f;font-weight:700;padding:15px;border-radius:14px;cursor:pointer;font-size:15px;">Перейти ко входу</div>
+            </div>`;
+    }
 </script>
 <script>
     if ('serviceWorker' in navigator) {

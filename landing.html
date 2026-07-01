@@ -627,6 +627,29 @@
     }
     playDemo();
     setInterval(playDemo, 3600);
+
+    // Автовход: если сессия Firebase восстановилась (юзер уже входил и подтвердил почту)
+    // — сразу пускаем в приложение, минуя landing (не надо вводить пароль каждый раз)
+    (function(){
+        function checkSession(){
+            const user = window.fbCurrentUser && window.fbCurrentUser();
+            if (user && user.emailVerified) {
+                // проверяем заполнена ли анкета — решаем куда вести
+                const u = FocusStorage.getUser();
+                const done = u && ((u.flags && u.flags.profileCompleted) || u.profileCompleted);
+                if (done) {
+                    location.replace('index.html');
+                } else {
+                    location.replace('profile-form.html');
+                }
+            }
+        }
+        // ждём восстановления сессии Firebase
+        if (window.FB_AUTH_READY) checkSession();
+        else window.addEventListener('fb-auth-ready', checkSession);
+        // подстраховка через момент (сессия может восстановиться с задержкой)
+        setTimeout(checkSession, 1500);
+    })();
 </script>
 <script>
     if ('serviceWorker' in navigator) {

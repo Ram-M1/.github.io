@@ -705,7 +705,7 @@ initAtmosphere(canvasId) {
         } catch(e){ return 0; }
     }
 
-    function analyzeDay(){
+    async function analyzeDay(){
         const markedCharge = data.charge.filter(s => marks[s.id]).map(s => ({name:s.name, p:marks[s.id]}));
         const markedDrain = data.drain.filter(s => marks[s.id]).map(s => ({name:s.name, p:marks[s.id]}));
         if (markedCharge.length === 0 && markedDrain.length === 0) {
@@ -713,38 +713,45 @@ initAtmosphere(canvasId) {
             return;
         }
         const el = document.getElementById('aiVerdictText');
-        el.innerText = 'AI анализирует твой день...';
-        // эвристический разбор (честный: расход не стирается зарядом) — заглушка до бэкенда
-        setTimeout(() => {
-            let chargeSum = markedCharge.reduce((s,x)=>s+x.p,0);
-            let drainSum = markedDrain.reduce((s,x)=>s+x.p,0);
-            const sleep = getSleepToday();
-            const parts = [];
+        el.innerText = '🧠 ИИ анализирует твой день...';
+        const sleep = getSleepToday();
 
-            // сон из дневника — отдельный сильный фактор
-            if (sleep) {
-                if (sleep.hours < 6) { parts.push('Сон всего ' + Math.round(sleep.hours) + 'ч — это серьёзный недосып, он бьёт по всему организму сильнее любого заряда.'); drainSum += 3; }
-                else if (sleep.hours >= 7 && sleep.hours <= 9) parts.push('Сон ' + Math.round(sleep.hours) + 'ч — хорошая база для энергии.');
+        // РЕАЛЬНЫЙ ИИ (DeepSeek)
+        if (window.fbAskAI) {
+            const chargeStr = markedCharge.map(x=>x.name+' (сила '+x.p+'/4)').join(', ') || 'нет';
+            const drainStr = markedDrain.map(x=>x.name+' (сила '+x.p+'/4)').join(', ') || 'нет';
+            const sleepStr = sleep ? ('Сон: '+Math.round(sleep.hours)+' часов.') : '';
+            const prompt = [
+                { role:'system', content:'Ты — заботливый консультант по энергии и восстановлению в приложении FOCUS. Проанализируй что зарядило и что истощило человека за день. Дай тёплый, конкретный разбор на русском (3-5 предложений): отметь баланс, выдели главный истощитель, дай 1-2 практических совета. Без воды, по-человечески.' },
+                { role:'user', content:`Заряжало сегодня: ${chargeStr}. Истощало: ${drainStr}. ${sleepStr}` }
+            ];
+            const res = await window.fbAskAI(prompt, 400);
+            if (res.ok) {
+                el.innerHTML = '🧠 ' + res.reply.replace(/</g,'&lt;').replace(/\n/g,'<br>');
+                rewardOncePerDay();
+                return;
             }
-            // сильные истощители
-            const strongDrain = markedDrain.filter(x => x.p >= 3);
-            if (strongDrain.length) parts.push('Сильно истощает: ' + strongDrain.map(x=>x.name.toLowerCase()).join(', ') + '. Это не компенсируется приятными делами — с этим стоит разобраться отдельно.');
+            // если ИИ не ответил — падаем в эвристику ниже
+        }
 
-            // вывод
-            let verdict;
-            if (drainSum >= chargeSum + 2) verdict = '🪫 Сегодня расход энергии заметно выше восстановления. Тело в минусе — постарайся лечь пораньше и снизить нагрузку.';
-            else if (chargeSum >= drainSum + 2) verdict = '🔋 Хороший день: заряжающего было больше. Так и держи.';
-            else verdict = '⚖️ День смешанный — было и то, что заряжает, и то, что выматывает. Заметь, что истощает, и по возможности убери это.';
-
-            if (markedCharge.length) parts.unshift('Заряжало: ' + markedCharge.map(x=>x.name.toLowerCase()).join(', ') + '.');
-            parts.push(verdict);
-            parts.push('💡 Полноценный персональный разбор подключится с серверной частью.');
-
-            el.innerHTML = parts.join('<br><br>');
-
-            // награда раз в день
-            rewardOncePerDay();
-        }, 800);
+        // Fallback: эвристический разбор (если ИИ недоступен)
+        let chargeSum = markedCharge.reduce((s,x)=>s+x.p,0);
+        let drainSum = markedDrain.reduce((s,x)=>s+x.p,0);
+        const parts = [];
+        if (sleep) {
+            if (sleep.hours < 6) { parts.push('Сон всего ' + Math.round(sleep.hours) + 'ч — серьёзный недосып, бьёт по всему организму.'); drainSum += 3; }
+            else if (sleep.hours >= 7 && sleep.hours <= 9) parts.push('Сон ' + Math.round(sleep.hours) + 'ч — хорошая база для энергии.');
+        }
+        const strongDrain = markedDrain.filter(x => x.p >= 3);
+        if (strongDrain.length) parts.push('Сильно истощает: ' + strongDrain.map(x=>x.name.toLowerCase()).join(', ') + '.');
+        let verdict;
+        if (drainSum >= chargeSum + 2) verdict = '🪫 Расход энергии выше восстановления. Ляг пораньше, снизь нагрузку.';
+        else if (chargeSum >= drainSum + 2) verdict = '🔋 Хороший день: заряжающего было больше. Так держи.';
+        else verdict = '⚖️ День смешанный. Заметь что истощает и убери по возможности.';
+        if (markedCharge.length) parts.unshift('Заряжало: ' + markedCharge.map(x=>x.name.toLowerCase()).join(', ') + '.');
+        parts.push(verdict);
+        el.innerHTML = parts.join('<br><br>');
+        rewardOncePerDay();
     }
     document.getElementById('aiAnalyzeBtn').addEventListener('click', analyzeDay);
 

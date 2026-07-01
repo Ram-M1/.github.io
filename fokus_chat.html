@@ -203,6 +203,15 @@
     .ai-suggest-btn { width:38px; height:38px; flex-shrink:0; border-radius:50%; background:rgba(var(--accent-2-rgb),0.14); border:1px solid rgba(var(--accent-2-rgb),0.3); display:flex; align-items:center; justify-content:center; color:var(--accent-2); cursor:pointer; }
     .ai-suggest-btn svg { width:19px; height:19px; }
     .ai-suggest-btn:active { transform:scale(0.92); }
+    .attach-preview { background:rgba(0,0,0,0.35); border:1px solid rgba(var(--accent-rgb),0.25); border-radius:14px; padding:11px; margin-bottom:8px; }
+    .attach-preview-content { margin-bottom:10px; }
+    .attach-preview-content img { max-width:140px; max-height:140px; border-radius:10px; display:block; margin:0 auto; }
+    .attach-preview-file { display:flex; align-items:center; gap:10px; color:#e8e8ee; font-size:13px; }
+    .attach-preview-file svg { width:26px; height:26px; flex-shrink:0; color:var(--accent); }
+    .attach-preview-actions { display:flex; gap:8px; }
+    .attach-preview-actions button { flex:1; padding:10px; border-radius:11px; font-size:13px; font-weight:700; cursor:pointer; border:none; font-family:inherit; }
+    .ap-cancel { background:rgba(255,255,255,0.08); color:#9a9aab; }
+    .ap-send { background:linear-gradient(135deg,var(--accent),var(--accent-2)); color:#0a0a0f; }
     .ai-suggests { display:flex; flex-direction:column; gap:6px; padding:8px 4px 4px; }
     .ai-suggest-item { background:linear-gradient(135deg, rgba(var(--accent-2-rgb),0.12), rgba(var(--accent-rgb),0.06)); border:1px solid rgba(var(--accent-2-rgb),0.25); border-radius:12px; padding:9px 13px; font-size:12.5px; color:#d8d8e0; cursor:pointer; line-height:1.35; }
     .ai-suggest-item:active { transform:scale(0.98); background:rgba(var(--accent-2-rgb),0.2); }
@@ -299,6 +308,15 @@
         </div>
 
         <div class="ai-suggests" id="aiSuggests" style="display:none;"></div>
+
+        <!-- Предпросмотр вложения перед отправкой -->
+        <div class="attach-preview" id="attachPreview" style="display:none;">
+            <div class="attach-preview-content" id="attachPreviewContent"></div>
+            <div class="attach-preview-actions">
+                <button class="ap-cancel" id="apCancel">Отмена</button>
+                <button class="ap-send" id="apSend">Отправить</button>
+            </div>
+        </div>
 
         <div class="chat-input-row">
             <div class="ai-suggest-btn" id="aiSuggestBtn" title="ИИ-подсказки ответа">
@@ -725,25 +743,53 @@ initAtmosphere(canvasId) {
         }
     });
 
-    // фото → base64 (демо; при бэкенде грузится в Storage)
+    // выбранное вложение (ждёт отправки)
+    let pendingAttach = null; // { kind:'photo'|'file', data, fileName?, fileSize? }
+    const attachPreview = document.getElementById('attachPreview');
+
+    function showAttachPreview(){
+        const c = document.getElementById('attachPreviewContent');
+        if (!pendingAttach) return;
+        if (pendingAttach.kind === 'photo') {
+            c.innerHTML = '<img src="'+pendingAttach.data+'">';
+        } else {
+            c.innerHTML = '<div class="attach-preview-file"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/></svg><div><div>'+escapeHtml(pendingAttach.fileName)+'</div><div style="font-size:11px;color:#9a9aab;">'+escapeHtml(pendingAttach.fileSize||'')+'</div></div></div>';
+        }
+        attachPreview.style.display = 'block';
+    }
+    document.getElementById('apCancel').addEventListener('click', () => {
+        pendingAttach = null;
+        attachPreview.style.display = 'none';
+    });
+    document.getElementById('apSend').addEventListener('click', async () => {
+        if (!pendingAttach) return;
+        const btn = document.getElementById('apSend');
+        btn.disabled = true; btn.innerText = 'Отправка...';
+        if (isRealChat && window.fbSendMessage) {
+            await window.fbSendMessage(realChatId, pendingAttach);
+        } else {
+            if (pendingAttach.kind === 'photo') addMsg({ from:'me', img: pendingAttach.data, time:nowTime() });
+            else addMsg({ from:'me', doc: pendingAttach.fileName, time:nowTime() });
+        }
+        pendingAttach = null;
+        attachPreview.style.display = 'none';
+        btn.disabled = false; btn.innerText = 'Отправить';
+    });
+
+    // фото → сжатие → предпросмотр (НЕ отправляем сразу)
     document.getElementById('fileInput').addEventListener('change', (e) => {
         const file = e.target.files[0];
         if (!file) return;
         const reader = new FileReader();
         reader.onload = () => {
-            // сжимаем фото через canvas
             const img = new Image();
-            img.onload = async () => {
+            img.onload = () => {
                 const max = 800, sc = Math.min(1, max/Math.max(img.width, img.height));
                 const cv = document.createElement('canvas');
                 cv.width = img.width*sc; cv.height = img.height*sc;
                 cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height);
-                const compressed = cv.toDataURL('image/jpeg', 0.7);
-                if (isRealChat && window.fbSendMessage) {
-                    await window.fbSendMessage(realChatId, { kind:'photo', data: compressed, text:'' });
-                } else {
-                    addMsg({ from:'me', img: compressed, time:nowTime() });
-                }
+                pendingAttach = { kind:'photo', data: cv.toDataURL('image/jpeg', 0.7), text:'' };
+                showAttachPreview();
             };
             img.src = reader.result;
         };
@@ -751,7 +797,7 @@ initAtmosphere(canvasId) {
         e.target.value = '';
         document.getElementById('attachMenu').classList.remove('show');
     });
-    // документ/файл → base64 (лимит 900КБ для Firestore; крупнее — нужен Storage)
+    // документ/файл → предпросмотр (НЕ отправляем сразу)
     document.getElementById('docInput').addEventListener('change', (e) => {
         const file = e.target.files[0];
         if (!file) return;
@@ -760,13 +806,9 @@ initAtmosphere(canvasId) {
             e.target.value = ''; return;
         }
         const reader = new FileReader();
-        reader.onload = async () => {
-            const sizeKb = Math.round(file.size/1024) + ' КБ';
-            if (isRealChat && window.fbSendMessage) {
-                await window.fbSendMessage(realChatId, { kind:'file', data: reader.result, fileName: file.name, fileSize: sizeKb, text:'' });
-            } else {
-                addMsg({ from:'me', doc: file.name, time:nowTime() });
-            }
+        reader.onload = () => {
+            pendingAttach = { kind:'file', data: reader.result, fileName: file.name, fileSize: Math.round(file.size/1024)+' КБ', text:'' };
+            showAttachPreview();
         };
         reader.readAsDataURL(file);
         e.target.value = '';
@@ -800,17 +842,18 @@ initAtmosphere(canvasId) {
         // рендер одного сообщения (все типы)
         function renderMsg(m, mine){
             const wrap = document.createElement('div');
-            wrap.className = 'msg-row ' + (mine ? 'me' : 'them');
+            wrap.style.display = 'flex';
+            wrap.style.flexDirection = 'column';
             const t = m.at ? new Date(m.at).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'}) : '';
             let inner = '';
             if (m.kind === 'photo' && m.data) {
-                inner = `<div class="msg-bubble ${mine?'me':'them'} msg-photo"><img src="${m.data}" onclick="window.open('${m.data}','_blank')">${m.text?'<div style=\"margin-top:5px;\">'+escapeHtml(m.text)+'</div>':''}<span class="msg-time">${t}</span></div>`;
+                inner = `<div class="msg ${mine?'me':'them'}"><img src="${m.data}" class="msg-img" onclick="window.open('${m.data}','_blank')">${m.text?'<div>'+escapeHtml(m.text)+'</div>':''}<span class="msg-time">${t}</span></div>`;
             } else if (m.kind === 'file' && m.data) {
-                inner = `<div class="msg-bubble ${mine?'me':'them'}"><a href="${m.data}" download="${escapeHtml(m.fileName||'файл')}" class="msg-file"><div class="msg-file-ic">📎</div><div><div class="msg-file-name">${escapeHtml(m.fileName||'Файл')}</div><div class="msg-file-size">${escapeHtml(m.fileSize||'')}</div></div></a><span class="msg-time">${t}</span></div>`;
+                inner = `<div class="msg ${mine?'me':'them'}"><a href="${m.data}" download="${escapeHtml(m.fileName||'файл')}" class="msg-doc" style="text-decoration:none;color:inherit;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/></svg><div><div class="msg-doc-name">${escapeHtml(m.fileName||'Файл')}</div><div style="font-size:10px;opacity:0.7;">${escapeHtml(m.fileSize||'')}</div></div></a><span class="msg-time">${t}</span></div>`;
             } else if (m.kind === 'coins') {
                 inner = `<div class="msg-coins">💰 ${mine?'Ты перевёл':'Тебе перевели'} ${m.amount} F-coin<span class="msg-time" style="display:block;color:#a88;">${t}</span></div>`;
             } else {
-                inner = `<div class="msg-bubble ${mine?'me':'them'}">${escapeHtml(m.text)}<span class="msg-time">${t}</span></div>`;
+                inner = `<div class="msg ${mine?'me':'them'}">${escapeHtml(m.text)}<span class="msg-time">${t}</span></div>`;
             }
             wrap.innerHTML = inner;
             return wrap;

@@ -490,15 +490,11 @@ initAtmosphere(canvasId) {
 
     // демо-чаты при первом заходе (чтобы экран не был пустым; при бэкенде заменится реальными)
     function seedIfEmpty(){
+        // чистим старых демо-ботов если завалялись в памяти
         let chats = getChats();
-        if (chats.length === 0) {
-            chats = [
-                { id:'c1', name:'Мария Таролог', type:'oracle', avatar:'М', online:true, last:'Здравствуйте! Расклад готов, смотрите...', time:'14:32', unread:2 },
-                { id:'c2', name:'Алексей', type:'user', avatar:'А', online:false, last:'Дружище, как успехи с зарядкой?', time:'12:05', unread:0 },
-                { id:'c3', name:'Команда FOCUS', type:'system', avatar:'F', online:true, last:'Добро пожаловать в FOCUS! 🎯', time:'Вчера', unread:0 }
-            ];
-            saveChats(chats);
-        }
+        const demoIds = ['c1','c2','c3'];
+        const cleaned = chats.filter(c => !demoIds.includes(c.id));
+        if (cleaned.length !== chats.length) { saveChats(cleaned); return cleaned; }
         return chats;
     }
 
@@ -670,16 +666,8 @@ initAtmosphere(canvasId) {
     if (window.FB_AUTH_READY) setTimeout(loadRealChats, 700);
     else window.addEventListener('fb-auth-ready', () => setTimeout(loadRealChats, 700));
 
-    // ===== Контакты (демо как WhatsApp) =====
+    // ===== Контакты (реальные из облака) =====
     const contactsModal = document.getElementById('contactsModal');
-    // демо-контакты: у кого есть приложение и у кого нет
-    const DEMO_CONTACTS = [
-        { name:'Дмитрий Соколов', phone:'+7 916 •••‑••‑12', hasApp:true },
-        { name:'Елена Карпова',   phone:'+7 925 •••‑••‑44', hasApp:true },
-        { name:'Игорь Петров',    phone:'+7 903 •••‑••‑88', hasApp:false },
-        { name:'Анна Морозова',   phone:'+7 911 •••‑••‑05', hasApp:true },
-        { name:'Сергей Волков',   phone:'+7 962 •••‑••‑37', hasApp:false }
-    ];
 
     document.getElementById('addFriendBtn').addEventListener('click', () => {
         renderContacts();
@@ -687,57 +675,62 @@ initAtmosphere(canvasId) {
     });
     contactsModal.addEventListener('click', (e) => { if (e.target.id === 'contactsModal') contactsModal.classList.remove('show'); });
 
-    function renderContacts(){
+    async function renderContacts(){
         const cont = document.getElementById('contactsList');
+        cont.innerHTML = '<div style="text-align:center;color:#8e8e9e;font-size:12px;padding:14px;">Загрузка...</div>';
+        let contacts = [];
+        if (window.fbGetContacts) {
+            try { contacts = await window.fbGetContacts(); } catch(e){}
+        }
+        if (!contacts.length) {
+            cont.innerHTML = `
+                <div style="text-align:center;padding:18px 10px;">
+                    <div style="font-size:34px;margin-bottom:10px;">👥</div>
+                    <div style="font-size:13px;color:#c8c8d0;line-height:1.5;margin-bottom:14px;">Пока нет контактов.<br>Найди человека по номеру телефона и добавь.</div>
+                    <div class="contact-action has-app" id="goFindPhone" style="display:inline-block;">🔍 Найти по номеру</div>
+                </div>`;
+            const btn = document.getElementById('goFindPhone');
+            if (btn) btn.addEventListener('click', () => {
+                contactsModal.classList.remove('show');
+                document.getElementById('writeByPhoneBtn').click();
+            });
+            return;
+        }
         cont.innerHTML = '';
-        // сначала те у кого есть приложение
-        DEMO_CONTACTS.slice().sort((a,b)=>(b.hasApp?1:0)-(a.hasApp?1:0)).forEach(ct => {
-            const initial = ct.name[0].toUpperCase();
+        contacts.forEach(ct => {
+            const initial = (ct.name && ct.name[0] || '?').toUpperCase();
             const item = document.createElement('div');
             item.className = 'contact-item';
             item.innerHTML = `
                 <div class="chat-avatar" style="width:44px;height:44px;font-size:17px;">${initial}</div>
                 <div class="contact-info">
-                    <div class="contact-name">${escapeHtml(ct.name)}</div>
-                    <div class="contact-phone">${escapeHtml(ct.phone)}${ct.hasApp?' · <span class="has-app-tag">в FOCUS</span>':''}</div>
+                    <div class="contact-name">${escapeHtml(ct.name||'Контакт')}</div>
+                    <div class="contact-phone">${escapeHtml(ct.phone||'')} · <span class="has-app-tag">в FOCUS</span></div>
                 </div>
-                <div class="contact-action ${ct.hasApp?'has-app':'invite'}" data-name="${escapeHtml(ct.name)}" data-hasapp="${ct.hasApp}">
-                    ${ct.hasApp?'Написать':'Пригласить'}
-                </div>`;
+                <div class="contact-action has-app" data-uid="${ct.uid}" data-name="${escapeHtml(ct.name||'')}">Написать</div>`;
             cont.appendChild(item);
         });
-        cont.querySelectorAll('.contact-action').forEach(el => el.addEventListener('click', () => {
-            const name = el.dataset.name;
-            if (el.dataset.hasapp === 'true') {
-                // создаём чат
-                const chats = getChats();
-                let ch = chats.find(c => c.name === name);
-                if (!ch) {
-                    ch = { id:'c'+Date.now(), name:name, type:'user', avatar:name[0], online:false, last:'', time:'', unread:0 };
-                    chats.push(ch); saveChats(chats);
-                }
+        cont.querySelectorAll('.contact-action[data-uid]').forEach(el => el.addEventListener('click', async () => {
+            if (!window.fbOpenChat) return;
+            const open = await window.fbOpenChat(el.dataset.uid, el.dataset.name);
+            if (open.ok) {
                 contactsModal.classList.remove('show');
-                location.href = 'fokus_chat.html?id=' + ch.id;
-            } else {
-                toast('Приглашение отправлено: ' + name);
+                location.href = 'fokus_chat.html?chatId=' + open.chatId + '&name=' + encodeURIComponent(el.dataset.name);
             }
         }));
     }
 
     // === Создание группы ===
     const groupModal = document.getElementById('groupModal');
-    // потенциальные участники (демо-друзья; с бэкендом — реальные контакты)
-    const friendPool = [
-        { id:'f1', name:'Алексей', av:'А' },
-        { id:'f2', name:'Мария', av:'М' },
-        { id:'f3', name:'Дмитрий', av:'Д' },
-        { id:'f4', name:'Ольга', av:'О' },
-        { id:'f5', name:'Иван', av:'И' }
-    ];
+    let friendPool = []; // заполняется реальными контактами
     let selectedMembers = [];
     function renderGroupMembers(){
         const cont = document.getElementById('groupMembersList');
         cont.innerHTML = '';
+        if (!friendPool.length) {
+            cont.innerHTML = '<div style="text-align:center;color:#8e8e9e;font-size:12px;padding:14px;">Нет контактов для группы.<br>Сначала добавь людей по номеру телефона.</div>';
+            return;
+        }
         friendPool.forEach(f => {
             const sel = selectedMembers.includes(f.id);
             const row = document.createElement('div');
@@ -754,9 +747,16 @@ initAtmosphere(canvasId) {
             cont.appendChild(row);
         });
     }
-    document.getElementById('createGroupBtn').addEventListener('click', () => {
+    document.getElementById('createGroupBtn').addEventListener('click', async () => {
         selectedMembers = [];
         document.getElementById('groupNameInput').value = '';
+        // подгружаем реальные контакты как участников
+        if (window.fbGetContacts) {
+            try {
+                const cs = await window.fbGetContacts();
+                friendPool = cs.map(c => ({ id: c.uid, name: c.name || 'Контакт', av: (c.name&&c.name[0]||'?').toUpperCase() }));
+            } catch(e){ friendPool = []; }
+        }
         renderGroupMembers();
         groupModal.classList.add('show');
     });

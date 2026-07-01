@@ -643,7 +643,7 @@ initAtmosphere(canvasId) {
     }
 
     // Отправка сообщения
-    function sendChat(){
+    async function sendChat(){
         const inp = document.getElementById('chatInput');
         const text = inp.value.trim();
         if (!text) return;
@@ -652,15 +652,36 @@ initAtmosphere(canvasId) {
         inp.value = '';
         inp.style.height = 'auto';
 
-        // Заглушка ответа AI (реальный ответ — с серверной частью)
-        const typing = addMsg('typing', 'AI-психолог печатает...');
-        setTimeout(() => {
+        const typing = addMsg('typing', 'ИИ-психолог печатает...');
+
+        if (window.fbAskAI) {
+            // строим историю диалога для контекста (последние 10 сообщений)
+            const history = chatLog.slice(-10).map(m => ({
+                role: m.role === 'ai' ? 'assistant' : 'user',
+                content: m.text
+            }));
+            const messages = [
+                { role:'system', content:'Ты — тёплый, поддерживающий ИИ-психолог в приложении FOCUS. Помогаешь человеку разобраться в эмоциях и мыслях. Слушай, задавай мягкие уточняющие вопросы, помогай увидеть ситуацию иначе. Отвечай коротко (2-4 предложения), по-человечески, на русском, без клише. НЕ ставь диагнозы. Если чувствуешь серьёзный кризис — мягко посоветуй обратиться к живому специалисту.' },
+                ...history
+            ];
+            const res = await window.fbAskAI(messages, 400);
             typing.remove();
-            // Честная заглушка: объясняем, что полноценный анализ подключится с бэкендом
-            const stub = 'Я тебя услышал. Полноценный разбор с живыми ответами подключится с серверной частью приложения. А пока — попробуй описать подробнее: что именно ты почувствовал(а) в этот момент и в теле тоже?';
-            addMsg('ai', stub);
-            chatLog.push({ role:'ai', text: stub });
-        }, 900);
+            if (res.ok) {
+                addMsg('ai', res.reply);
+                chatLog.push({ role:'ai', text: res.reply });
+            } else {
+                const fb = 'Я тебя услышал. Расскажи подробнее — что именно ты почувствовал(а) и где это отозвалось в теле?';
+                addMsg('ai', fb);
+                chatLog.push({ role:'ai', text: fb });
+            }
+        } else {
+            setTimeout(() => {
+                typing.remove();
+                const stub = 'Я тебя услышал. Попробуй описать подробнее: что именно ты почувствовал(а) в этот момент?';
+                addMsg('ai', stub);
+                chatLog.push({ role:'ai', text: stub });
+            }, 900);
+        }
     }
 
     document.getElementById('chatSend').addEventListener('click', sendChat);

@@ -14,7 +14,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
   getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
-  signOut, onAuthStateChanged
+  signOut, onAuthStateChanged, sendEmailVerification, reload
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {
   getFirestore, doc, setDoc, getDoc, updateDoc, collection, query, where, getDocs, arrayUnion,
@@ -50,21 +50,48 @@ function ruError(code) {
   return map[code] || ('Ошибка: ' + code);
 }
 
-// регистрация
+// регистрация — создаёт аккаунт, шлёт письмо подтверждения, НЕ пускает до подтверждения
 window.fbRegister = async function(email, password) {
   try {
     const cred = await createUserWithEmailAndPassword(auth, email, password);
+    // отправляем письмо подтверждения
+    try { await sendEmailVerification(cred.user); } catch(e){}
+    // выходим — пускаем только после подтверждения почты
+    await signOut(auth);
+    return { ok: true, needVerify: true, email: email };
+  } catch (e) {
+    return { ok: false, error: ruError(e.code) };
+  }
+};
+
+// вход — проверяет подтверждение почты, но СОХРАНЯЕТ сессию (не разлогинивает)
+window.fbLogin = async function(email, password) {
+  try {
+    const cred = await signInWithEmailAndPassword(auth, email, password);
+    // проверяем подтверждение почты (только чтобы не пускать совсем неподтверждённых)
+    if (!cred.user.emailVerified) {
+      try { await sendEmailVerification(cred.user); } catch(e){}
+      await signOut(auth);
+      return { ok: false, needVerify: true, email: email, error: 'Подтвердите почту — письмо отправлено на ' + email };
+    }
+    // почта подтверждена — сессия СОХРАНЯЕТСЯ (Firebase помнит, повторный вход не нужен)
     return { ok: true, uid: cred.user.uid };
   } catch (e) {
     return { ok: false, error: ruError(e.code) };
   }
 };
 
-// вход
-window.fbLogin = async function(email, password) {
+// повторно отправить письмо подтверждения (вход по паролю → письмо → выход)
+window.fbResendVerification = async function(email, password) {
   try {
     const cred = await signInWithEmailAndPassword(auth, email, password);
-    return { ok: true, uid: cred.user.uid };
+    if (cred.user.emailVerified) {
+      await signOut(auth);
+      return { ok: true, alreadyVerified: true };
+    }
+    await sendEmailVerification(cred.user);
+    await signOut(auth);
+    return { ok: true };
   } catch (e) {
     return { ok: false, error: ruError(e.code) };
   }
@@ -590,6 +617,68 @@ window.fbGetChatList = async function() {
     return list;
   } catch (e) {
     return [];
+  }
+};
+
+// ========== ИИ (DeepSeek через прокси Cloudflare) ==========
+
+// Адрес твоего прокси-воркера (ключ спрятан на стороне Cloudflare)
+window.FOCUS_AI_PROXY = 'https://focus-ai.playing-life-rama.workers.dev';
+
+// Универсальный вызов ИИ. messages — массив [{role, content}]
+// Возвращает { ok, reply } или { ok:false, error }
+window.fbAskAI = async function(messages, maxTokens) {
+  try {
+    const res = await fetch(window.FOCUS_AI_PROXY, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ messages, max_tokens: maxTokens || 600 })
+    });
+    const data = await res.json();
+    if (data.ok && data.reply) return { ok: true, reply: data.reply };
+    return { ok: false, error: data.error || 'Пустой ответ ИИ' };
+  } catch (e) {
+    return { ok: false, error: 'Нет связи с ИИ: ' + e.message };
+  }
+};
+
+// ИИ-подсказки ответов в чате: возвращает массив из 3 вариантов
+window.fbAiSuggestReplies = async function(chatId) {
+  try {
+    // берём последние сообщения чата для контекста
+    const snap = await getDocs(query(collection(db, 'chats', chatId, 'messages'), orderBy('ts', 'desc'), limit(6)));
+    const recent = [];
+    snap.forEach(d => { const m = d.data(); recent.unshift(m.text || (m.kind==='photo'?'[фото]':m.kind==='file'?'[файл]':'')); });
+    const context = recent.filter(Boolean).join('\n');
+    const prompt = [
+      { role: 'system', content: 'Ты помощник в мессенджере. На основе переписки предложи РОВНО 3 коротких варианта ответа от лица пользователя. Каждый с новой строки, без нумерации, без кавычек, естественным разговорным языком на русском.' },
+      { role: 'user', content: 'Переписка:\n' + context + '\n\nПредложи 3 варианта ответа:' }
+    ];
+    const res = await window.fbAskAI(prompt, 200);
+    if (res.ok) {
+      const variants = res.reply.split('\n').map(s => s.replace(/^[\d\-\.\)\s]+/, '').trim()).filter(Boolean).slice(0, 3);
+      return variants.length ? variants : ['Хорошо', 'Понял, спасибо', 'Давай обсудим позже'];
+    }
+    return ['Хорошо', 'Понял', 'Давай позже'];
+  } catch (e) {
+    return ['Хорошо', 'Понял', 'Давай позже'];
+  }
+};
+
+// Вызов ИИ с картинкой (vision) — для разбора фото анализов, еды и т.п.
+// imageDataUrl — base64 data:image/...; prompt — текстовый вопрос
+window.fbAskAIVision = async function(messages, imageDataUrl, maxTokens) {
+  try {
+    const res = await fetch(window.FOCUS_AI_PROXY, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ messages, image: imageDataUrl, max_tokens: maxTokens || 700 })
+    });
+    const data = await res.json();
+    if (data.ok && data.reply) return { ok: true, reply: data.reply };
+    return { ok: false, error: data.error || 'Пустой ответ', detail: data.detail, hint: data.hint };
+  } catch (e) {
+    return { ok: false, error: 'Нет связи с ИИ: ' + e.message };
   }
 };
 

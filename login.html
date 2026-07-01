@@ -604,6 +604,22 @@
                     } else {
                         window.location.href = 'index.html';
                     }
+                } else if (res.needVerify) {
+                    // почта не подтверждена — не пускаем
+                    loginBtn.disabled = false;
+                    loginBtn.innerText = origText;
+                    const errEl = document.getElementById('passwordError');
+                    errEl.innerHTML = '📬 Подтвердите почту. Письмо отправлено на ' + email + '. <span style="text-decoration:underline;cursor:pointer;" id="resendLink">Отправить снова</span>';
+                    errEl.style.display = 'block';
+                    errEl.style.color = '#FFD966';
+                    const rl = document.getElementById('resendLink');
+                    if (rl) rl.addEventListener('click', async () => {
+                        rl.innerText = 'Отправляем...';
+                        if (window.fbResendVerification) {
+                            const r = await window.fbResendVerification(email, password);
+                            rl.innerText = r.ok ? '✓ Отправлено, проверь почту' : 'Ошибка';
+                        }
+                    });
                 } else {
                     loginBtn.disabled = false;
                     loginBtn.innerText = origText;
