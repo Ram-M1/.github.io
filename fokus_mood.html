@@ -221,6 +221,7 @@
     <div class="toast" id="toast"></div>
 </div>
 <script src="focus-storage.js"></script>
+<script src="focus-rewards.js"></script>
 <script type="module" src="firebase-auth-helper.js"></script>
 <script src="focus-core.js"></script>
 <script>
@@ -714,8 +715,7 @@ initAtmosphere(canvasId) {
         saveEntries();
 
         if (!hadToday) {
-            FocusStorage.addCoins(1);
-            FocusStorage.addActivity('mental', 'mood');
+            if(window.FocusRewards)FocusRewards.mark('mental','mood');else FocusStorage.addActivity('mental','mood');
             if (FocusCore.celebrate) FocusCore.celebrate({ fromEl: document.getElementById('saveMoodBtn'), text: 'Услышал себя', emoji: '💛' });
             toast('Запись сохранена! +1 F-coin');
         } else {

@@ -107,18 +107,26 @@ window.fbLogout = async function() {
 let _currentUser = null;
 onAuthStateChanged(auth, (user) => {
   _currentUser = user;
-  // когда сессия восстановилась — синкаем локальные данные в облако (одним разом)
+  // синкаем локальные данные в облако ТОЛЬКО один раз за сессию и только если есть что синкать
   if (user && window.FocusStorage && typeof window.FocusStorage.getUser === 'function') {
+    // защита: не чаще раза в 5 минут и только если данные менялись
+    const lastSync = parseInt(sessionStorage.getItem('_fb_synced') || '0');
+    if (Date.now() - lastSync < 5*60*1000) return;
+    sessionStorage.setItem('_fb_synced', String(Date.now()));
     try {
       const d = window.FocusStorage.getUser();
-      window.fbSaveUserData({
-        name: d.name || '', age: d.age || '', city: d.city || '', phone: d.phone || '',
-        coins: d.coins || 0, subscription: d.subscription || null,
-        subscriptionUntil: d.subscriptionUntil || null, theme: d.theme || 'original',
-        activity: d.activity || {}, weekStats: d.weekStats || {},
-        referral: d.referral || {}, flags: d.flags || {},
-        updatedAt: new Date().toISOString()
-      }).catch(() => {});
+      // синкаем в фоне, не блокируя загрузку страницы
+      setTimeout(() => {
+        window.fbSaveUserData({
+          name: d.name || '', age: d.age || '', city: d.city || '', phone: d.phone || '',
+          avatar: d.avatar || null,
+          coins: d.coins || 0, subscription: d.subscription || null,
+          subscriptionUntil: d.subscriptionUntil || null, theme: d.theme || 'original',
+          activity: d.activity || {}, weekStats: d.weekStats || {},
+          referral: d.referral || {}, flags: d.flags || {},
+          updatedAt: new Date().toISOString()
+        }).catch(() => {});
+      }, 3000);
     } catch(e){}
   }
 });
@@ -565,11 +573,12 @@ window.fbSearchChats = async function(queryText) {
     listSnap.forEach(d => chatList.push({ id: d.id, ...d.data() }));
     // чаты по имени собеседника
     const matchedChats = chatList.filter(c => (c.withName || '').toLowerCase().includes(qq));
-    // сообщения и файлы во всех чатах
+    // сообщения и файлы во всех чатах (ограничиваем для скорости)
     const matchedMessages = [];
     for (const c of chatList) {
       try {
-        const msgSnap = await getDocs(collection(db, 'chats', c.chatId, 'messages'));
+        // берём только последние 50 сообщений чата (не все — для скорости)
+        const msgSnap = await getDocs(query(collection(db, 'chats', c.chatId, 'messages'), orderBy('ts', 'desc'), limit(50)));
         msgSnap.forEach(m => {
           const data = m.data();
           const text = (data.text || '').toLowerCase();

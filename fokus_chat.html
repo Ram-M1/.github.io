@@ -866,12 +866,15 @@ initAtmosphere(canvasId) {
             const area = document.getElementById('messagesArea');
             area.innerHTML = '';
             window.fbListenMessages(realChatId, (msgs) => {
-                area.innerHTML = '';
                 if (!msgs.length) {
                     area.innerHTML = '<div style="text-align:center;color:#8e8e9e;font-size:12px;padding:30px 20px;">Начни переписку — напиши первое сообщение 👋</div>';
                     return;
                 }
-                msgs.forEach(m => area.appendChild(renderMsg(m, m.from === myUid)));
+                // быстрый рендер: собираем всё во фрагмент, один reflow
+                const frag = document.createDocumentFragment();
+                msgs.forEach(m => frag.appendChild(renderMsg(m, m.from === myUid)));
+                area.innerHTML = '';
+                area.appendChild(frag);
                 area.scrollTop = area.scrollHeight;
             });
         }

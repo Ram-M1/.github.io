@@ -181,6 +181,7 @@
     <div class="toast" id="toast"></div>
 </div>
 <script src="focus-storage.js"></script>
+<script src="focus-rewards.js"></script>
 <script type="module" src="firebase-auth-helper.js"></script>
 <script src="focus-core.js"></script>
 <script>
@@ -705,8 +706,7 @@ initAtmosphere(canvasId) {
             if (!rewardDays.includes(today)) {
                 rewardDays.push(today);
                 localStorage.setItem('focus_breathing_reward', JSON.stringify(rewardDays));
-                FocusStorage.addCoins(1);
-                FocusStorage.addActivity('energy', 'breathing');
+                if(window.FocusRewards)FocusRewards.mark('energy','breathing');else FocusStorage.addActivity('energy','breathing');
             }
             if (FocusCore.celebrate) FocusCore.celebrate({ text: 'Дыхание сделано', emoji: '🌬️' });
             toast('Практика завершена!');

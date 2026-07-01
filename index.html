@@ -738,6 +738,7 @@
     </div>
 </div>
 <script src="focus-storage.js"></script>
+<script src="focus-rewards.js"></script>
 <script type="module" src="firebase-auth-helper.js"></script>
 <script src="focus-core.js"></script>
 <script>
@@ -1333,11 +1334,13 @@
             if (!text) { input.focus(); return; }
             const matched = recognize(text);
             if (matched.length > 0) {
-                // распознали команду — записываем активность (быстро, без ИИ)
+                // распознали команду — записываем активность через FocusRewards (в достижения + прогресс)
                 matched.forEach(m => {
-                    try { FocusStorage.addActivity(m.sphere, m.action); } catch(e){}
+                    try {
+                        if (window.FocusRewards) FocusRewards.mark(m.sphere, m.action);
+                        else { FocusStorage.addActivity(m.sphere, m.action); FocusStorage.addCoins(1); }
+                    } catch(e){}
                 });
-                try { FocusStorage.addCoins(1); } catch(e){}
                 const labels = matched.map(m => m.label).join(', ');
                 result.className = 'ai-result show';
                 result.innerHTML = '<span class="check">✓</span> Записал: ' + labels + ' &nbsp;(+1 F-coin)';

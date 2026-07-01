@@ -225,6 +225,7 @@
     <div class="toast" id="toast"></div>
 </div>
 <script src="focus-storage.js"></script>
+<script src="focus-rewards.js"></script>
 <script type="module" src="firebase-auth-helper.js"></script>
 <script src="focus-core.js"></script>
 <script>
@@ -705,7 +706,7 @@ initAtmosphere(canvasId) {
                 let rd = []; try { rd = JSON.parse(localStorage.getItem('focus_rel_reward')) || []; } catch(e){}
                 if (!rd.includes(today)) {
                     rd.push(today); localStorage.setItem('focus_rel_reward', JSON.stringify(rd));
-                    FocusStorage.addCoins(1); FocusStorage.addActivity('relationships', 'add_person');
+                    if(window.FocusRewards)FocusRewards.mark('relationships','add_person');else{FocusStorage.addCoins(1);FocusStorage.addActivity('relationships','add_person');}
                     if (FocusCore.coinBurst) FocusCore.coinBurst({ amount:1, reason:'Связь добавлена', sourceEl: document.querySelector('.title-icon') });
                     toast('Сохранено! +1 F-coin');
                 } else toast('Сохранено');

@@ -279,6 +279,7 @@
     <div class="toast" id="toast"></div>
 </div>
 <script src="focus-storage.js"></script>
+<script src="focus-rewards.js"></script>
 <script type="module" src="firebase-auth-helper.js"></script>
 <script src="focus-core.js"></script>
 <script>
@@ -899,8 +900,7 @@ initAtmosphere(canvasId) {
         if (!rewardDays.includes(today)) {
             rewardDays.push(today);
             localStorage.setItem('focus_meditation_reward', JSON.stringify(rewardDays));
-            FocusStorage.addCoins(1);
-            FocusStorage.addActivity('energy', 'meditation');
+            if(window.FocusRewards)FocusRewards.mark('energy','meditation');else{FocusStorage.addCoins(1);FocusStorage.addActivity('energy','meditation');}
             if (FocusCore.coinBurst) FocusCore.coinBurst({ amount:1, reason:'Медитация', sourceEl: document.querySelector('.title-icon') });
             toast('Медитация завершена! +1 F-coin 🧘');
         } else {
@@ -1012,8 +1012,7 @@ initAtmosphere(canvasId) {
             try { rd = JSON.parse(localStorage.getItem('focus_detox_reward')) || []; } catch(e){}
             if (!rd.includes(today)) {
                 rd.push(today); localStorage.setItem('focus_detox_reward', JSON.stringify(rd));
-                FocusStorage.addCoins(1);
-                FocusStorage.addActivity('energy', 'detox');
+                if(window.FocusRewards)FocusRewards.mark('energy','detox');else{FocusStorage.addCoins(1);FocusStorage.addActivity('energy','detox');}
                 if (FocusCore.coinBurst) FocusCore.coinBurst({ amount:1, reason:'Цифровой детокс', sourceEl: document.querySelector('.title-icon') });
                 toast('Детокс ' + minutes + ' мин! +1 F-coin 📵');
             } else {

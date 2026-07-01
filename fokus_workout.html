@@ -246,6 +246,7 @@
     <div class="toast" id="toast"></div>
 </div>
 <script src="focus-storage.js"></script>
+<script src="focus-rewards.js"></script>
 <script type="module" src="firebase-auth-helper.js"></script>
 <script src="focus-core.js"></script>
 <script>
@@ -699,22 +700,11 @@ initAtmosphere(canvasId) {
             toast('Отметь минимум ' + MIN_EXERCISES + ' упражнения');
             return;
         }
-        // Анти-накрутка: разброс по времени между отметками ≥ 30 мин
-        const times = checkedTimes();
-        if (times.length >= 2) {
-            const spread = Math.max(...times) - Math.min(...times);
-            if (spread < MIN_SPREAD) {
-                toast('Делай зарядку, а не отмечай всё сразу');
-                return;
-            }
-        } else {
-            toast('Делай зарядку, а не отмечай всё сразу');
-            return;
-        }
         days.push(today);
         saveCompletedDays(days);
-        FocusStorage.addCoins(1);
-        FocusStorage.addActivity('body', 'workout');
+        // пишем в прогресс через FocusRewards (обновляет статистику и стрики)
+        if (window.FocusRewards) FocusRewards.mark('body', 'workout');
+        else { FocusStorage.addCoins(1); FocusStorage.addActivity('body', 'workout'); }
         if (FocusCore.celebrate) FocusCore.celebrate({ fromEl: document.getElementById('completeBtn'), text: 'Бодрое начало', emoji: '💪' });
         toast('Зарядка выполнена! +1 F-coin 🔥');
     }

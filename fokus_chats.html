@@ -152,6 +152,22 @@
     /* ===== СПИСОК ЧАТОВ ===== */
     .scroll-area { flex:1; overflow-y:auto; scrollbar-width:none; }
     .scroll-area::-webkit-scrollbar { display:none; }
+    .hdr-btn { width:38px; height:38px; border-radius:12px; background:rgba(255,255,255,0.08); display:flex; align-items:center; justify-content:center; cursor:pointer; transition:0.15s; }
+    .hdr-btn:active { background:rgba(255,255,255,0.14); }
+    .hdr-btn svg { width:20px; height:20px; color:#c8c8d0; }
+    .hdr-add { background:linear-gradient(135deg,var(--accent),var(--accent-2)); }
+    .hdr-add svg { color:#0a0a0f; }
+    .max-tabs { display:flex; gap:8px; padding:6px 2px 10px; flex-shrink:0; }
+    .max-tab { font-size:14px; font-weight:600; color:#8e8e9e; padding:6px 14px; border-radius:18px; cursor:pointer; transition:0.15s; display:flex; align-items:center; gap:5px; }
+    .max-tab.active { color:#fff; background:rgba(255,255,255,0.1); }
+    .max-tab-badge { background:var(--accent-2); color:#0a0a0f; font-size:11px; font-weight:700; padding:1px 6px; border-radius:9px; min-width:18px; text-align:center; }
+    .connect-banner { display:flex; align-items:center; background:linear-gradient(120deg,#4a7fe0,#3a6fd8); border-radius:16px; padding:16px 18px; margin-bottom:13px; cursor:pointer; transition:0.15s; }
+    .connect-banner:active { transform:scale(0.99); }
+    .connect-banner-text { flex:1; }
+    .connect-banner-title { font-size:17px; font-weight:700; color:#fff; margin-bottom:3px; }
+    .connect-banner-sub { font-size:12.5px; color:rgba(255,255,255,0.75); }
+    .connect-banner-ic { width:48px; height:48px; border-radius:50%; background:rgba(255,255,255,0.18); display:flex; align-items:center; justify-content:center; }
+    .connect-banner-ic svg { width:24px; height:24px; color:#fff; }
     .chat-search { width:100%; background:rgba(0,0,0,0.3); border:1px solid rgba(var(--accent-rgb),0.16); border-radius:13px; padding:11px 14px; color:#fff; font-size:13px; font-family:inherit; outline:none; margin-bottom:13px; }
     .search-section-label { font-size:10px; color:#8e8e9e; font-weight:700; text-transform:uppercase; letter-spacing:0.4px; margin:10px 4px 7px; }
     .search-msg-item { background:rgba(255,255,255,0.03); border:0.5px solid rgba(var(--accent-rgb),0.1); border-radius:12px; padding:10px 13px; margin-bottom:6px; cursor:pointer; transition:0.15s; }
@@ -218,31 +234,42 @@
 <div class="phone">
     <canvas id="atmosCanvas" width="375" height="700" style="width:375px;height:700px;"></canvas>
     <div class="screen">
-        <div class="header-row">
-            <div class="back-btn" onclick="location.href='index.html'">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+        <div class="header-row" style="padding-bottom:4px;">
+            <div class="title" style="font-size:26px;">Чаты</div>
+            <div style="margin-left:auto;display:flex;gap:8px;align-items:center;">
+                <div class="hdr-btn" id="menuBtn"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg></div>
+                <div class="hdr-btn hdr-add" id="writeByPhoneBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></div>
             </div>
-            <div class="title">Чаты</div>
-            <div class="title-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5Z"/></svg></div>
+        </div>
+
+        <!-- Табы как в Max -->
+        <div class="max-tabs">
+            <div class="max-tab active" data-tab="all">Все</div>
+            <div class="max-tab" data-tab="unread">Новые <span class="max-tab-badge" id="unreadBadge" style="display:none;">0</span></div>
+            <div class="max-tab" data-tab="groups">Группы</div>
         </div>
 
         <div class="scroll-area">
             <input type="text" class="chat-search" id="chatSearch" placeholder="Поиск: имена, сообщения, файлы...">
             <div id="globalSearchResults"></div>
 
-            <div class="add-friend-btn" id="writeByPhoneBtn" style="background:linear-gradient(135deg,rgba(var(--accent-rgb),0.15),rgba(var(--accent-2-rgb),0.1));border-color:rgba(var(--accent-rgb),0.35);color:var(--accent);">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92Z"/></svg>
-                Найти по номеру телефона
+            <!-- Синий баннер "Подключите контакты" как в Max -->
+            <div class="connect-banner" id="addFriendBtn">
+                <div class="connect-banner-text">
+                    <div class="connect-banner-title">Подключите контакты</div>
+                    <div class="connect-banner-sub">Чтобы найти здесь знакомых</div>
+                </div>
+                <div class="connect-banner-ic">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/></svg>
+                </div>
             </div>
 
-            <div class="add-friend-btn" id="addFriendBtn">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/></svg>
-                Добавить друзей по контактам
-            </div>
-
+            <!-- Скрытые кнопки (по кнопке меню) -->
+            <div id="hiddenActions" style="display:none;">
             <div class="add-friend-btn" id="createGroupBtn" style="background:rgba(120,220,150,0.1);border-color:rgba(120,220,150,0.3);color:#78DC96;">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-3-3.87M9 21v-2a4 4 0 0 1 3-3.87M12 3a4 4 0 1 0 0 8 4 4 0 0 0 0-8ZM23 21v-2a4 4 0 0 0-3-3.87M3 21v-2a4 4 0 0 1 3-3.87"/></svg>
                 Создать группу
+            </div>
             </div>
 
             <div id="chatsList"></div>
@@ -499,16 +526,29 @@ initAtmosphere(canvasId) {
     }
 
     let searchQuery = '';
+    let currentTab = 'all';
 
     function renderChats(){
         const cont = document.getElementById('chatsList');
         let chats = seedIfEmpty();
-        const filtered = chats.filter(c => !searchQuery || c.name.toLowerCase().includes(searchQuery.toLowerCase()));
+        // фильтр по табу + поиску (быстро, в памяти)
+        let filtered = chats;
+        if (currentTab === 'unread') filtered = filtered.filter(c => c.unread > 0);
+        else if (currentTab === 'groups') filtered = filtered.filter(c => c.type === 'group');
+        if (searchQuery) filtered = filtered.filter(c => (c.name||'').toLowerCase().includes(searchQuery.toLowerCase()));
+
+        // счётчик новых
+        const unreadTotal = chats.filter(c => c.unread > 0).length;
+        const badge = document.getElementById('unreadBadge');
+        if (badge) { badge.style.display = unreadTotal ? 'inline-block' : 'none'; badge.innerText = unreadTotal; }
+
         if (filtered.length === 0) {
-            cont.innerHTML = '<div class="empty-chats">💬 Чатов пока нет.<br>Добавь друзей по контактам или напиши оракулу из каталога.</div>';
+            const msg = currentTab === 'unread' ? 'Нет новых сообщений' : currentTab === 'groups' ? 'Нет групп' : '💬 Чатов пока нет.<br>Найди друзей по номеру телефона.';
+            cont.innerHTML = '<div class="empty-chats">' + msg + '</div>';
             return;
         }
-        cont.innerHTML = '';
+        // быстрый рендер через фрагмент (один reflow)
+        const frag = document.createDocumentFragment();
         filtered.forEach(c => {
             const initial = (c.avatar || c.name[0] || '?').toUpperCase();
             const avCls = c.type === 'oracle' ? 'chat-avatar oracle' : 'chat-avatar';
@@ -531,15 +571,31 @@ initAtmosphere(canvasId) {
                     </div>
                 </div>`;
             item.addEventListener('click', () => {
-                // сбрасываем непрочитанные и открываем переписку
                 const all = getChats();
                 const ch = all.find(x => x.id === c.id);
                 if (ch) { ch.unread = 0; saveChats(all); }
                 location.href = 'fokus_chat.html?id=' + c.id;
             });
-            cont.appendChild(item);
+            frag.appendChild(item);
         });
+        cont.innerHTML = '';
+        cont.appendChild(frag);
     }
+
+    // Табы Max
+    document.querySelectorAll('.max-tab').forEach(t => {
+        t.addEventListener('click', () => {
+            document.querySelectorAll('.max-tab').forEach(x => x.classList.remove('active'));
+            t.classList.add('active');
+            currentTab = t.dataset.tab;
+            renderChats();
+        });
+    });
+    // Меню (показать скрытые действия)
+    document.getElementById('menuBtn').addEventListener('click', () => {
+        const h = document.getElementById('hiddenActions');
+        h.style.display = h.style.display === 'none' ? 'block' : 'none';
+    });
 
     document.getElementById('chatSearch').addEventListener('input', (e) => {
         searchQuery = e.target.value;

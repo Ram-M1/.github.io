@@ -278,6 +278,7 @@
     <div class="toast" id="toast"></div>
 </div>
 <script src="focus-storage.js"></script>
+<script src="focus-rewards.js"></script>
 <script type="module" src="firebase-auth-helper.js"></script>
 <script src="focus-core.js"></script>
 <script>
@@ -683,8 +684,14 @@ initAtmosphere(canvasId) {
 
     let currentWorkout = null;   // {label, exercises:[...]}
     let factInputs = [];          // ссылки на инпуты факта
-    let exDone = {};              // отметки выполнения (анти-накрутка)
+    let exDone = {};              // отметки выполнения
     let timers = {};              // активные таймеры по индексу
+
+    // сохранение отметок выполнения (чтобы не слетали при выходе)
+    const EXDONE_KEY = 'focus_session_done_' + progId + '_' + new Date().toISOString().slice(0,10);
+    function saveExDone(){ try { localStorage.setItem(EXDONE_KEY, JSON.stringify(exDone)); } catch(e){} }
+    function loadExDone(){ try { exDone = JSON.parse(localStorage.getItem(EXDONE_KEY)) || {}; } catch(e){ exDone = {}; } }
+    loadExDone();
 
     if (!program) {
         document.getElementById('exCards').innerHTML = '<div class="empty-mini">Программа не найдена.<br>Вернись к списку программ.</div>';
@@ -763,7 +770,7 @@ initAtmosphere(canvasId) {
     function renderExCards(){
         const cont = document.getElementById('exCards');
         cont.innerHTML = '';
-        exDone = {};
+        // exDone НЕ сбрасываем — отметки загружены из localStorage и должны сохраняться
         const prev = lastSameSession(currentWorkout);
 
         currentWorkout.exercises.forEach((ex, i) => {
@@ -811,7 +818,7 @@ initAtmosphere(canvasId) {
                 }
                 // отметка выполнено нужна, если нет таймера (таймер сам отмечает); при наличии дистанции тоже
                 if (!hasTime) {
-                    inner += `<div class="mark-done" data-mark="${i}">Отметить выполнено</div>`;
+                    inner += `<div class="mark-done${exDone[i]?' done':''}" data-mark="${i}">${exDone[i]?'✓ Выполнено':'Отметить выполнено'}</div>`;
                 }
                 card.innerHTML = inner;
             } else {
@@ -837,7 +844,7 @@ initAtmosphere(canvasId) {
                         <div class="pf-cell"><input type="number" class="pf-fact-input" data-fact="reps-${i}" value="${planReps}" inputmode="numeric"></div>
                         <div class="pf-cell"><input type="number" class="pf-fact-input" data-fact="weight-${i}" value="${planWeight}" inputmode="numeric"></div>
                     </div>
-                    <div class="mark-done" data-mark="${i}">Отметить выполнено</div>`;
+                    <div class="mark-done${exDone[i]?' done':''}" data-mark="${i}">${exDone[i]?'✓ Выполнено':'Отметить выполнено'}</div>`;
             }
             cont.appendChild(card);
         });
@@ -855,6 +862,7 @@ initAtmosphere(canvasId) {
                 const i = +el.dataset.mark;
                 if (exDone[i]) { exDone[i]=null; el.classList.remove('done'); el.innerText='Отметить выполнено'; }
                 else { exDone[i]=Date.now(); el.classList.add('done'); el.innerText='✓ Выполнено'; }
+                saveExDone();
             });
         });
     }
@@ -874,6 +882,7 @@ initAtmosphere(canvasId) {
             if (remain <= 0) {
                 clearInterval(timers[i]); timers[i] = null;
                 exDone[i] = Date.now(); // засчитано: таймер реально отработал
+                saveExDone();
                 const f = document.querySelector(`[data-fact="durationSec-${i}"]`);
                 if (f) f.value = totalSec;
                 if (status) { status.innerText = '✓ Выполнено! Время засчитано'; status.classList.add('ok'); }
@@ -885,6 +894,7 @@ initAtmosphere(canvasId) {
     function resetTimer(i, totalSec){
         if (timers[i]) { clearInterval(timers[i]); timers[i]=null; }
         exDone[i] = null;
+        saveExDone();
         const disp = document.getElementById('timerDisp-'+i);
         const status = document.getElementById('timerStatus-'+i);
         const startBtn = document.querySelector(`[data-timer-start="${i}"]`);
@@ -952,8 +962,8 @@ initAtmosphere(canvasId) {
         savePrograms();
 
         try {
-            FocusStorage.addCoins(1);
-            FocusStorage.addActivity('body', 'workout_program');
+            if (window.FocusRewards) FocusRewards.mark('body', 'workout_program');
+            else { FocusStorage.addCoins(1); FocusStorage.addActivity('body', 'workout_program'); }
             if (FocusCore.celebrate) FocusCore.celebrate({ fromEl: document.getElementById('finishBtn'), text: 'Сделано', emoji: '🔥' });
         } catch(e){}
 

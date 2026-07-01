@@ -435,6 +435,7 @@
     <div class="toast" id="toast"></div>
 </div>
 <script src="focus-storage.js"></script>
+<script src="focus-rewards.js"></script>
 <script type="module" src="firebase-auth-helper.js"></script>
 <script src="focus-core.js"></script>
 <script>
@@ -1265,8 +1266,7 @@ initAtmosphere(canvasId) {
         const days = getFinishedDays();
         days.push(today);
         localStorage.setItem(FINISHED_KEY, JSON.stringify(days));
-        FocusStorage.addCoins(1);
-        FocusStorage.addActivity('body', 'nutrition');
+        if(window.FocusRewards)FocusRewards.mark('body','nutrition');else{FocusStorage.addCoins(1);FocusStorage.addActivity('body','nutrition');}
         if (FocusCore.celebrate) FocusCore.celebrate({ fromEl: document.getElementById('finishDayBtn'), text: 'День под контролем', emoji: '🥗' });
         renderFinishBtn();
         toast('День завершён! +1 F-coin 🍽️');

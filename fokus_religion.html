@@ -302,6 +302,7 @@
     <div class="toast" id="toast"></div>
 </div>
 <script src="focus-storage.js"></script>
+<script src="focus-rewards.js"></script>
 <script type="module" src="firebase-auth-helper.js"></script>
 <script src="focus-core.js"></script>
 <script>
@@ -813,7 +814,7 @@ initAtmosphere(canvasId) {
             saveDone();
             if (doneToday.length > 0 && !prayerDays.includes(today)) {
                 prayerDays.push(today); localStorage.setItem(STREAK_KEY, JSON.stringify(prayerDays));
-                FocusStorage.addCoins(1); FocusStorage.addActivity('faith','prayer');
+                if(window.FocusRewards)FocusRewards.mark('faith','prayer');else{FocusStorage.addCoins(1);FocusStorage.addActivity('faith','prayer');}
                 if (FocusCore.coinBurst) FocusCore.coinBurst({ amount:1, reason:'Молитва', sourceEl: el });
                 toast('Отмечено! +1 F-coin 🙏');
             } else if (doneToday.length === 0) {
@@ -905,7 +906,7 @@ initAtmosphere(canvasId) {
         const time = document.getElementById('visitTime').value || '';
         visits.push({ date: today, time });
         saveVisits();
-        FocusStorage.addCoins(1); FocusStorage.addActivity('faith','temple');
+        if(window.FocusRewards)FocusRewards.mark('faith','temple');else{FocusStorage.addCoins(1);FocusStorage.addActivity('faith','temple');}
         if (FocusCore.coinBurst) FocusCore.coinBurst({ amount:1, reason:'Посещение', sourceEl: document.getElementById('visitBtn') });
         toast('Отмечено! +1 F-coin 🏛');
         renderTemple();

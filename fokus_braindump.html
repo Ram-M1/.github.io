@@ -225,6 +225,7 @@
     <div class="toast" id="toast"></div>
 </div>
 <script src="focus-storage.js"></script>
+<script src="focus-rewards.js"></script>
 <script type="module" src="firebase-auth-helper.js"></script>
 <script src="focus-core.js"></script>
 <script>
@@ -636,8 +637,7 @@ initAtmosphere(canvasId) {
             if (!days.includes(today)) {
                 days.push(today);
                 localStorage.setItem(REWARD_KEY, JSON.stringify(days));
-                FocusStorage.addCoins(1);
-                FocusStorage.addActivity('mental', 'braindump');
+                if(window.FocusRewards)FocusRewards.mark('mental','braindump');else FocusStorage.addActivity('mental','braindump');
                 const src = document.querySelector('.dump-input-card') || document.body;
                 if (FocusCore.celebrate) FocusCore.celebrate({ fromEl: src, text: 'Голова чище', emoji: '🧠' });
                 toast('Голова очищена! +1 F-coin 🧠');

@@ -187,6 +187,7 @@
     <div class="toast" id="toast"></div>
 </div>
 <script src="focus-storage.js"></script>
+<script src="focus-rewards.js"></script>
 <script type="module" src="firebase-auth-helper.js"></script>
 <script src="focus-core.js"></script>
 <script>
@@ -613,8 +614,7 @@ initAtmosphere(canvasId) {
 
         document.getElementById('savedBadge').classList.add('show');
         if (!wasToday) {
-            FocusStorage.addCoins(1);
-            FocusStorage.addActivity('faith', 'gratitude');
+            if(window.FocusRewards)FocusRewards.mark('faith','gratitude');else FocusStorage.addActivity('faith','gratitude');
             if (FocusCore.celebrate) FocusCore.celebrate({ fromEl: document.getElementById('saveBtn'), text: 'От души', emoji: '🙏' });
             toast('Записано!');
         } else toast('Обновлено 🙏');

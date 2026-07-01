@@ -154,6 +154,7 @@ const FocusStorage = {
                     age: data.age || '',
                     city: data.city || '',
                     phone: data.phone || '',
+                    avatar: data.avatar || null,
                     coins: data.coins || 0,
                     subscription: data.subscription || null,
                     subscriptionUntil: data.subscriptionUntil || null,

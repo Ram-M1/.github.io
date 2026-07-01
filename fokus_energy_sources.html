@@ -249,6 +249,7 @@
     <div class="toast" id="toast"></div>
 </div>
 <script src="focus-storage.js"></script>
+<script src="focus-rewards.js"></script>
 <script type="module" src="firebase-auth-helper.js"></script>
 <script src="focus-core.js"></script>
 <script>
@@ -608,8 +609,7 @@ initAtmosphere(canvasId) {
         try { rd = JSON.parse(localStorage.getItem('focus_energy_sources_reward')) || []; } catch(e){}
         if (!rd.includes(today)) {
             rd.push(today); localStorage.setItem('focus_energy_sources_reward', JSON.stringify(rd));
-            FocusStorage.addCoins(1);
-            FocusStorage.addActivity('energy', 'sources');
+            if(window.FocusRewards)FocusRewards.mark('energy','sources');else{FocusStorage.addCoins(1);FocusStorage.addActivity('energy','sources');}
             if (FocusCore.celebrate) FocusCore.celebrate({ text: 'Разобрался в себе', emoji: '⚡' });
             toast('Отмечено! +1 F-coin ⚡');
             return true;

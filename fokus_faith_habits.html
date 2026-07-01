@@ -279,6 +279,7 @@
     <div class="toast" id="toast"></div>
 </div>
 <script src="focus-storage.js"></script>
+<script src="focus-rewards.js"></script>
 <script type="module" src="firebase-auth-helper.js"></script>
 <script src="focus-core.js"></script>
 <script>
@@ -835,7 +836,7 @@ initAtmosphere(canvasId) {
         let rd = []; try { rd = JSON.parse(localStorage.getItem('focus_habit_reward')) || []; } catch(e){}
         if (!rd.includes(today)) {
             rd.push(today); localStorage.setItem('focus_habit_reward', JSON.stringify(rd));
-            FocusStorage.addCoins(1); FocusStorage.addActivity('faith', 'habit');
+            if(window.FocusRewards)FocusRewards.mark('faith','habit');else{FocusStorage.addCoins(1);FocusStorage.addActivity('faith','habit');}
         }
 
         // окно с нормой на следующий день

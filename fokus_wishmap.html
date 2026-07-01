@@ -288,6 +288,7 @@
     <div class="toast" id="toast"></div>
 </div>
 <script src="focus-storage.js"></script>
+<script src="focus-rewards.js"></script>
 <script type="module" src="firebase-auth-helper.js"></script>
 <script src="focus-core.js"></script>
 <script>
@@ -732,7 +733,7 @@ initAtmosphere(canvasId) {
             let rd = []; try { rd = JSON.parse(localStorage.getItem('focus_wish_reward')) || []; } catch(e){}
             if (!rd.includes(today)) {
                 rd.push(today); localStorage.setItem('focus_wish_reward', JSON.stringify(rd));
-                FocusStorage.addCoins(1); FocusStorage.addActivity('faith', 'wish');
+                if(window.FocusRewards)FocusRewards.mark('faith','wish');else{FocusStorage.addCoins(1);FocusStorage.addActivity('faith','wish');}
                 if (FocusCore.coinBurst) FocusCore.coinBurst({ amount:1, reason:'Желание добавлено', sourceEl: document.querySelector('.title-icon') });
                 toast('Желание добавлено! +1 F-coin ✨');
             } else toast('Желание добавлено ✨');
@@ -812,7 +813,7 @@ initAtmosphere(canvasId) {
             const today2 = new Date().toISOString().slice(0,10);
             if (!rd.includes(today2)) {
                 rd.push(today2); localStorage.setItem('focus_wish_reward', JSON.stringify(rd));
-                FocusStorage.addCoins(1); FocusStorage.addActivity('faith','wishmap');
+                if(window.FocusRewards)FocusRewards.mark('faith','wishmap');else{FocusStorage.addCoins(1);FocusStorage.addActivity('faith','wishmap');}
             }
         } catch(e){}
     });

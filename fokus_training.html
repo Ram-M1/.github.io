@@ -339,6 +339,7 @@
     <div class="toast" id="toast"></div>
 </div>
 <script src="focus-storage.js"></script>
+<script src="focus-rewards.js"></script>
 <script type="module" src="firebase-auth-helper.js"></script>
 <script src="focus-core.js"></script>
 <script>
@@ -980,18 +981,6 @@ initAtmosphere(canvasId) {
             toast('Отметь минимум 3 упражнения галочками');
             return;
         }
-        // Анти-накрутка: разброс времени отметок ≥ 30 минут
-        const times = checkedEx.map(ex => ex.checked).filter(v => typeof v === 'number');
-        if (times.length >= 2) {
-            const spread = Math.max(...times) - Math.min(...times);
-            if (spread < 30 * 60 * 1000) {
-                toast('Тренируйся, а не отмечай всё сразу');
-                return;
-            }
-        } else {
-            toast('Тренируйся, а не отмечай всё сразу');
-            return;
-        }
 
         w.lastDate = todayLabel();
 
@@ -1017,8 +1006,8 @@ initAtmosphere(canvasId) {
         workouts = workouts.filter(x => x.id !== currentWorkoutId);
         saveWorkouts();
 
-        FocusStorage.addCoins(1);
-        FocusStorage.addActivity('body', 'training');
+        if (window.FocusRewards) FocusRewards.mark('body', 'training');
+        else { FocusStorage.addCoins(1); FocusStorage.addActivity('body', 'training'); }
         if (FocusCore.celebrate) FocusCore.celebrate({ fromEl: document.getElementById('completeBtn'), text: 'Тренировка взята', emoji: '💪' });
         toast('Тренировка завершена! Сохранена в архив.');
 
