@@ -80,6 +80,16 @@
     .profile-top { display:flex; gap:10px; margin-bottom:14px; align-items:stretch; }
     .profile-id { flex:0 0 auto; width:118px; display:flex; flex-direction:column; align-items:center; justify-content:center; background:linear-gradient(135deg, rgba(35,35,46,0.55), rgba(22,22,30,0.55)); border:0.5px solid rgba(var(--accent-rgb),0.15); border-radius:16px; padding:12px 8px; }
     .avatar-wrap { position:relative; width:54px; height:54px; margin-bottom:7px; }
+    .hidden-link-modal { position:absolute; inset:0; z-index:500; background:rgba(0,0,0,0.88); backdrop-filter:blur(8px); display:none; align-items:center; justify-content:center; border-radius:52px; padding:20px; }
+    .hidden-link-modal.show { display:flex; }
+    .hidden-link-box { background:linear-gradient(165deg, #1c1c26, #15151c); border-radius:20px; width:100%; max-width:290px; padding:20px; border:0.5px solid rgba(var(--accent-rgb),0.25); }
+    .hidden-link-title { font-size:15px; font-weight:700; color:var(--accent); margin-bottom:8px; text-align:center; }
+    .hidden-link-hint { font-size:11px; color:#9a9aab; line-height:1.45; margin-bottom:14px; text-align:center; }
+    #hiddenParentCode { width:100%; background:rgba(0,0,0,0.35); border:1px solid rgba(var(--accent-rgb),0.2); border-radius:11px; padding:12px; color:#fff !important; -webkit-text-fill-color:#fff; font-size:16px; text-align:center; letter-spacing:2px; font-weight:700; text-transform:uppercase; outline:none; margin-bottom:14px; font-family:inherit; }
+    .hidden-link-btns { display:flex; gap:9px; }
+    .hidden-link-btns button { flex:1; padding:12px; border-radius:12px; font-size:13px; font-weight:700; cursor:pointer; border:none; font-family:inherit; }
+    .hl-cancel { background:rgba(255,255,255,0.08); color:#9a9aab; }
+    .hl-link { background:linear-gradient(135deg, var(--accent), var(--accent-2)); color:#0a0a0f; }
     .avatar { width:54px; height:54px; border-radius:50%; background:radial-gradient(circle at 35% 30%, rgba(var(--accent-rgb),0.3), rgba(var(--accent-2-rgb),0.15)); border:2px solid rgba(var(--accent-rgb),0.4); display:flex; align-items:center; justify-content:center; box-shadow:0 0 22px rgba(var(--accent-rgb),0.25); cursor:pointer; position:relative; transition:0.25s ease; font-size:28px; overflow:hidden; }
     .avatar:active { transform:scale(0.94); }
     .avatar svg { width:30px; height:30px; color:var(--accent); }
@@ -304,6 +314,19 @@
         <div class="logout-btn" id="logoutBtn">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
             Выйти из аккаунта
+        </div>
+    </div>
+
+    <!-- Скрытая привязка к родителю (родитель делает долгий тап на аватар) -->
+    <div class="hidden-link-modal" id="hiddenLinkModal">
+        <div class="hidden-link-box">
+            <div class="hidden-link-title">Родительский контроль</div>
+            <div class="hidden-link-hint">Введите код из вашего приложения FOCUS, чтобы привязать это устройство.</div>
+            <input type="text" id="hiddenParentCode" placeholder="Код (напр. F3K9X)" maxlength="6" autocapitalize="characters">
+            <div class="hidden-link-btns">
+                <button class="hl-cancel" id="hlCancel">Отмена</button>
+                <button class="hl-link" id="hlLink">Привязать</button>
+            </div>
         </div>
     </div>
     <div class="avatar-modal" id="avatarModal">
@@ -679,12 +702,19 @@ initAtmosphere(canvasId) {
         if (e.target.id === 'confirmModal') e.currentTarget.style.display = 'none';
     });
 
-    // Скрытый вход в админку — долгое нажатие (1.5с) на имя профиля
+    // Долгий тап (1.5с) на ИМЯ → скрытая привязка к родителю
+    // (родитель берёт телефон ребёнка и привязывает незаметно)
     (function(){
         const nameEl = document.getElementById('profileName');
-        if (!nameEl) return;
+        const modal = document.getElementById('hiddenLinkModal');
+        if (!nameEl || !modal) return;
         let pressTimer = null;
-        function startPress(){ pressTimer = setTimeout(() => { location.href = 'admin.html'; }, 1500); }
+        function startPress(){
+            pressTimer = setTimeout(() => {
+                document.getElementById('hiddenParentCode').value = '';
+                modal.classList.add('show');
+            }, 1500);
+        }
         function cancelPress(){ if (pressTimer) clearTimeout(pressTimer); }
         nameEl.addEventListener('mousedown', startPress);
         nameEl.addEventListener('touchstart', startPress, { passive:true });
@@ -692,6 +722,23 @@ initAtmosphere(canvasId) {
         nameEl.addEventListener('mouseleave', cancelPress);
         nameEl.addEventListener('touchend', cancelPress);
         nameEl.addEventListener('touchmove', cancelPress);
+
+        document.getElementById('hlCancel').addEventListener('click', () => modal.classList.remove('show'));
+        document.getElementById('hlLink').addEventListener('click', async () => {
+            const code = document.getElementById('hiddenParentCode').value.trim().toUpperCase();
+            if (!code) { toast('Введите код'); return; }
+            if (window.fbLinkByCode) {
+                const btn = document.getElementById('hlLink');
+                btn.disabled = true; btn.innerText = 'Привязка...';
+                const res = await window.fbLinkByCode(code);
+                btn.disabled = false; btn.innerText = 'Привязать';
+                if (res.ok) { modal.classList.remove('show'); toast('Устройство привязано'); }
+                else { toast(res.error || 'Не удалось привязать'); }
+            } else {
+                toast('Нужно войти в аккаунт для привязки');
+            }
+        });
+        modal.addEventListener('click', (e) => { if (e.target.id === 'hiddenLinkModal') modal.classList.remove('show'); });
     })();
 </script>
 <script>

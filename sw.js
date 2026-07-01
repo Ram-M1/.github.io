@@ -10,7 +10,7 @@
      и ускоряем загрузку — что особенно важно при слабом интернете)
 */
 
-const CACHE_NAME = 'focus-cache-v1';
+const CACHE_NAME = 'focus-cache-v2';
 
 self.addEventListener('install', (event) => {
     self.skipWaiting();
@@ -45,18 +45,18 @@ self.addEventListener('fetch', (event) => {
     if (url.origin !== location.origin) return;
 
     if (isStaticAsset(url.pathname)) {
-        // CSS/JS/иконки — сначала кэш, в фоне обновляем
+        // CSS/JS/иконки — СНАЧАЛА СЕТЬ (всегда свежая версия), кэш только при офлайне.
+        // Это важно чтобы обновления JS подхватывались без ручной чистки кэша.
         event.respondWith(
-            caches.open(CACHE_NAME).then(async (cache) => {
-                const cached = await cache.match(request);
-                const networkFetch = fetch(request)
-                    .then((response) => {
-                        if (response.ok) cache.put(request, response.clone());
-                        return response;
-                    })
-                    .catch(() => cached);
-                return cached || networkFetch;
-            })
+            fetch(request)
+                .then((response) => {
+                    if (response.ok) {
+                        const copy = response.clone();
+                        caches.open(CACHE_NAME).then((cache) => cache.put(request, copy));
+                    }
+                    return response;
+                })
+                .catch(() => caches.open(CACHE_NAME).then((cache) => cache.match(request)))
         );
     } else {
         // HTML-страницы — сначала сеть (видим актуальную версию),

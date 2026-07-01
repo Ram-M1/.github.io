@@ -592,10 +592,13 @@
             window.fbLogin(email, password).then(function(res) {
                 if (res.ok) {
                     FocusStorage.saveUser({ email: email, flags: { loggedIn: true } });
-                    // подтянуть профиль из облака
+                    // подтянуть профиль из облака (с обработкой ошибки, чтобы вход не завис)
                     if (window.fbLoadUserData) {
                         window.fbLoadUserData().then(function(data) {
                             if (data) FocusStorage.saveUser(data);
+                            window.location.href = 'index.html';
+                        }).catch(function() {
+                            // даже если облако не ответило — пускаем в приложение
                             window.location.href = 'index.html';
                         });
                     } else {
