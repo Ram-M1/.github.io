@@ -75,12 +75,30 @@ window.fbLogout = async function() {
   catch (e) { return { ok: false, error: ruError(e.code) }; }
 };
 
-// текущий пользователь
-window.fbCurrentUser = function() { return auth.currentUser; };
+// текущий пользователь — храним актуальное значение через слушатель сессии
+let _currentUser = null;
+onAuthStateChanged(auth, (user) => {
+  _currentUser = user;
+  // когда сессия восстановилась — синкаем локальные данные в облако (одним разом)
+  if (user && window.FocusStorage && typeof window.FocusStorage.getUser === 'function') {
+    try {
+      const d = window.FocusStorage.getUser();
+      window.fbSaveUserData({
+        name: d.name || '', age: d.age || '', city: d.city || '', phone: d.phone || '',
+        coins: d.coins || 0, subscription: d.subscription || null,
+        subscriptionUntil: d.subscriptionUntil || null, theme: d.theme || 'original',
+        activity: d.activity || {}, weekStats: d.weekStats || {},
+        referral: d.referral || {}, flags: d.flags || {},
+        updatedAt: new Date().toISOString()
+      }).catch(() => {});
+    } catch(e){}
+  }
+});
+window.fbCurrentUser = function() { return _currentUser || auth.currentUser; };
 
 // сохранить данные профиля пользователя в Firestore
 window.fbSaveUserData = async function(data) {
-  const user = auth.currentUser;
+  const user = _currentUser || auth.currentUser;
   if (!user) return { ok: false, error: 'Не авторизован' };
   try {
     await setDoc(doc(db, 'users', user.uid), data, { merge: true });
@@ -92,7 +110,7 @@ window.fbSaveUserData = async function(data) {
 
 // загрузить данные профиля из Firestore
 window.fbLoadUserData = async function() {
-  const user = auth.currentUser;
+  const user = _currentUser || auth.currentUser;
   if (!user) return null;
   try {
     const snap = await getDoc(doc(db, 'users', user.uid));

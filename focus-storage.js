@@ -135,7 +135,37 @@ const FocusStorage = {
             flags: { ...current.flags, ...(partial.flags || {}) }
         };
         localStorage.setItem(FOCUS_STORAGE_KEY, JSON.stringify(merged));
+        // Автосинхронизация в облако (если Firebase подключён и юзер вошёл).
+        // Дебаунс, чтобы не слать на каждый чих — раз в 2 сек после последнего изменения.
+        this._cloudSync(merged);
         return merged;
+    },
+
+    /** Отложенная синхронизация всего профиля в Firestore (дебаунс) */
+    _cloudSync(data) {
+        if (typeof window === 'undefined') return;
+        if (!window.fbSaveUserData || !window.fbCurrentUser || !window.fbCurrentUser()) return;
+        clearTimeout(this._syncTimer);
+        this._syncTimer = setTimeout(() => {
+            try {
+                // шлём только сериализуемые данные профиля
+                window.fbSaveUserData({
+                    name: data.name || '',
+                    age: data.age || '',
+                    city: data.city || '',
+                    phone: data.phone || '',
+                    coins: data.coins || 0,
+                    subscription: data.subscription || null,
+                    subscriptionUntil: data.subscriptionUntil || null,
+                    theme: data.theme || 'original',
+                    activity: data.activity || {},
+                    weekStats: data.weekStats || {},
+                    referral: data.referral || {},
+                    flags: data.flags || {},
+                    updatedAt: new Date().toISOString()
+                }).catch(() => {});
+            } catch(e) {}
+        }, 2000);
     },
 
     // ========== ЭКОНОМИКА ==========
@@ -323,3 +353,8 @@ const FocusStorage = {
         localStorage.removeItem(FOCUS_STORAGE_KEY);
     }
 };
+
+// Делаем FocusStorage доступным глобально (нужно для firebase-auth-helper — синк в облако)
+if (typeof window !== 'undefined') {
+    window.FocusStorage = FocusStorage;
+}
