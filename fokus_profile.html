@@ -79,7 +79,8 @@
 
     .profile-top { display:flex; gap:10px; margin-bottom:14px; align-items:stretch; }
     .profile-id { flex:0 0 auto; width:118px; display:flex; flex-direction:column; align-items:center; justify-content:center; background:linear-gradient(135deg, rgba(35,35,46,0.55), rgba(22,22,30,0.55)); border:0.5px solid rgba(var(--accent-rgb),0.15); border-radius:16px; padding:12px 8px; }
-    .avatar { width:54px; height:54px; border-radius:50%; background:radial-gradient(circle at 35% 30%, rgba(var(--accent-rgb),0.3), rgba(var(--accent-2-rgb),0.15)); border:2px solid rgba(var(--accent-rgb),0.4); display:flex; align-items:center; justify-content:center; margin-bottom:7px; box-shadow:0 0 22px rgba(var(--accent-rgb),0.25); cursor:pointer; position:relative; transition:0.25s ease; font-size:28px; }
+    .avatar-wrap { position:relative; width:54px; height:54px; margin-bottom:7px; }
+    .avatar { width:54px; height:54px; border-radius:50%; background:radial-gradient(circle at 35% 30%, rgba(var(--accent-rgb),0.3), rgba(var(--accent-2-rgb),0.15)); border:2px solid rgba(var(--accent-rgb),0.4); display:flex; align-items:center; justify-content:center; box-shadow:0 0 22px rgba(var(--accent-rgb),0.25); cursor:pointer; position:relative; transition:0.25s ease; font-size:28px; overflow:hidden; }
     .avatar:active { transform:scale(0.94); }
     .avatar svg { width:30px; height:30px; color:var(--accent); }
     .avatar-edit { position:absolute; bottom:-2px; right:-2px; width:20px; height:20px; border-radius:50%; background:linear-gradient(135deg, var(--accent), var(--accent-2)); border:2px solid var(--bg-1); display:flex; align-items:center; justify-content:center; }
@@ -220,8 +221,10 @@
 
         <div class="profile-top">
             <div class="profile-id">
-                <div class="avatar" id="avatarBtn">
-                    <span id="avatarContent"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.6"/><path d="M5 20c0-3.8 3.1-6.8 7-6.8s7 3 7 6.8"/></svg></span>
+                <div class="avatar-wrap">
+                    <div class="avatar" id="avatarBtn">
+                        <span id="avatarContent"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.6"/><path d="M5 20c0-3.8 3.1-6.8 7-6.8s7 3 7 6.8"/></svg></span>
+                    </div>
                     <div class="avatar-edit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></div>
                 </div>
                 <div class="profile-name" id="profileName">Друг</div>
@@ -330,6 +333,7 @@
     </div>
 </div>
 <script src="focus-storage.js"></script>
+<script type="module" src="firebase-auth-helper.js"></script>
 <script src="focus-core.js"></script>
 <script>
     if (typeof FocusStorage === 'undefined') {
@@ -534,12 +538,18 @@ initAtmosphere(canvasId) {
     const savedAvatar = user.avatar || null;
     function renderAvatar(val) {
         const content = document.getElementById('avatarContent');
+        const avatarBox = document.getElementById('avatarBtn');
         if (!val) return;
         if (typeof val === 'string' && val.startsWith('data:image')) {
-            // фото-аватар
-            content.innerHTML = '<img src="' + val + '" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;">';
+            // фото-аватар — растягиваем span на весь круг и вставляем фото
+            content.style.cssText = 'position:absolute;inset:0;border-radius:50%;overflow:hidden;display:block;';
+            content.innerHTML = '<img src="' + val + '" style="width:100%;height:100%;object-fit:cover;display:block;">';
+            if (avatarBox) avatarBox.style.fontSize = '0'; // убираем возможный отступ
         } else {
-            content.innerHTML = val; // эмодзи
+            // эмодзи или иконка
+            content.style.cssText = '';
+            content.innerHTML = val;
+            if (avatarBox) avatarBox.style.fontSize = '28px';
         }
     }
     renderAvatar(savedAvatar);

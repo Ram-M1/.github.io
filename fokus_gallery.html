@@ -319,6 +319,7 @@
 </div>
 
 <script src="focus-storage.js"></script>
+<script type="module" src="firebase-auth-helper.js"></script>
 <script src="focus-core.js"></script>
 <script>
     if (typeof FocusStorage === 'undefined') {
@@ -523,7 +524,7 @@ initAtmosphere(canvasId) {
     // ===== Редактор =====
     const CANVAS_SIZE = 1000;
     const canvas = document.getElementById('editorCanvas');
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
     canvas.width = CANVAS_SIZE; canvas.height = CANVAS_SIZE;
 
     let photos = [];          // загруженные Image
@@ -541,6 +542,64 @@ initAtmosphere(canvasId) {
         bright: 'brightness(1.18) contrast(1.05) saturate(1.15)'
     };
 
+    // Ручная обработка пикселей (работает в Safari iOS, где ctx.filter не пашет)
+    function applyPixelFilter(ctx, w, h, name){
+        if (name === 'none') return;
+        let imageData;
+        try { imageData = ctx.getImageData(0, 0, w, h); }
+        catch(e){ toast('Фильтр недоступен: ' + (e.message||'ошибка')); return; }
+        const d = imageData.data;
+        const clamp = v => v < 0 ? 0 : (v > 255 ? 255 : v);
+        for (let i = 0; i < d.length; i += 4) {
+            let r = d[i], g = d[i+1], b = d[i+2];
+            switch(name){
+                case 'bw': {
+                    const gray = 0.299*r + 0.587*g + 0.114*b;
+                    r = g = b = gray;
+                    break;
+                }
+                case 'sepia': {
+                    const nr = 0.393*r + 0.769*g + 0.189*b;
+                    const ng = 0.349*r + 0.686*g + 0.168*b;
+                    const nb = 0.272*r + 0.534*g + 0.131*b;
+                    r = clamp(nr); g = clamp(ng); b = clamp(nb);
+                    break;
+                }
+                case 'vintage': {
+                    // лёгкая сепия + контраст + чуть темнее
+                    const gray = 0.299*r + 0.587*g + 0.114*b;
+                    r = clamp(r*0.6 + gray*0.4 + 18);
+                    g = clamp(g*0.65 + gray*0.35 + 8);
+                    b = clamp(b*0.7 + gray*0.3 - 6);
+                    r = clamp((r-128)*1.12 + 128);
+                    g = clamp((g-128)*1.12 + 128);
+                    b = clamp((b-128)*1.12 + 128);
+                    break;
+                }
+                case 'cold': {
+                    r = clamp(r * 0.92);
+                    b = clamp(b * 1.12 + 6);
+                    g = clamp(g * 1.02);
+                    break;
+                }
+                case 'warm': {
+                    r = clamp(r * 1.12 + 10);
+                    g = clamp(g * 1.04);
+                    b = clamp(b * 0.88);
+                    break;
+                }
+                case 'bright': {
+                    r = clamp((r-128)*1.06 + 128 + 22);
+                    g = clamp((g-128)*1.06 + 128 + 22);
+                    b = clamp((b-128)*1.06 + 128 + 22);
+                    break;
+                }
+            }
+            d[i] = r; d[i+1] = g; d[i+2] = b;
+        }
+        ctx.putImageData(imageData, 0, 0);
+    }
+
     function drawCollage(){
         if (photos.length === 0) {
             canvas.style.display = 'none';
@@ -553,7 +612,6 @@ initAtmosphere(canvasId) {
         ctx.clearRect(0,0,CANVAS_SIZE,CANVAS_SIZE);
         ctx.fillStyle = '#0d0d12';
         ctx.fillRect(0,0,CANVAS_SIZE,CANVAS_SIZE);
-        ctx.filter = filterMap[filter] || 'none';
 
         const gap = 8;
         const n = photos.length;
@@ -585,7 +643,8 @@ initAtmosphere(canvasId) {
             else { sw=img.width; sh=img.width/rr; sx=0; sy=(img.height-sh)/2; }
             ctx.drawImage(img, sx,sy,sw,sh, x,y,w,h);
         });
-        ctx.filter = 'none';
+        // применяем фильтр попиксельно (надёжно в Safari iOS)
+        applyPixelFilter(ctx, CANVAS_SIZE, CANVAS_SIZE, filter);
     }
 
     // загрузка фото
