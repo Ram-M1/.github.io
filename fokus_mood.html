@@ -692,7 +692,7 @@ initAtmosphere(canvasId) {
                 addMsg('ai', res.reply.trim());
                 chatLog.push({ role:'ai', text: res.reply.trim() });
             } else {
-                const fb = 'Связь с ИИ на секунду прервалась. Напиши свою мысль ещё раз — я отвечу.';
+                const fb = 'ИИ не ответил. Причина: ' + (res.error || 'неизвестно') + '. Попробуй ещё раз.';
                 addMsg('ai', fb);
                 chatLog.push({ role:'ai', text: fb });
             }

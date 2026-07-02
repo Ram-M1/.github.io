@@ -47,7 +47,7 @@ export default {
       const maxTokens = Math.min(body.max_tokens || 600, 1200);
 
       // Если пришла картинка — встраиваем в последнее user-сообщение (vision-формат)
-      let model = 'deepseek-chat';
+      let model = 'deepseek-v4-flash';
       if (body.image && typeof body.image === 'string') {
         model = 'deepseek-vl2';
         for (let i = messages.length - 1; i >= 0; i--) {

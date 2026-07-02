@@ -1427,7 +1427,7 @@
                         input.value = '';
                     } else {
                         result.className = 'ai-result show unknown';
-                        result.innerHTML = '⚠️ Связь с ИИ прервалась. Попробуй ещё раз через секунду.';
+                        result.innerHTML = '⚠️ ИИ не ответил. Причина: ' + (res.error || 'неизвестно');
                     }
                     return;
                 } else {

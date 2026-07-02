@@ -663,11 +663,17 @@ window.fbAskAI = async function(messages, maxTokens) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ messages, max_tokens: maxTokens || 600 })
     });
+    // если воркер вернул не-200 — показываем статус
+    if (!res.ok) {
+      let detail = '';
+      try { const errData = await res.json(); detail = errData.error || errData.detail || ''; } catch(e){}
+      return { ok: false, error: 'Воркер вернул ' + res.status + (detail ? ': ' + detail : '') };
+    }
     const data = await res.json();
     if (data.ok && data.reply) return { ok: true, reply: data.reply };
-    return { ok: false, error: data.error || 'Пустой ответ ИИ' };
+    return { ok: false, error: data.error || data.detail || 'Пустой ответ ИИ' };
   } catch (e) {
-    return { ok: false, error: 'Нет связи с ИИ: ' + e.message };
+    return { ok: false, error: 'Нет связи с воркером: ' + e.message + ' (проверь адрес воркера и что он развёрнут)' };
   }
 };
 
