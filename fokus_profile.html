@@ -739,7 +739,11 @@ initAtmosphere(canvasId) {
             }
             btn.disabled = true; btn.innerText = 'Привязка...';
             try {
-                const res = await window.fbLinkByCode(code);
+                // таймаут 12 сек — чтобы не висело вечно если правила Firestore блокируют
+                const res = await Promise.race([
+                    window.fbLinkByCode(code),
+                    new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 12000))
+                ]);
                 btn.disabled = false; btn.innerText = 'Привязать';
                 if (res.ok) {
                     modal.classList.remove('show');
@@ -749,7 +753,11 @@ initAtmosphere(canvasId) {
                 }
             } catch(e) {
                 btn.disabled = false; btn.innerText = 'Привязать';
-                toast('Ошибка: ' + (e.message || 'неизвестная'));
+                if (e.message === 'timeout') {
+                    toast('Долго нет ответа. Проверь: обновлены ли правила Firestore (v5) в Firebase Console');
+                } else {
+                    toast('Ошибка: ' + (e.message || 'неизвестная'));
+                }
             }
         });
         modal.addEventListener('click', (e) => { if (e.target.id === 'hiddenLinkModal') modal.classList.remove('show'); });

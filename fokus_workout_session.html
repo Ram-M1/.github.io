@@ -108,6 +108,16 @@
     .pf-cell { flex:1; }
     .pf-plan-val { background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:8px; padding:9px 4px; color:#c8c8d0; font-size:14px; font-weight:700; text-align:center; }
     .pf-fact-input { width:100%; background:rgba(255,156,100,0.08); border:1px solid rgba(255,156,100,0.3); border-radius:8px; padding:9px 4px; color:#fff; font-size:14px; font-weight:700; font-family:inherit; outline:none; text-align:center; }
+    .sets-plan-head { display:flex; align-items:center; gap:8px; font-size:9.5px; color:#8e8e9e; font-weight:700; margin:8px 0 6px; padding:0 2px; }
+    .sets-plan-head span:nth-child(1){ width:22px; }
+    .sets-plan-head span:nth-child(2){ flex:1; }
+    .sets-plan-head span:nth-child(3){ flex:1; text-align:right; }
+    .sets-plan-list { display:flex; flex-direction:column; gap:6px; }
+    .set-plan-row { display:flex; align-items:center; gap:7px; }
+    .set-plan-num { width:22px; height:34px; flex-shrink:0; display:flex; align-items:center; justify-content:center; background:rgba(255,156,100,0.14); border-radius:7px; color:#FF9C64; font-weight:700; font-size:12px; }
+    .set-plan-info { flex:1; font-size:11px; color:#c8c8d0; }
+    .set-plan-info b { color:#fff; }
+    .set-fact-reps, .set-fact-weight { width:52px !important; flex-shrink:0; padding:7px 2px !important; font-size:13px !important; }
     .pf-fact-input:focus { border-color:#FF9C64; }
     .delta { font-size:9px; text-align:center; margin-top:3px; font-weight:600; }
     .delta.up { color:#78DC96; } .delta.down { color:#FF8A7C; } .delta.same { color:#8e8e9e; }
@@ -822,28 +832,33 @@ initAtmosphere(canvasId) {
                 }
                 card.innerHTML = inner;
             } else {
-                // strength
-                let planSets = ex.sets, planReps = ex.reps, planWeight = ex.weight;
-                if (p) {
-                    planSets = p.factSets || ex.sets;
-                    planReps = p.factReps || ex.reps;
-                    planWeight = p.factWeight != null ? p.factWeight : ex.weight;
+                // strength — показываем каждый подход отдельно (свои повторы+вес)
+                let setsData = ex.setsData;
+                if (!setsData || !setsData.length) {
+                    // старый формат — разворачиваем в подходы
+                    const n = ex.sets || 3;
+                    setsData = [];
+                    for (let s = 0; s < n; s++) setsData.push({ reps: ex.reps||10, weight: ex.weight||0 });
                 }
+                // факт из прошлой сессии если есть
+                const factSets = (p && p.factSetsData && p.factSetsData.length) ? p.factSetsData : null;
+                let setsRows = '';
+                setsData.forEach((set, si) => {
+                    const fReps = factSets && factSets[si] ? factSets[si].reps : set.reps;
+                    const fWeight = factSets && factSets[si] ? factSets[si].weight : set.weight;
+                    setsRows += `
+                        <div class="set-plan-row">
+                            <div class="set-plan-num">${si+1}</div>
+                            <div class="set-plan-info">план: <b>${set.reps}</b> раз × <b>${set.weight}</b> кг</div>
+                            <input type="number" class="pf-fact-input set-fact-reps" data-ex="${i}" data-set="${si}" data-f="reps" value="${fReps}" inputmode="numeric" title="повторы факт">
+                            <span style="color:#6e6e7e;font-size:11px;">×</span>
+                            <input type="number" class="pf-fact-input set-fact-weight" data-ex="${i}" data-set="${si}" data-f="weight" value="${fWeight}" inputmode="numeric" title="вес факт">
+                        </div>`;
+                });
                 card.innerHTML = `
                     <div class="ex-card-name">${escapeHtml(ex.name)}</div>
-                    <div class="pf-head"><span>ПОДХОДЫ</span><span>ПОВТОРЫ</span><span>ВЕС, КГ</span></div>
-                    <div class="pf-row">
-                        <div class="pf-rowlabel plan">ПЛАН</div>
-                        <div class="pf-cell"><div class="pf-plan-val" data-plan="sets-${i}">${planSets}</div></div>
-                        <div class="pf-cell"><div class="pf-plan-val" data-plan="reps-${i}">${planReps}</div></div>
-                        <div class="pf-cell"><div class="pf-plan-val" data-plan="weight-${i}">${planWeight}</div></div>
-                    </div>
-                    <div class="pf-row">
-                        <div class="pf-rowlabel fact">ФАКТ</div>
-                        <div class="pf-cell"><input type="number" class="pf-fact-input" data-fact="sets-${i}" value="${planSets}" inputmode="numeric"></div>
-                        <div class="pf-cell"><input type="number" class="pf-fact-input" data-fact="reps-${i}" value="${planReps}" inputmode="numeric"></div>
-                        <div class="pf-cell"><input type="number" class="pf-fact-input" data-fact="weight-${i}" value="${planWeight}" inputmode="numeric"></div>
-                    </div>
+                    <div class="sets-plan-head"><span>#</span><span>План</span><span>Факт: повт × вес</span></div>
+                    <div class="sets-plan-list">${setsRows}</div>
                     <div class="mark-done${exDone[i]?' done':''}" data-mark="${i}">${exDone[i]?'✓ Выполнено':'Отметить выполнено'}</div>`;
             }
             cont.appendChild(card);
@@ -942,8 +957,19 @@ initAtmosphere(canvasId) {
                 r.planDistanceM = getPlan('distanceM');
                 r.factDistanceM = getFact('distanceM');
             } else {
-                r.planSets = getPlan('sets'); r.planReps = getPlan('reps'); r.planWeight = getPlan('weight');
-                r.factSets = getFact('sets'); r.factReps = getFact('reps'); r.factWeight = getFact('weight');
+                // strength — собираем факт по каждому подходу
+                const setsData = ex.setsData && ex.setsData.length ? ex.setsData : [{reps:ex.reps||10, weight:ex.weight||0}];
+                r.factSetsData = setsData.map((set, si) => {
+                    const repsEl = document.querySelector(`[data-ex="${i}"][data-set="${si}"][data-f="reps"]`);
+                    const wEl = document.querySelector(`[data-ex="${i}"][data-set="${si}"][data-f="weight"]`);
+                    return { reps: repsEl ? num(repsEl.value) : set.reps, weight: wEl ? num(wEl.value) : set.weight };
+                });
+                r.planSetsData = setsData.map(s => ({ reps:s.reps, weight:s.weight }));
+                // сводные для статистики (сумма)
+                r.factSets = r.factSetsData.length;
+                r.factReps = Math.round(r.factSetsData.reduce((a,s)=>a+s.reps,0) / r.factSetsData.length);
+                r.factWeight = Math.max(...r.factSetsData.map(s=>s.weight));
+                r.planSets = setsData.length;
             }
             return r;
         });

@@ -256,7 +256,7 @@
     <canvas id="atmosCanvas" width="375" height="700" style="width:375px;height:700px;"></canvas>
     <div class="screen">
         <div class="chat-header">
-            <div class="back-btn" onclick="location.href='fokus_chats.html'" style="position:static;">
+            <div class="back-btn" onclick="chatGoBack()" style="position:static;">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
             </div>
             <div class="chat-hdr-avatar" id="hdrAvatar">?</div>
@@ -266,6 +266,9 @@
             </div>
             <div class="hdr-action-btn" id="addContactBtn" title="В контакты" style="display:none;">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8M19 8v6M22 11h-6"/></svg>
+            </div>
+            <div class="hdr-action-btn" onclick="location.href='index.html'" title="На главную FOCUS">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg>
             </div>
         </div>
 
@@ -343,6 +346,10 @@
 <script type="module" src="firebase-auth-helper.js"></script>
 <script src="focus-core.js"></script>
 <script>
+    // возврат из переписки: в список чатов (а оттуда кнопкой — на главную)
+    function chatGoBack(){
+        location.href = 'fokus_chats.html';
+    }
     if (typeof FocusStorage === 'undefined') {
         window.FocusStorage = {
             _key:'focus_user',
@@ -661,33 +668,59 @@ initAtmosphere(canvasId) {
         sendBtn.style.display = hasText ? 'flex' : 'none';
         voiceBtn.style.display = hasText ? 'none' : 'flex';
     });
-    // голосовое сообщение (демо-запись: зажал — пишет, отпустил — отправляет)
-    let recTimer = null, recSec = 0;
+    // голосовой ввод в чате: зажал — говоришь, отпустил — распозналось в текст
+    const SR_CHAT = window.SpeechRecognition || window.webkitSpeechRecognition;
+    let chatRecog = null, chatListening = false, chatVoiceText = '';
     function startRec(){
-        voiceBtn.classList.add('recording');
-        recSec = 0;
-        const sub = document.querySelector('.chat-sub');
-        if (sub) { sub.dataset.prev = sub.innerText; sub.innerText = '🔴 Запись...'; }
-        recTimer = setInterval(()=>{ recSec++; }, 1000);
+        if (!SR_CHAT) { toast('Голосовой ввод не поддерживается браузером'); return; }
+        if (chatListening) return;
+        chatVoiceText = '';
+        chatRecog = new SR_CHAT();
+        chatRecog.lang = 'ru-RU';
+        chatRecog.interimResults = true;
+        chatRecog.continuous = true;
+        chatRecog.maxAlternatives = 1;
+        chatRecog.onstart = () => {
+            chatListening = true;
+            voiceBtn.classList.add('recording');
+            const sub = document.querySelector('.chat-hdr-status');
+            if (sub) { sub.dataset.prev = sub.innerText; sub.innerText = '🔴 Говори...'; }
+        };
+        chatRecog.onend = () => {
+            chatListening = false;
+            voiceBtn.classList.remove('recording');
+            const sub = document.querySelector('.chat-hdr-status');
+            if (sub && sub.dataset.prev) sub.innerText = sub.dataset.prev;
+            // распознанный текст вставляем в поле (не отправляем сразу — юзер проверит и нажмёт отправить)
+            if (chatVoiceText.trim()) {
+                input.value = (input.value ? input.value + ' ' : '') + chatVoiceText.trim();
+                input.dispatchEvent(new Event('input')); // покажет кнопку отправить
+                input.focus();
+            }
+        };
+        chatRecog.onerror = (e) => {
+            chatListening = false; voiceBtn.classList.remove('recording');
+            const sub = document.querySelector('.chat-hdr-status');
+            if (sub && sub.dataset.prev) sub.innerText = sub.dataset.prev;
+            if (e.error === 'not-allowed') toast('Разреши доступ к микрофону');
+        };
+        chatRecog.onresult = (e) => {
+            let txt = '';
+            for (let i = 0; i < e.results.length; i++) txt += e.results[i][0].transcript;
+            chatVoiceText = txt;
+        };
+        try { chatRecog.start(); } catch(er){}
     }
-    function stopRec(send){
-        voiceBtn.classList.remove('recording');
-        clearInterval(recTimer);
-        const sub = document.querySelector('.chat-sub');
-        if (sub && sub.dataset.prev) sub.innerText = sub.dataset.prev;
-        if (send && recSec >= 1) {
-            addMsg({ from:'me', voice:true, dur:recSec, time:nowTime() });
-        } else if (send) {
-            toast('Слишком коротко — удерживай для записи');
-        }
-        recSec = 0;
+    function stopRec(){
+        if (chatRecog && chatListening) { try { chatRecog.stop(); } catch(er){} }
     }
-    // зажатие (тач + мышь)
+    // зажатие (тач + мышь): держишь — говоришь, отпустил — текст в поле
     voiceBtn.addEventListener('mousedown', startRec);
-    voiceBtn.addEventListener('mouseup', ()=>stopRec(true));
-    voiceBtn.addEventListener('mouseleave', ()=>{ if(voiceBtn.classList.contains('recording')) stopRec(false); });
+    voiceBtn.addEventListener('mouseup', stopRec);
+    voiceBtn.addEventListener('mouseleave', ()=>{ if(chatListening) stopRec(); });
     voiceBtn.addEventListener('touchstart', (e)=>{ e.preventDefault(); startRec(); }, {passive:false});
-    voiceBtn.addEventListener('touchend', (e)=>{ e.preventDefault(); stopRec(true); }, {passive:false});
+    voiceBtn.addEventListener('touchend', (e)=>{ e.preventDefault(); stopRec(); }, {passive:false});
+    voiceBtn.addEventListener('touchcancel', ()=>stopRec());
 
     // меню вложений
     const attachMenu = document.getElementById('attachMenu');
@@ -860,26 +893,42 @@ initAtmosphere(canvasId) {
         }
 
         function startRealChat(){
-            if (!window.fbListenMessages || !myUidNow()) { setTimeout(startRealChat, 400); return; }
-            resolveOther();
-            const myUid = myUidNow();
             const area = document.getElementById('messagesArea');
-            area.innerHTML = '';
+            const myUid = myUidNow();
+            const cacheKey = 'focus_chat_msgs_' + realChatId;
+
+            // 1. МГНОВЕННО показываем кэшированные сообщения (без ожидания облака)
+            try {
+                const cached = JSON.parse(localStorage.getItem(cacheKey));
+                if (cached && cached.length) {
+                    const frag = document.createDocumentFragment();
+                    cached.forEach(m => frag.appendChild(renderMsg(m, m.from === myUid)));
+                    area.innerHTML = '';
+                    area.appendChild(frag);
+                    area.scrollTop = area.scrollHeight;
+                }
+            } catch(e){}
+
+            // 2. подключаем реалтайм из облака (обновит когда придёт)
+            if (!window.fbListenMessages || !myUidNow()) { setTimeout(startRealChat, 300); return; }
+            resolveOther();
             window.fbListenMessages(realChatId, (msgs) => {
                 if (!msgs.length) {
-                    area.innerHTML = '<div style="text-align:center;color:#8e8e9e;font-size:12px;padding:30px 20px;">Начни переписку — напиши первое сообщение 👋</div>';
+                    if (!area.querySelector('.msg')) area.innerHTML = '<div style="text-align:center;color:#8e8e9e;font-size:12px;padding:30px 20px;">Начни переписку — напиши первое сообщение 👋</div>';
                     return;
                 }
-                // быстрый рендер: собираем всё во фрагмент, один reflow
+                const uid = myUidNow();
                 const frag = document.createDocumentFragment();
-                msgs.forEach(m => frag.appendChild(renderMsg(m, m.from === myUid)));
+                msgs.forEach(m => frag.appendChild(renderMsg(m, m.from === uid)));
                 area.innerHTML = '';
                 area.appendChild(frag);
                 area.scrollTop = area.scrollHeight;
+                // кэшируем последние 50 для мгновенного показа в след. раз
+                try { localStorage.setItem(cacheKey, JSON.stringify(msgs.slice(-50))); } catch(e){}
             });
         }
         if (window.FB_AUTH_READY) startRealChat();
-        else window.addEventListener('fb-auth-ready', startRealChat);
+        else { startRealChat(); window.addEventListener('fb-auth-ready', startRealChat); }
 
         // === Добавить в контакты ===
         addContactBtn.addEventListener('click', async () => {

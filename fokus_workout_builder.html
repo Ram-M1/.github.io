@@ -113,6 +113,13 @@
     .ex-num-field { flex:1; }
     .ex-num-label { font-size:8.5px; color:#9a9aab; margin-bottom:3px; display:block; text-align:center; }
     .ex-num-input { width:100%; background:rgba(0,0,0,0.28); border:1px solid rgba(255,156,100,0.16); border-radius:8px; padding:8px 4px; color:#fff; font-size:14px; font-weight:700; font-family:inherit; outline:none; text-align:center; }
+    .sets-label { font-size:10.5px; color:#FF9C64; font-weight:700; margin:8px 0 7px; letter-spacing:0.2px; }
+    .sets-list { display:flex; flex-direction:column; gap:7px; }
+    .set-row { display:flex; align-items:flex-end; gap:8px; }
+    .set-num { width:24px; height:38px; flex-shrink:0; display:flex; align-items:center; justify-content:center; background:rgba(255,156,100,0.14); border-radius:8px; color:#FF9C64; font-weight:700; font-size:13px; }
+    .set-del { width:26px; height:38px; flex-shrink:0; display:flex; align-items:center; justify-content:center; color:#8e8e9e; cursor:pointer; font-size:14px; }
+    .set-del:active { color:#ff6b6b; }
+    .add-set-btn { margin-top:8px; padding:9px; border-radius:10px; background:rgba(255,156,100,0.08); border:1px dashed rgba(255,156,100,0.3); color:#FF9C64; font-weight:700; font-size:11.5px; text-align:center; cursor:pointer; }
     .ex-del { text-align:right; margin-top:5px; }
     .ex-del span { font-size:9.5px; color:#ff6b6b; opacity:0.6; cursor:pointer; }
     .add-ex-btn { padding:10px; border-radius:11px; background:rgba(255,156,100,0.1); border:1px dashed rgba(255,156,100,0.35); color:#FF9C64; font-weight:700; font-size:12px; text-align:center; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px; margin-bottom:10px; }
@@ -591,7 +598,7 @@ initAtmosphere(canvasId) {
     let draftWorkouts = [];
     let activeDayIdx = 0;
 
-    function newEx(){ return { name:'', type:'strength', sets:3, reps:10, weight:0, durationSec:60, distanceM:1000 }; }
+    function newEx(){ return { name:'', type:'strength', sets:3, reps:10, weight:0, durationSec:60, distanceM:1000, setsData:[{reps:10,weight:0},{reps:10,weight:0},{reps:10,weight:0}] }; }
     function newWorkout(idx){ return { label: 'Тренировка ' + (LABELS[idx]||(idx+1)), exercises:[ newEx() ] }; }
 
     // init draft
@@ -638,13 +645,28 @@ initAtmosphere(canvasId) {
                 </div>
                 <div class="hint" style="margin-top:5px;">Заполни время, дистанцию или оба — что важно для упражнения.</div>`;
         }
-        // strength
+        // strength — каждый подход со своими повторами и весом
+        // структура: ex.setsData = [{reps, weight}, ...]
+        if (!ex.setsData || !Array.isArray(ex.setsData)) {
+            // миграция со старого формата (одно значение на все)
+            const n = ex.sets || 3;
+            ex.setsData = [];
+            for (let s = 0; s < n; s++) ex.setsData.push({ reps: ex.reps || 10, weight: ex.weight || 0 });
+        }
+        let rows = '';
+        ex.setsData.forEach((set, si) => {
+            rows += `
+                <div class="set-row">
+                    <div class="set-num">${si+1}</div>
+                    <div class="ex-num-field"><label class="ex-num-label">ПОВТОРЫ</label><input type="number" class="ex-num-input" data-i="${i}" data-set="${si}" data-f="reps" value="${set.reps}" inputmode="numeric"></div>
+                    <div class="ex-num-field"><label class="ex-num-label">ВЕС, КГ</label><input type="number" class="ex-num-input" data-i="${i}" data-set="${si}" data-f="weight" value="${set.weight}" inputmode="numeric"></div>
+                    ${ex.setsData.length > 1 ? `<div class="set-del" data-delset="${i}_${si}">✕</div>` : '<div style="width:26px;"></div>'}
+                </div>`;
+        });
         return `
-            <div class="ex-nums">
-                <div class="ex-num-field"><label class="ex-num-label">ПОДХОДЫ</label><input type="number" class="ex-num-input" data-i="${i}" data-f="sets" value="${ex.sets}" inputmode="numeric"></div>
-                <div class="ex-num-field"><label class="ex-num-label">ПОВТОРЫ</label><input type="number" class="ex-num-input" data-i="${i}" data-f="reps" value="${ex.reps}" inputmode="numeric"></div>
-                <div class="ex-num-field"><label class="ex-num-label">ВЕС, КГ</label><input type="number" class="ex-num-input" data-i="${i}" data-f="weight" value="${ex.weight}" inputmode="numeric"></div>
-            </div>`;
+            <div class="sets-label">Подходы <span style="color:#8e8e9e;font-weight:600;">(у каждого свои повторы и вес)</span></div>
+            <div class="sets-list">${rows}</div>
+            <div class="add-set-btn" data-addset="${i}">+ Добавить подход</div>`;
     }
 
     function renderEx(){
@@ -678,9 +700,31 @@ initAtmosphere(canvasId) {
                 if (f === 'name') { w.exercises[i].name = inp.value; }
                 else if (f === 'durMin') { const s = w.exercises[i].durationSec%60; w.exercises[i].durationSec = num(inp.value)*60 + s; }
                 else if (f === 'durSec') { const m = Math.floor(w.exercises[i].durationSec/60); w.exercises[i].durationSec = m*60 + num(inp.value); }
+                else if (inp.dataset.set !== undefined) {
+                    // повторы/вес конкретного подхода
+                    const si = +inp.dataset.set;
+                    if (!w.exercises[i].setsData) w.exercises[i].setsData = [];
+                    if (!w.exercises[i].setsData[si]) w.exercises[i].setsData[si] = { reps:10, weight:0 };
+                    w.exercises[i].setsData[si][f] = num(inp.value);
+                }
                 else { w.exercises[i][f] = num(inp.value); }
             });
         });
+        // добавить подход
+        cont.querySelectorAll('[data-addset]').forEach(el => el.addEventListener('click', () => {
+            const i = +el.dataset.addset;
+            if (!w.exercises[i].setsData) w.exercises[i].setsData = [];
+            // копируем параметры последнего подхода (удобно — обычно похожие)
+            const last = w.exercises[i].setsData[w.exercises[i].setsData.length-1] || { reps:10, weight:0 };
+            w.exercises[i].setsData.push({ reps: last.reps, weight: last.weight });
+            renderEx();
+        }));
+        // удалить подход
+        cont.querySelectorAll('[data-delset]').forEach(el => el.addEventListener('click', () => {
+            const [i, si] = el.dataset.delset.split('_').map(Number);
+            w.exercises[i].setsData.splice(si, 1);
+            renderEx();
+        }));
         cont.querySelectorAll('[data-del]').forEach(el => el.addEventListener('click', () => {
             w.exercises.splice(+el.dataset.del, 1); renderEx();
         }));
@@ -701,7 +745,13 @@ initAtmosphere(canvasId) {
             exercises: w.exercises.filter(e => e.name.trim()).map(e => {
                 const base = { name:e.name.trim(), type:e.type||'strength' };
                 if (e.type === 'cardio') { base.durationSec = e.durationSec||0; base.distanceM = e.distanceM||0; }
-                else { base.sets = e.sets||0; base.reps = e.reps||0; base.weight = e.weight||0; }
+                else {
+                    // сохраняем подходы с индивидуальными повторами/весом
+                    base.setsData = (e.setsData && e.setsData.length) ? e.setsData.map(s => ({ reps:s.reps||0, weight:s.weight||0 })) : [{reps:e.reps||10,weight:e.weight||0}];
+                    base.sets = base.setsData.length;
+                    // для совместимости оставляем первые значения
+                    base.reps = base.setsData[0].reps; base.weight = base.setsData[0].weight;
+                }
                 return base;
             })
         })).filter(w => w.exercises.length > 0);

@@ -107,9 +107,27 @@ window.fbLogout = async function() {
 let _currentUser = null;
 onAuthStateChanged(auth, (user) => {
   _currentUser = user;
-  // синкаем локальные данные в облако ТОЛЬКО один раз за сессию и только если есть что синкать
+  if (user) {
+    // 1. ВОССТАНОВЛЕНИЕ: при входе подтягиваем данные из облака (только то, чего локально нет)
+    if (!sessionStorage.getItem('_fb_restored')) {
+      sessionStorage.setItem('_fb_restored', '1');
+      if (window.fbRestoreAllData) {
+        window.fbRestoreAllData().then(r => {
+          if (r && r.restored > 0) {
+            // данные вернулись из облака — обновим экран
+            window.dispatchEvent(new Event('focus-data-restored'));
+          }
+          // после восстановления — бэкапим текущее состояние
+          setTimeout(() => { if (window.fbBackupAllData) window.fbBackupAllData(); }, 3000);
+        });
+      }
+    } else {
+      // не первый раз за сессию — просто бэкап в фоне
+      setTimeout(() => { if (window.fbBackupAllData) window.fbBackupAllData(); }, 6000);
+    }
+  }
+  // синкаем профиль в облако
   if (user && window.FocusStorage && typeof window.FocusStorage.getUser === 'function') {
-    // защита: не чаще раза в 5 минут и только если данные менялись
     const lastSync = parseInt(sessionStorage.getItem('_fb_synced') || '0');
     if (Date.now() - lastSync < 5*60*1000) return;
     sessionStorage.setItem('_fb_synced', String(Date.now()));
@@ -200,13 +218,15 @@ window.fbLinkByCode = async function(code) {
     await setDoc(doc(db, 'users', parentUid), { children: arrayUnion(user.uid) }, { merge: true });
     // помечаем код использованным
     await setDoc(doc(db, 'pairing_codes', code), { used: true, childUid: user.uid }, { merge: true });
-    // сразу шлём геопозицию (первый раз, чтобы родитель увидел ребёнка на карте)
-    if (navigator.geolocation && window.fbSaveLocation) {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => { window.fbSaveLocation(pos.coords.latitude, pos.coords.longitude); },
-        () => {}, { enableHighAccuracy: false, timeout: 8000 }
-      );
-    }
+    // геопозицию шлём в фоне, НЕ блокируя привязку (не ждём разрешения гео)
+    setTimeout(() => {
+      if (navigator.geolocation && window.fbSaveLocation) {
+        navigator.geolocation.getCurrentPosition(
+          (pos) => { window.fbSaveLocation(pos.coords.latitude, pos.coords.longitude); },
+          () => {}, { enableHighAccuracy: false, timeout: 8000 }
+        );
+      }
+    }, 500);
     return { ok: true, parentUid };
   } catch (e) {
     return { ok: false, error: e.message };
@@ -690,6 +710,85 @@ window.fbAskAIVision = async function(messages, imageDataUrl, maxTokens) {
     return { ok: false, error: 'Нет связи с ИИ: ' + e.message };
   }
 };
+
+// ========== БЭКАП ДАННЫХ РАЗДЕЛОВ (безопасный, ручной вызов) ==========
+const _SYNC_SKIP = ['focus_realchats_cache','focus_geo_sent','_fb_synced','_fb_restored','focus_selected_child','focus_controlled_children'];
+const _SYNC_SKIP_PREFIX = ['focus_chat_msgs_'];
+
+function _collectLocalData(){
+  const out = {};
+  try {
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (!k || !k.startsWith('focus_')) continue;
+      if (_SYNC_SKIP.includes(k)) continue;
+      if (_SYNC_SKIP_PREFIX.some(p => k.startsWith(p))) continue;
+      out[k] = localStorage.getItem(k);
+    }
+  } catch(e){}
+  return out;
+}
+
+// Сохранить данные разделов в облако (дебаунс). Вызывается вручную, не перехватом.
+let _fullSyncTimer = null;
+window.fbBackupAllData = function(){
+  const user = _currentUser || auth.currentUser;
+  if (!user) return;
+  clearTimeout(_fullSyncTimer);
+  _fullSyncTimer = setTimeout(async () => {
+    try {
+      const data = _collectLocalData();
+      if (Object.keys(data).length === 0) return; // нечего бэкапить — не трогаем облако
+      await setDoc(doc(db, 'users', user.uid, 'backup', 'sections'), {
+        data: data, updatedAt: new Date().toISOString()
+      });
+    } catch(e){}
+  }, 4000);
+};
+
+// Загрузить данные разделов из облака ТОЛЬКО если локально совсем пусто (новое устройство)
+window.fbRestoreAllData = async function(){
+  const user = _currentUser || auth.currentUser;
+  if (!user) return { ok:false };
+  try {
+    const snap = await getDoc(doc(db, 'users', user.uid, 'backup', 'sections'));
+    if (!snap.exists()) return { ok:true, restored:0 };
+    const cloud = snap.data().data || {};
+    let restored = 0;
+    Object.keys(cloud).forEach(k => {
+      const localVal = localStorage.getItem(k);
+      // ТОЛЬКО если локально пусто И облачное значение непустое — восстанавливаем
+      if (localVal === null && cloud[k] && cloud[k] !== 'null' && cloud[k] !== '{}' && cloud[k] !== '[]') {
+        try { localStorage.setItem(k, cloud[k]); restored++; } catch(e){}
+      }
+    });
+    return { ok:true, restored };
+  } catch(e){ return { ok:false, error:e.message }; }
+};
+
+// Периодический автобэкап — каждые 30 сек проверяет изменения и сохраняет в облако
+(function(){
+  if (typeof window === 'undefined') return;
+  let _lastBackupHash = '';
+  setInterval(() => {
+    const user = _currentUser || auth.currentUser;
+    if (!user || !window.fbBackupAllData) return;
+    // простой хеш данных — бэкапим только если что-то изменилось
+    try {
+      const data = _collectLocalData();
+      const hash = Object.keys(data).length + ':' + JSON.stringify(data).length;
+      if (hash !== _lastBackupHash) {
+        _lastBackupHash = hash;
+        window.fbBackupAllData();
+      }
+    } catch(e){}
+  }, 30000);
+  // бэкап при уходе со страницы (закрытие/переход) — чтобы точно не потерять
+  window.addEventListener('pagehide', () => {
+    const user = _currentUser || auth.currentUser;
+    if (user && window.fbBackupAllData) window.fbBackupAllData();
+  });
+})();
 
 // сигнал готовности
 window.FB_AUTH_READY = true;

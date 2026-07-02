@@ -615,11 +615,11 @@
         <div class="ai-focus-card">
             <div class="ai-card-head">
                 <span class="ai-pulse"></span>
-                <span class="ai-card-title">ИИ-наставник Фокуса</span>
+                <span class="ai-card-title">ИИ-ассистент Фокуса</span>
             </div>
             <div class="ai-card-hint">Отметь, что сделал сегодня — голосом или текстом</div>
             <div class="ai-input-row">
-                <input type="text" class="ai-input" id="aiInput" placeholder="Отметь дело или спроси совет у наставника...">
+                <input type="text" class="ai-input" id="aiInput" placeholder="Отметь дело или спроси совет у ассистента...">
                 <div class="ai-mic-btn" id="aiMicBtn" title="Голос">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v1a7 7 0 0 1-14 0v-1M12 18v4M8 22h8"/></svg>
                 </div>
@@ -1264,8 +1264,20 @@
             actx.fillRect(0, 0, ac.width, ac.height);
         }
 
+        let _atmoPaused = false;
+        document.addEventListener('visibilitychange', () => {
+            _atmoPaused = document.hidden;
+            if (!_atmoPaused) atmosphereLoop(); // возобновляем когда вернулись
+        });
         function atmosphereLoop() {
+            if (_atmoPaused) return; // вкладка скрыта — не тратим ресурсы
             const theme = currentTheme();
+            // тема "original" без анимации фона — не крутим цикл впустую
+            if (theme === 'original') {
+                if (theme !== lastTheme) { actx.clearRect(0, 0, ac.width, ac.height); lastTheme = theme; }
+                setTimeout(atmosphereLoop, 500); // редкая проверка смены темы
+                return;
+            }
             if (theme !== lastTheme) {
                 actx.clearRect(0, 0, ac.width, ac.height);
                 tronPulses = []; mkEmbers = []; mkDrips = []; mkBolt = null; matrixDrops = null;
@@ -1312,6 +1324,46 @@
             { kw:['погулял','прогул','шагов','ходил пешком','прошёл'], sphere:'body', action:'walk', label:'Тело · Прогулка' },
         ];
 
+        // РЕАЛЬНО заполняет раздел как будто ты сам прошёл флоу (галочки + завершить)
+        function markSectionDone(action){
+            const today = new Date().toISOString().slice(0,10);
+            function addDay(key){
+                try {
+                    let days = JSON.parse(localStorage.getItem(key)) || [];
+                    if (!days.includes(today)) { days.push(today); localStorage.setItem(key, JSON.stringify(days)); }
+                } catch(e){}
+            }
+            try {
+                if (action === 'workout') {
+                    // зарядка: отмечаем все упражнения выполненными + завершаем день
+                    const exList = JSON.parse(localStorage.getItem('focus_workout_exercises') || 'null');
+                    if (exList && exList.length) {
+                        const checks = {};
+                        exList.forEach(ex => { checks[ex.id] = true; });
+                        localStorage.setItem('focus_workout_checks_' + today, JSON.stringify(checks));
+                    }
+                    addDay('focus_workout_days'); // завершённый день
+                }
+                else if (action === 'nutrition') {
+                    addDay('focus_nutrition_finished'); // день питания завершён
+                }
+                else if (action === 'sleep') {
+                    // сон: добавляем запись сна за сегодня если её нет
+                    try {
+                        let entries = JSON.parse(localStorage.getItem('focus_sleep_entries') || '[]');
+                        if (!entries.some(e => e.date === today)) {
+                            entries.push({ date: today, hours: 8, quality: 3, note: 'Отмечено голосом' });
+                            localStorage.setItem('focus_sleep_entries', JSON.stringify(entries));
+                        }
+                    } catch(e){}
+                }
+                else if (action === 'gratitude') {
+                    addDay('focus_habit_reward'); // засчитываем благодарность
+                }
+                // для остальных действий — активность уже записана через FocusRewards.mark выше
+            } catch(e){}
+        }
+
         function recognize(text){
             const t = (text||'').toLowerCase();
             const matched = [];
@@ -1334,11 +1386,13 @@
             if (!text) { input.focus(); return; }
             const matched = recognize(text);
             if (matched.length > 0) {
-                // распознали команду — записываем активность через FocusRewards (в достижения + прогресс)
+                // распознали команду — записываем активность + отмечаем раздел выполненным
                 matched.forEach(m => {
                     try {
                         if (window.FocusRewards) FocusRewards.mark(m.sphere, m.action);
                         else { FocusStorage.addActivity(m.sphere, m.action); FocusStorage.addCoins(1); }
+                        // отмечаем конкретный раздел как выполненный сегодня (как будто сам заполнил)
+                        markSectionDone(m.action);
                     } catch(e){}
                 });
                 const labels = matched.map(m => m.label).join(', ');
@@ -1346,10 +1400,10 @@
                 result.innerHTML = '<span class="check">✓</span> Записал: ' + labels + ' &nbsp;(+1 F-coin)';
                 input.value = '';
             } else {
-                // не команда — спрашиваем реальный ИИ (совет наставника)
+                // не команда — спрашиваем реальный ИИ (совет ассистента)
                 if (window.fbAskAI) {
                     result.className = 'ai-result show';
-                    result.innerHTML = '<span class="ai-thinking">🧠 Наставник думает...</span>';
+                    result.innerHTML = '<span class="ai-thinking">🧠 Ассистент думает...</span>';
                     // проверка лимита ИИ (если есть система лимитов)
                     let canAsk = true;
                     try { if (FocusStorage.canUseAI) canAsk = FocusStorage.canUseAI('mentor', 'text').ok; } catch(e){}
@@ -1359,7 +1413,7 @@
                     }
                     const prompt = [
                         { role: 'system', content:
-                            'Ты — умный, поддерживающий наставник по саморазвитию в приложении FOCUS. Помогаешь с привычками, целями, дисциплиной, здоровьем, мышлением, мотивацией.\n' +
+                            'Ты — умный, поддерживающий ассистент по саморазвитию в приложении FOCUS. Помогаешь с привычками, целями, дисциплиной, здоровьем, мышлением, мотивацией.\n' +
                             'Отвечай ИМЕННО на вопрос человека, конкретно и по делу. Давай practical советы которые реально можно применить сегодня. Живой разговорный русский, 2-5 предложений, без воды и клише. Если человек язвит — реагируй спокойно и с юмором. Не читай нотации.'
                         },
                         { role: 'user', content: text }
@@ -1378,7 +1432,7 @@
                     return;
                 } else {
                     result.className = 'ai-result show unknown';
-                    result.innerHTML = '🤔 Не понял. Попробуй: «сделал зарядку», «выпил воды», или задай вопрос наставнику.';
+                    result.innerHTML = '🤔 Не понял. Попробуй: «сделал зарядку», «выпил воды», или задай вопрос ассистенту.';
                 }
             }
             clearTimeout(window._aiTimer);
@@ -1388,29 +1442,47 @@
         sendBtn.addEventListener('click', process);
         input.addEventListener('keydown', (e) => { if (e.key === 'Enter') process(); });
 
-        // голосовой ввод (Web Speech API — где поддерживается)
+        // голосовой ввод: ТАП — старт записи, ещё ТАП — стоп (надёжно на iOS)
         const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
         if (SR && micBtn) {
-            let recog = null, listening = false;
-            micBtn.addEventListener('click', () => {
-                if (listening) { if (recog) { try { recog.stop(); } catch(e){} } listening = false; micBtn.classList.remove('recording'); return; }
+            let recog = null, listening = false, finalText = '';
+
+            function toggleRec(){
+                if (listening) {
+                    // второй тап — стоп
+                    if (recog) { try { recog.stop(); } catch(er){} }
+                    return;
+                }
+                // первый тап — старт
+                finalText = '';
                 recog = new SR();
                 recog.lang = 'ru-RU';
-                recog.interimResults = false;
-                recog.continuous = false;   // одна фраза → авто-стоп
+                recog.interimResults = true;
+                recog.continuous = false;   // на iOS false надёжнее — авто-стоп по паузе
                 recog.maxAlternatives = 1;
-                recog.onstart = () => { listening = true; micBtn.classList.add('recording'); };
-                recog.onend = () => { listening = false; micBtn.classList.remove('recording'); };
-                recog.onerror = () => { listening = false; micBtn.classList.remove('recording'); };
-                recog.onresult = (e) => {
-                    const text = (e.results[0][0].transcript || '').trim();
-                    listening = false;
-                    micBtn.classList.remove('recording');
-                    try { recog.stop(); } catch(er){}
-                    if (text) { input.value = text; process(); }  // только если реально что-то сказали
+                recog.onstart = () => { listening = true; micBtn.classList.add('recording'); input.placeholder = '🎤 Слушаю... (тап чтобы стоп)'; };
+                recog.onend = () => {
+                    listening = false; micBtn.classList.remove('recording');
+                    input.placeholder = 'Отметь дело или спроси совет у ассистента...';
+                    if (finalText.trim()) { input.value = finalText.trim(); process(); }
                 };
-                try { recog.start(); } catch(e){}
-            });
+                recog.onerror = (e) => {
+                    listening = false; micBtn.classList.remove('recording');
+                    input.placeholder = 'Отметь дело или спроси совет у ассистента...';
+                    if (e.error === 'not-allowed' || e.error === 'service-not-allowed') {
+                        toast('Разреши доступ к микрофону в настройках браузера');
+                    }
+                };
+                recog.onresult = (e) => {
+                    let txt = '';
+                    for (let i = 0; i < e.results.length; i++) txt += e.results[i][0].transcript;
+                    finalText = txt;
+                    input.value = txt.trim();   // показываем вживую
+                };
+                try { recog.start(); } catch(er){}
+            }
+            // один обработчик click (работает и на тач, и на мышь, iOS-friendly)
+            micBtn.addEventListener('click', (e) => { e.preventDefault(); toggleRec(); });
         } else if (micBtn) {
             // нет поддержки голоса — микрофон подсказывает писать текстом
             micBtn.addEventListener('click', () => {

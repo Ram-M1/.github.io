@@ -235,6 +235,9 @@
     <canvas id="atmosCanvas" width="375" height="700" style="width:375px;height:700px;"></canvas>
     <div class="screen">
         <div class="header-row" style="padding-bottom:4px;">
+            <div class="back-btn" onclick="location.href='index.html'" title="На главную">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+            </div>
             <div class="title" style="font-size:26px;">Чаты</div>
             <div style="margin-left:auto;display:flex;gap:8px;align-items:center;">
                 <div class="hdr-btn" id="menuBtn"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg></div>
@@ -708,11 +711,15 @@ initAtmosphere(canvasId) {
             renderChats();
         } catch(e){}
     }
-    if (window.FB_AUTH_READY) setTimeout(loadRealChats, 700);
-    else window.addEventListener('fb-auth-ready', () => setTimeout(loadRealChats, 700));
-    // обновляем список когда возвращаешься на вкладку (вдруг создался новый чат)
+    // МГНОВЕННО показываем из кэша (без ожидания облака)
+    renderChats();
+    // затем обновляем из облака в фоне (без задержки)
+    if (window.FB_AUTH_READY) loadRealChats();
+    else window.addEventListener('fb-auth-ready', loadRealChats);
+    // обновляем когда возвращаешься на экран (новый чат мог появиться)
     document.addEventListener('visibilitychange', () => { if (!document.hidden) loadRealChats(); });
     window.addEventListener('focus', loadRealChats);
+    window.addEventListener('pageshow', loadRealChats);
 
     // ===== Контакты (реальные из облака) =====
     const contactsModal = document.getElementById('contactsModal');
