@@ -530,39 +530,36 @@ initAtmosphere(canvasId) {
 
     function renderChats(){
         const cont = document.getElementById('chatsList');
-        let chats = seedIfEmpty();
-        // фильтр по табу + поиску (быстро, в памяти)
+        // основной источник — реальные чаты из Firebase (+ кэш для мгновенного показа)
+        let chats = realChats;
+        if (!chats.length) {
+            try { chats = JSON.parse(localStorage.getItem('focus_realchats_cache')) || []; } catch(e){ chats = []; }
+        }
+        // фильтр по табу + поиску
         let filtered = chats;
         if (currentTab === 'unread') filtered = filtered.filter(c => c.unread > 0);
         else if (currentTab === 'groups') filtered = filtered.filter(c => c.type === 'group');
         if (searchQuery) filtered = filtered.filter(c => (c.name||'').toLowerCase().includes(searchQuery.toLowerCase()));
 
-        // счётчик новых
         const unreadTotal = chats.filter(c => c.unread > 0).length;
         const badge = document.getElementById('unreadBadge');
         if (badge) { badge.style.display = unreadTotal ? 'inline-block' : 'none'; badge.innerText = unreadTotal; }
 
         if (filtered.length === 0) {
-            const msg = currentTab === 'unread' ? 'Нет новых сообщений' : currentTab === 'groups' ? 'Нет групп' : '💬 Чатов пока нет.<br>Найди друзей по номеру телефона.';
+            const msg = currentTab === 'unread' ? 'Нет новых сообщений' : currentTab === 'groups' ? 'Нет групп' : '💬 Чатов пока нет.<br>Найди друзей по номеру телефона (кнопка + вверху).';
             cont.innerHTML = '<div class="empty-chats">' + msg + '</div>';
             return;
         }
-        // быстрый рендер через фрагмент (один reflow)
         const frag = document.createDocumentFragment();
         filtered.forEach(c => {
-            const initial = (c.avatar || c.name[0] || '?').toUpperCase();
-            const avCls = c.type === 'oracle' ? 'chat-avatar oracle' : 'chat-avatar';
-            const tag = c.type === 'oracle' ? '<span class="chat-badge-tag">Оракул</span>' : '';
-            const avInner = (c.photo && c.photo.startsWith('data:image'))
-                ? `<img src="${c.photo}" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;">`
-                : escapeHtml(initial);
+            const initial = (c.name[0] || '?').toUpperCase();
             const item = document.createElement('div');
             item.className = 'chat-item';
             item.innerHTML = `
-                <div class="${avCls}">${avInner}${c.online?'<span class="online-dot"></span>':''}</div>
+                <div class="chat-avatar">${escapeHtml(initial)}</div>
                 <div class="chat-body">
                     <div class="chat-row1">
-                        <div class="chat-name">${escapeHtml(c.name)}${tag}</div>
+                        <div class="chat-name">${escapeHtml(c.name)}</div>
                         <div class="chat-time">${escapeHtml(c.time||'')}</div>
                     </div>
                     <div class="chat-row2">
@@ -571,10 +568,7 @@ initAtmosphere(canvasId) {
                     </div>
                 </div>`;
             item.addEventListener('click', () => {
-                const all = getChats();
-                const ch = all.find(x => x.id === c.id);
-                if (ch) { ch.unread = 0; saveChats(all); }
-                location.href = 'fokus_chat.html?id=' + c.id;
+                location.href = 'fokus_chat.html?chatId=' + c.chatId + '&name=' + encodeURIComponent(c.name);
             });
             frag.appendChild(item);
         });
@@ -690,37 +684,35 @@ initAtmosphere(canvasId) {
         }
     });
 
-    // загрузка реальных чатов из облака (добавляются к демо сверху)
+    // загрузка реальных чатов из облака — ОСНОВНОЙ источник
+    let realChats = [];
     async function loadRealChats(){
         if (!window.fbGetChatList) return;
-        const list = await window.fbGetChatList();
-        if (!list || !list.length) return;
-        const cont = document.getElementById('chatsList');
-        // убираем "пусто"
-        const empty = cont.querySelector('.empty-chats');
-        if (empty) cont.innerHTML = '';
-        list.forEach(c => {
-            const item = document.createElement('div');
-            item.className = 'chat-item';
-            const initial = (c.withName && c.withName[0] || '?').toUpperCase();
-            item.innerHTML = `
-                <div class="chat-avatar">${escapeHtml(initial)}</div>
-                <div class="chat-body">
-                    <div class="chat-row1">
-                        <div class="chat-name">${escapeHtml(c.withName||'Пользователь')} <span class="chat-badge-tag" style="background:rgba(120,220,150,0.18);color:#78DC96;">чат</span></div>
-                    </div>
-                    <div class="chat-row2">
-                        <div class="chat-last">${escapeHtml(c.lastText||'Начни переписку')}</div>
-                    </div>
-                </div>`;
-            item.addEventListener('click', () => {
-                location.href = 'fokus_chat.html?chatId=' + c.chatId + '&name=' + encodeURIComponent(c.withName||'');
-            });
-            cont.insertBefore(item, cont.firstChild);
-        });
+        try {
+            const list = await window.fbGetChatList();
+            realChats = (list || []).map(c => ({
+                id: c.chatId,
+                chatId: c.chatId,
+                name: c.withName || 'Пользователь',
+                last: c.lastText || 'Начни переписку',
+                time: c.updatedAt ? new Date(c.updatedAt).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'}) : '',
+                unread: c.unread || 0,
+                type: 'user',
+                real: true,
+                lastAt: c.updatedAt || ''
+            }));
+            // сортируем по свежести
+            realChats.sort((a,b) => (b.lastAt||'').localeCompare(a.lastAt||''));
+            // кэшируем для мгновенного показа при следующем входе
+            try { localStorage.setItem('focus_realchats_cache', JSON.stringify(realChats)); } catch(e){}
+            renderChats();
+        } catch(e){}
     }
     if (window.FB_AUTH_READY) setTimeout(loadRealChats, 700);
     else window.addEventListener('fb-auth-ready', () => setTimeout(loadRealChats, 700));
+    // обновляем список когда возвращаешься на вкладку (вдруг создался новый чат)
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) loadRealChats(); });
+    window.addEventListener('focus', loadRealChats);
 
     // ===== Контакты (реальные из облака) =====
     const contactsModal = document.getElementById('contactsModal');

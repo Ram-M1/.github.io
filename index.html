@@ -1358,20 +1358,24 @@
                         return;
                     }
                     const prompt = [
-                        { role: 'system', content: 'Ты — доброжелательный наставник по саморазвитию в приложении FOCUS. Отвечай кратко (2-4 предложения), по делу, мотивирующе, на русском. Помогай с привычками, целями, дисциплиной, здоровьем, мышлением. Без воды.' },
+                        { role: 'system', content:
+                            'Ты — умный, поддерживающий наставник по саморазвитию в приложении FOCUS. Помогаешь с привычками, целями, дисциплиной, здоровьем, мышлением, мотивацией.\n' +
+                            'Отвечай ИМЕННО на вопрос человека, конкретно и по делу. Давай practical советы которые реально можно применить сегодня. Живой разговорный русский, 2-5 предложений, без воды и клише. Если человек язвит — реагируй спокойно и с юмором. Не читай нотации.'
+                        },
                         { role: 'user', content: text }
                     ];
-                    const res = await window.fbAskAI(prompt, 400);
-                    if (res.ok) {
+                    let res = await window.fbAskAI(prompt, 600);
+                    if (!res.ok) res = await window.fbAskAI(prompt, 600); // повтор при сбое
+                    if (res.ok && res.reply && res.reply.trim()) {
                         try { if (FocusStorage.useAI) FocusStorage.useAI('mentor', 'text'); } catch(e){}
                         result.className = 'ai-result show';
-                        result.innerHTML = '🧠 ' + res.reply.replace(/</g,'&lt;');
+                        result.innerHTML = '🧠 ' + res.reply.trim().replace(/</g,'&lt;').replace(/\n/g,'<br>');
                         input.value = '';
                     } else {
                         result.className = 'ai-result show unknown';
-                        result.innerHTML = '⚠️ ИИ недоступен: ' + (res.error||'ошибка') + '. Попробуй позже.';
+                        result.innerHTML = '⚠️ Связь с ИИ прервалась. Попробуй ещё раз через секунду.';
                     }
-                    return; // не прячем совет автоматически
+                    return;
                 } else {
                     result.className = 'ai-result show unknown';
                     result.innerHTML = '🤔 Не понял. Попробуй: «сделал зарядку», «выпил воды», или задай вопрос наставнику.';
@@ -1434,20 +1438,20 @@
                 }
             }
             if (!parentUid) return; // не привязан — не шлём
-            // кулдаун 10 мин (но при первом заходе в сессии — шлём сразу)
+            // шлём при каждом заходе на главную (родителю нужна свежая точка); внутри сессии не спамим (3 мин)
             const last = parseInt(sessionStorage.getItem('focus_geo_sent') || '0');
-            if (last && Date.now() - last < 10*60*1000) return;
+            if (last && Date.now() - last < 3*60*1000) return;
             navigator.geolocation.getCurrentPosition(
                 async (pos) => {
                     const r = await window.fbSaveLocation(pos.coords.latitude, pos.coords.longitude);
                     if (r && r.ok) sessionStorage.setItem('focus_geo_sent', String(Date.now()));
                 },
-                (err) => { /* отказ/ошибка доступа — молча, ребёнок не должен замечать */ },
-                { enableHighAccuracy: true, timeout: 12000, maximumAge: 60000 }
+                (err) => { /* отказ/ошибка доступа — молча */ },
+                { enableHighAccuracy: true, timeout: 15000, maximumAge: 30000 }
             );
         }
-        if (window.FB_AUTH_READY) setTimeout(sendLocationIfChild, 2000);
-        else window.addEventListener('fb-auth-ready', () => setTimeout(sendLocationIfChild, 2000));
+        if (window.FB_AUTH_READY) setTimeout(sendLocationIfChild, 1500);
+        else window.addEventListener('fb-auth-ready', () => setTimeout(sendLocationIfChild, 1500));
     })();
 
     // ===== Задания от родителя (сторона ребёнка) =====

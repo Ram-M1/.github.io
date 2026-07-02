@@ -487,13 +487,23 @@ initAtmosphere(canvasId) {
                     childMarker.setLatLng([childPos.lat, childPos.lng]);
                     const when = loc.at ? new Date(loc.at).toLocaleString('ru-RU') : '';
                     childMarker.bindPopup('<b>'+escapeHtml(childName)+'</b><br>был здесь: '+when).openPopup();
+                } else {
+                    // карта ещё не готова — обновим когда будет
+                    setTimeout(() => {
+                        if (map && childMarker) {
+                            map.setView([childPos.lat, childPos.lng], 15);
+                            childMarker.setLatLng([childPos.lat, childPos.lng]);
+                        }
+                    }, 1000);
                 }
-                if (noteEl && loc.at) {
-                    noteEl.innerText = 'Последнее местоположение: ' + new Date(loc.at).toLocaleString('ru-RU');
+                if (noteEl) {
+                    noteEl.innerText = loc.at
+                        ? 'Последнее местоположение: ' + new Date(loc.at).toLocaleString('ru-RU')
+                        : 'Местоположение получено';
                 }
                 renderZones();
             } else {
-                if (noteEl) noteEl.innerText = 'Ребёнок ещё не заходил в FOCUS после привязки, или не дал доступ к геолокации. Попроси его открыть приложение.';
+                if (noteEl) noteEl.innerText = 'Ребёнок ещё не заходил в FOCUS после привязки, или не дал доступ к геолокации. Попроси его открыть приложение и разрешить геолокацию.';
             }
         } catch(e){
             if (noteEl) noteEl.innerText = 'Не удалось загрузить местоположение: ' + (e.message||'ошибка');

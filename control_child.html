@@ -546,7 +546,14 @@ initAtmosphere(canvasId) {
     const params = new URLSearchParams(location.search);
     const childId = params.get('id');
     let children = getChildren();
-    let child = children.find(c => String(c.id) === String(childId));
+    // приоритет: focus_selected_child (там свежие данные с uid и флагом real от parental_control)
+    let child = null;
+    try {
+        const sel = JSON.parse(localStorage.getItem('focus_selected_child'));
+        if (sel && String(sel.id) === String(childId) || (sel && String(sel.uid) === String(childId))) child = sel;
+    } catch(e){}
+    // если не нашли в selected — ищем в локальном списке
+    if (!child) child = children.find(c => String(c.id) === String(childId) || String(c.uid) === String(childId));
     if (!child) { try { child = JSON.parse(localStorage.getItem('focus_selected_child')); } catch(e){} }
     if (!child) child = { id:0, name:'Ребёнок', spheres:{}, notifs:{}, access:'full', geolocation:true };
     // дефолты
