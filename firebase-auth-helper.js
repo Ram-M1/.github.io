@@ -656,7 +656,7 @@ window.FOCUS_AI_PROXY = 'https://focus-ai.playing-life-rama.workers.dev';
 
 // Универсальный вызов ИИ. messages — массив [{role, content}]
 // Возвращает { ok, reply } или { ok:false, error }
-window.fbAskAI = async function(messages, maxTokens) {
+if (!window.fbAskAI) window.fbAskAI = async function(messages, maxTokens) {
   try {
     const res = await fetch(window.FOCUS_AI_PROXY, {
       method: 'POST',

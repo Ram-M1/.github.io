@@ -278,6 +278,7 @@
 </div>
 
 <script src="focus-storage.js"></script>
+<script src="focus-ai.js"></script>
 <script type="module" src="firebase-auth-helper.js"></script>
 <script src="focus-core.js"></script>
 <script>
@@ -541,7 +542,14 @@ initAtmosphere(canvasId) {
             return;
         }
 
-        if (!window.fbAskAI) { toast('ИИ недоступен, обнови страницу'); return; }
+        if (!window.fbAskAI) {
+            toast('ИИ-функция не загрузилась. Причина: ' + (window.FB_AUTH_READY ? 'helper есть, но fbAskAI нет' : 'Firebase SDK не загрузился (проверь интернет/VPN)'));
+            textEl.innerHTML = '⚠️ Модуль ИИ не загрузился.<br><span style="font-size:12px;color:#9a9aab;">' +
+                (typeof firebase === 'undefined' && !window.FB_AUTH_READY ? 'Firebase не подключился — возможно блокировка сети или VPN. Попробуй выключить VPN и обновить.' : 'Обнови страницу (удали иконку с экрана и открой заново).') +
+                '</span>';
+            result.classList.add('show');
+            return;
+        }
 
         // собираем ВСЕ поля с правильными подписями
         const labels = {
